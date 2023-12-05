@@ -1,0 +1,18 @@
+# Pancake batter
+## Ingredients
+* 1 Egg
+* 180 g milk
+* 50 g granulated sugar
+* 50 g melted butter
+* 1 tsp vanila extract
+* 180 g AP flour
+* 1 tsp baking powder
+* 1 pinch salt
+
+## for creating doughnuts in multi cake
+
+- 5 minute bake in multi cake
+- produces 18 doughnuts
+
+## chocolate ganache glaze
+60 g dark baking chocolate melted in microwave with a couple of tablespoons of milk
