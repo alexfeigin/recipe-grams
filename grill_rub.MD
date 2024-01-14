@@ -1,8 +1,8 @@
 # Grill Rub
 ## Ingredients (grams):
 
-* 20g Sweet Paprika
-* 20g Smoked Paprika
+* 15g Sweet Paprika
+* 15g Smoked Paprika
 * 5g Ground black pepper
 * 20g Granulated garlic
 * 5g Cayenne pepper
