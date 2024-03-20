@@ -3,6 +3,6 @@
 
 * 15g Sweet Paprika
 * 15g Smoked Paprika
-* 5g Ground black pepper
-* 20g Granulated garlic
-* 5g Cayenne pepper
+* 3g Ground black pepper
+* 30g Granulated garlic
+* 2g Cayenne pepper
