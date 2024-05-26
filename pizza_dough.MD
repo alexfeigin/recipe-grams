@@ -1,5 +1,8 @@
 # Pizza Dough Recipe
-[poolish calculator](https://ggalmazor.com/bread_making/poolish_recipe_calculator.html)
+1. [poolish calculator](https://ggalmazor.com/bread_making/poolish_recipe_calculator.html)
+2. [poolish bash script](./poolish_calc.sh)
+
+
 ## Overall
 
 ## Recipe for 566g of dough, 2 12-inch pizzas of 283g each
