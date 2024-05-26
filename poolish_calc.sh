@@ -41,8 +41,8 @@ calculate_dough_recipe() {
             -py|--poolish-yeast) poolish_yeast_percentage="$2"; shift ;;
             -ry|--rest-yeast) rest_dough_yeast_percentage="$2"; shift ;;
             -s|--salt) salt_percentage="$2"; shift ;;
-            --help) _show_help_calculate_dough_recipe; exit 0 ;;
-            *) echo "Unknown parameter passed: $1"; _show_help_calculate_dough_recipe; exit 1 ;;
+            --help) _show_help_calculate_dough_recipe; return 0 ;;
+            *) echo "Unknown parameter passed: $1"; _show_help_calculate_dough_recipe; return 1;;
         esac
         shift
     done
