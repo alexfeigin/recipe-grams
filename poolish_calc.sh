@@ -27,7 +27,7 @@ calculate_dough_recipe() {
     hydration_percentage="0.70"
     poolish_percentage="0.67"
     poolish_hydration_percentage="1.0"
-    poolish_yeast_percentage="0.0013"
+    poolish_yeast_percentage="0.013"
     rest_dough_yeast_percentage="0"
     salt_percentage="0.027"
 
