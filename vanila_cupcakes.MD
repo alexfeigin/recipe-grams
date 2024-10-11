@@ -1,4 +1,5 @@
 # Vanilla Cupcake Recipe (White Cake)
+[עברית](./vanila_cupcakes.he.MD)
 
 ## Ingredients (8-10 cupcakes):
 - 1 large egg (or 2 small eggs)
