@@ -12,6 +12,7 @@
 | [תיבול לגריל](he/grill_rub.MD) 🌶️                            | [Grill Rub](en/grill_rub.MD) 🌶️                            |
 | [טורטיות](he/tortillas.MD) 🌮                                 | [Tortillas](en/tortillas.MD) 🌮                             |
 | [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗             | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗   |
+| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬    |
 
 ## מתוק | Desserts
 
