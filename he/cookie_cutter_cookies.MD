@@ -30,4 +30,4 @@
 -יותר קשה להכין בצק פריך מקמח כוסמין - זה אפשרי אך מאתגר יותר.
  ★ | ★ 
 :--:|:--:
-![cookie](images/cookiecutter.jpeg) | ![cookie](images/cookiecutter2.jpg)
+![cookie](../images/cookiecutter.jpeg) | ![cookie](../images/cookiecutter2.jpg)

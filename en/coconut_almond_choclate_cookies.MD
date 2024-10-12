@@ -15,4 +15,4 @@
 
  ★ | ★ 
 :--:|:--:
-![cookie](images/almondcoconut.jpeg) | ![cookie](images/almondcoconut2.jpeg)
+![cookie](../images/almondcoconut.jpeg) | ![cookie](../images/almondcoconut2.jpeg)

@@ -13,4 +13,4 @@
 1. מערבבים את כל החומרים בעזרת מטרפה או כף לפי הסדר הרשום.
 2. יוצקים לתבנית מאפינס ואופים בתנור שחומם מראש ל-180 מעלות במשך כ-15 דקות.
 
-![Vanilla Cupcakes](images/cupcake.jpg)
+![Vanilla Cupcakes](../images/cupcake.jpg)

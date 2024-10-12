@@ -33,4 +33,4 @@
 
  ★ | ★ 
 :--:|:--:
-![Banana Bread With lioric](images/bananaBread1.jpg) | ![Banana Bread](images/bananaBread2.jpg)
+![Banana Bread With lioric](../images/bananaBread1.jpg) | ![Banana Bread](../images/bananaBread2.jpg)

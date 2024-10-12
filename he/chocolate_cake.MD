@@ -44,4 +44,4 @@
 1/4 כפית סודה לשתייה
  ★ | ★ 
 :--:|:--:
-![Choclate cake1](images/chocake.jpg) | ![Choclate cake2](images/chocake2.jpg)
+![Choclate cake1](../images/chocake.jpg) | ![Choclate cake2](../images/chocake2.jpg)

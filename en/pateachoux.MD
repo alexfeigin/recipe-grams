@@ -21,4 +21,4 @@
 
 last egg might be too large, we can beat the egg and add it little by little to get wanted consistency of dough
 
-![3rd place winner](images/peta.jpeg)
+![3rd place winner](../images/peta.jpeg)
