@@ -14,6 +14,7 @@
 4. Knead the dough by hand for 12 minutes.
 5. If you don't have a food processor, use the well method to mix the ingredients.
 6. Flour the dough, wrap it in plastic, and let it rest at room temperature for 30 minutes.
+
  ★ | ★ 
 :--:|:--:
 ![Pilmeni](images/pilmeni1.jpg) | ![Pilmeni](images/pilmeni2.jpg)
