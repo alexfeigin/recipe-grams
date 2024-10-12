@@ -23,3 +23,5 @@
 * Press the ball into a disc shape, pinching the sides to thin them out before rolling to help achieve a circular shape.
 * Roll out the dough with a rolling pin, rotating it 90 degrees and flipping it often. If the dough becomes sticky, lightly flour the dough on both sides.
 * Cook the rolled dough on a medium heat griddle for approximately 90 seconds on the first side and 30 seconds on the second side.
+
+![First place winner Tortilas](images/tortila.jpeg)
