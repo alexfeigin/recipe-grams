@@ -1,8 +1,11 @@
 # תוכן עניינים | Table of Contents
 
 🅥=Vegan ★=Our favorites!
+<br>
 
-<span style="font-size: 70px;">🍚🍝</span>
+<img src="images/titles_for_index/spaghetti.png" alt="prez" width="70" height="70">
+<img src="images/titles_for_index/rice.png" alt="prez" width="70" height="70">
+
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [קינואה](he/quinoa.MD) 🍚 🅥                                     | [Quinoa](en/quinoa.MD) 🍚 🅥                                  |
@@ -14,7 +17,9 @@
 | [בצק פילמני](he/pilmeni_dough.MD) 🥟                           | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟                      |
 
 <br>
-<span style="font-size: 70px;">🍖</span>
+<br>
+
+<img src="images/titles_for_index/meat_on_bone.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
@@ -23,16 +28,17 @@
 | [מרק עוף של סש](he/chicken_soup.MD) 🍲★                        | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★                |
 
 <br>
-<span style="font-size: 70px;">🥗</span>
+<br>
+<img src="images/titles_for_index/green_salad.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬 🅥             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬 🅥    |
 | [סלט גזר](he/carrot_salad.MD) 🥕 ★🅥                    | [carrot salad](en/carrot_salad.MD) 🥕 ★🅥    |
 
-
 <br>
-<span style="font-size: 70px;">🍪🧁🍰</span>
+<br>
+<img src="images/titles_for_index/cake.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
@@ -48,9 +54,11 @@
 
 
 <br>
+<br>
 
 <img src="images/titles_for_index/pretzel.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [קראקרים](he/crackers.MD) 🌰★                        | [Seed Crackers](en/crackers.MD) 🌰★   |
+
