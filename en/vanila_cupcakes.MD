@@ -1,3 +1,5 @@
+[Back to index](../index.MD)
+
 # Vanilla Cupcake Recipe (White Cake)
 [עברית](./vanila_cupcakes.he.MD)
 
