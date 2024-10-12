@@ -48,7 +48,8 @@
 
 
 <br>
-<span style="font-size: 70px;">🥨🌰</span>
+
+<img src="images/titles_for_index/pretzel.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
