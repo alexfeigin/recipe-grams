@@ -31,6 +31,7 @@ Rest of flour: 110g
 Rest of water: 10g  
 Salt: 9g
 
+![Slice](images/pizza3.jpeg)
  ★ | ★ 
 :--:|:--:
 ![Pizza](images/pizza.jpg) | ![Before the sauce](images/pizza2.jpeg)
