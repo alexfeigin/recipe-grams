@@ -14,4 +14,4 @@
 2. Pour into a muffin tin.
 3. Bake in a preheated oven at 180°C for about 15 minutes.
 
-![Vanilla Cupcakes](images/cupcake.jpg)
+![Vanilla Cupcakes](../images/cupcake.jpg)

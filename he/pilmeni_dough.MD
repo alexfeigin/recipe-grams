@@ -19,4 +19,4 @@
 
  ★ | ★ 
 :--:|:--:
-![Pilmeni](images/pilmeni1.jpg) | ![Pilmeni](images/pilmeni2.jpg)
+![Pilmeni](../images/pilmeni1.jpg) | ![Pilmeni](../images/pilmeni2.jpg)

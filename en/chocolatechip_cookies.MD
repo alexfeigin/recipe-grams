@@ -19,4 +19,4 @@
 6. Form 10-12 dough balls and place on a lined baking tray. Top with the extra chocolate.
 7. Bake for 12-17 minutes until golden. Cool slightly before serving.
 8. let cool to room temperature before serving.
-![choclate chip cookie](images/chocookies.jpeg)
+![choclate chip cookie](../images/chocookies.jpeg)

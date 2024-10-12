@@ -20,4 +20,4 @@
 
  ★ | ★ 
 :--:|:--:
-![cookie](images/honeycookies.jpeg) | ![cookie](images/honeycookies2.jpeg)
+![cookie](../images/honeycookies.jpeg) | ![cookie](../images/honeycookies2.jpeg)
