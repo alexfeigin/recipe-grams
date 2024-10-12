@@ -1,3 +1,5 @@
+[Back to index](../index.MD)
+
 # Pastry Cream
 ## Ingredients
 * 1 egg yolk
@@ -15,3 +17,4 @@
 * 5g teaspoon cold butter
 
 too sweet.. next time less sugar, or maybe half the sugar here, half in whipped creme for diplomat
+

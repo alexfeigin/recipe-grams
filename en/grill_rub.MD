@@ -1,3 +1,5 @@
+[Back to index](../index.MD)
+
 # Grill Rub
 ## Ingredients (grams):
 
@@ -6,3 +8,4 @@
 * 3g Ground black pepper
 * 30g Granulated garlic
 * 2g Cayenne pepper
+

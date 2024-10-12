@@ -1,3 +1,5 @@
+[Back to index](../index.MD)
+
 # Pâte à choux
 ## Ingredients
 * 60 g milk

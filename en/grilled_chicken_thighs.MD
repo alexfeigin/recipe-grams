@@ -1,3 +1,5 @@
+[Back to index](../index.MD)
+
 # Grilled Chicken Thighs
 ## Ingredients (Grams):
 
