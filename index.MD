@@ -6,7 +6,7 @@
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [קינואה](he/quinoa.MD) 🍚 🅥                                     | [Quinoa](en/quinoa.MD) 🍚 🅥                                  |
-| [בצק פילמני](he/pilmeni_dough.MD) 🥟 🅥                          | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟 🅥                     |
+| [בצק פילמני](he/pilmeni_dough.MD) 🥟                           | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟                      |
 | [מרק עוף של סש](he/chicken_soup.MD) 🍲                        | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲                |
 | [פאו דה קייז'ו](he/paodequeijo.MD) 🧀                         | [Pão de Queijo](en/paodequeijo.MD) 🧀                       |
 | [בצק פיצה](he/pizza_dough.MD) 🍕                              | [Pizza Dough](en/pizza_dough.MD) 🍕                         |
