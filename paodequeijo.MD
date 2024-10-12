@@ -14,3 +14,4 @@
 * Heat milk+oil to milk boil point, fork-mix with flour until lumpy but incorporated, let rest 5 min.
 * Add all other ingredients and mix well to a soft sticky dough, ice-cream scoop to baking parchment.
 * Bake for 20 min, or until golden (not brown).
+![Nice balls](images/paude.jpeg)

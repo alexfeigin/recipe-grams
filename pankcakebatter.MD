@@ -16,3 +16,6 @@
 
 ## chocolate ganache glaze
 60 g Dark baking chocolate melted in microwave with a couple of tablespoons of milk
+ ★ | ★ 
+:--:|:--:
+![in the multimaker](images/pancake1.jpeg) | ![in the multimaker](images/pancake2.jpeg)
