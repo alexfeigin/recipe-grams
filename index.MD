@@ -13,6 +13,7 @@
 | [טורטיות](he/tortillas.MD) 🌮                                 | [Tortillas](en/tortillas.MD) 🌮                             |
 | [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗             | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗   |
 | [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬    |
+| [סלט גזר](he/carrot_salad.MD) 🥕                           | [carrot salad](en/carrot_salad.MD) 🥕    |
 
 ## מתוק | Desserts
 
