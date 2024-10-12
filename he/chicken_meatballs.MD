@@ -15,4 +15,7 @@
 4. לרווח בין הקציצות כדי לתת להן מקום להוציא נוזלים.
 5. להכניס לתנור שחומם מראש ולבשל במשך 10-15 דקות עד שהקצוות מתחילות להשחים.
 
-![nice to take to work](../images/meatballsc.jpeg)
+ ★ | ★ 
+:--:|:--:
+![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpg)
+
