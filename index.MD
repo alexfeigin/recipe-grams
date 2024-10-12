@@ -1,10 +1,13 @@
 # תוכן עניינים | Table of Contents
+<div style="text-align: center;">
+
 
 🅥=Vegan ★=Our favorites!
 <br>
-
-<img src="images/titles_for_index/spaghetti.png" alt="prez" width="70" height="70">
-<img src="images/titles_for_index/rice.png" alt="prez" width="70" height="70">
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="images/titles_for_index/spaghetti.png" alt="Pretzel" width="70" height="70" style="margin: 5px;">
+    <img src="images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">
+</div>
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
@@ -62,3 +65,4 @@
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [קראקרים](he/crackers.MD) 🌰★                        | [Seed Crackers](en/crackers.MD) 🌰★   |
 
+</div>
