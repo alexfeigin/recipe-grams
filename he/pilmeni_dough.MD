@@ -19,6 +19,7 @@
 5. אם אין מעבד מזון, להשתמש בשיטת הבאר לערבוב המרכיבים.
 6. לקמח את הבצק, לעטוף בניילון ולהשאיר בטמפרטורת החדר למשך 30 דקות.
 
- ★ | ★ 
-:--:|:--:
-![Pilmeni](../images/pilmeni1.jpg) | ![Pilmeni](../images/pilmeni2.jpg)
+|                        ★                        |               ★                               |
+:-----------------------------------------------:|:---------------------------------------------:|
+|       ![Pilmeni](../images/pilmeni1.jpg)        | ![Pilmeni fried](../images/pilmeni_fried.jpg) |
+| ![Pilmeni frozen](../images/pilmeni_frozen.jpg) |      ![Pilmeni](../images/pilmeni2.jpg)       |
