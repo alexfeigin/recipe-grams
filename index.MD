@@ -47,7 +47,7 @@
 |---------------------------------------------------------------|-------------------------------------------------------------|
 | [עוגיות שוקולד צ'יפס](he/chocolatechip_cookies.MD) 🍪★         | [Chocolate Chip Cookies](en/chocolatechip_cookies.MD)🍪★    |
 | [עוגיות קוקוס ושקדים עם שוקולד](he/coconut_almond_choclate_cookies.MD)🍪🅥 | [Coconut Almond Chocolate Cookies](en/coconut_almond_choclate_cookies.MD)🍪🅥|
-| [עוגיות שוקולדצ׳יפ טבעוניות](he/Choclatechip_vegan.MD) 🍪🅥 | [vegan chocolate chip cookies](en/Choclatechip_vegan.MD) 🍪 🅥|
+| [עוגיות שוקולדצ׳יפ טבעוניות](he/choclatechip_vegan.MD) 🍪🅥 | [vegan chocolate chip cookies](en/choclatechip_vegan.MD) 🍪 🅥|
 | [עוגיות חמאה לחיתוך צורות](he/cookie_cutter_cookies.MD) 🍪    | [Cookie Cutter Butter Cookies](en/cookie_cutter_cookies.MD) 🍪 |
 | [עוגיות מנומרות](he/leopard_cookies.MD) 🐆         | [Leopard Cookies](en/leopard_cookies.MD)🐆   |
 | [קאפקייקס וניל](he/vanila_cupcakes.MD) 🧁★                     | [Vanilla Cupcakes](en/vanila_cupcakes.MD) 🧁★                |
@@ -55,7 +55,7 @@
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                        | [Chocolate Cake](en/chocolate_cake.MD) 🥮                   |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                           | [Banana Bread](en/banana_bread.MD) 🥮★                       |
 | [עוגיות דבש וסוכר](he/honey_sugar_cookies.MD) 🍯              | [Honey Sugar Cookies](en/honey_sugar_cookies.MD) 🍯         |
-| [ארטיק בננה שוקולד](he/Frozen_banana.MD) 🍌★              | [Frozen banana n' choclate](en/Frozen_banana.MD) 🍌★         |
+| [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★              | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★         |
 
 
 <br>
