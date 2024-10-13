@@ -55,6 +55,7 @@
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                        | [Chocolate Cake](en/chocolate_cake.MD) 🥮                   |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                           | [Banana Bread](en/banana_bread.MD) 🥮★                       |
 | [עוגיות דבש וסוכר](he/honey_sugar_cookies.MD) 🍯              | [Honey Sugar Cookies](en/honey_sugar_cookies.MD) 🍯         |
+| [ארטיק בננה שוקולד](he/Frozen_banana.MD) 🍌★              | [Frozen banana n' choclate](en/Frozen_banana.MD) 🍌★         |
 
 
 <br>
