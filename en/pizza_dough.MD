@@ -21,12 +21,12 @@ Salt percentage: 2.7%
 Yeast percentage for the rest: 0%
 
 ## Ingredients
-Total flour: 333g
+Total flour: 333g  
 Total water: 233g
 
 Poolish flour: 223g  
 Poolish water: 223g  
-Poolish yeast: 3g
+Poolish yeast: 3g  
 Poolish honey: 3g
 
 Rest of flour: 110g  
