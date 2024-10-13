@@ -15,6 +15,8 @@
 4. לרווח בין הקציצות כדי לתת להן מקום להוציא נוזלים.
 5. להכניס לתנור שחומם מראש ולבשל במשך 10-15 דקות עד שהקצוות מתחילות להשחים.
 
+ניתן לקנות את מכשיר הקציצות [כאן](https://a.aliexpress.com/_oD9yzu5)
+
  ★ | ★ 
 :--:|:--:
 ![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpg)
