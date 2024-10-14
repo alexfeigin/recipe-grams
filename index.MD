@@ -36,8 +36,8 @@
 
 | Hebrew (he)                                                   | English (en)                                                |
 |---------------------------------------------------------------|-------------------------------------------------------------|
-| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬 🅥             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬 🅥    |
-| [סלט גזר](he/carrot_salad.MD) 🥕 ★🅥                    | [carrot salad](en/carrot_salad.MD) 🥕 ★🅥                   |
+| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬🅥             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬🅥    |
+| [סלט גזר](he/carrot_salad.MD) 🥕★🅥                    | [carrot salad](en/carrot_salad.MD) 🥕★🅥                   |
 
 <br>
 <br>
@@ -55,7 +55,7 @@
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                                     | [Chocolate Cake](en/chocolate_cake.MD) 🥮                                     |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                                        | [Banana Bread](en/banana_bread.MD) 🥮★                                        |
 | [עוגיות דבש וסוכר](he/honey_sugar_cookies.MD) 🍯                           | [Honey Sugar Cookies](en/honey_sugar_cookies.MD) 🍯                           |
-| [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★                                | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★                          |
+| [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★🅥                                | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★🅥                          |
 
 
 <br>
