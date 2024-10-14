@@ -1,24 +1,15 @@
 [Back to index](../index.MD)
 
 # Pizza Dough Recipe
-1. Unfortunately the original calculator seems to be down [poolish calculator](https://ggalmazor.com/bread_making/poolish_recipe_calculator.html)
-2. Fortunately I copied the logic to a bash script before it went down [poolish bash script](../poolish_calc.sh)
+[Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)  
+[Stats for nerds](#for-nerds)
 
-
-## Overall
+## What is Poolish
+This recipe uses the [poolish](https://en.wikipedia.org/wiki/Pre-ferment) method which is a preferment that is made by mixing equal parts of flour and water with a small amount of yeast.
+The poolish is then left to ferment at room temperature to get it started, and then overnight in the fridge to develop gluten and flavour.
+The poolish is then mixed with the rest of the flour, water, and salt to make the final dough.
 
 ## Recipe for 566g of dough, 2 12-inch pizzas of 283g each
-Desired dough weight: 566g
-Desired dough hydration: 70%
-
-## Poolish
-Poolish percentage: 67%
-Hydration percentage: 100%
-Poolish yeast percentage: 1.4%
-
-## Rest of Dough
-Salt percentage: 2.7%
-Yeast percentage for the rest: 0%
 
 ## Ingredients
 Total flour: 333g  
@@ -87,3 +78,22 @@ Salt: 9g
 |:-------------------------------:|:-----------------------------------:|
 |  ![Pizza](../images/pizza.jpg)  | ![Par-baked](../images/pizza2.jpeg) |
 | ![Slice](../images/pizza3.jpeg) |                                     |
+
+
+
+## For nerds
+
+1. Unfortunately the original calculator seems to be down [poolish calculator](https://ggalmazor.com/bread_making/poolish_recipe_calculator.html)
+2. Fortunately I copied the logic to a bash script before it went down [poolish bash script](../poolish_calc.sh)
+
+Desired dough weight: 566g  makes 2 12-inch pizzas of 283g each
+Desired dough hydration: 70%
+
+## Poolish
+Poolish percentage: 67%  
+Hydration percentage: 100%  
+Poolish yeast percentage: 1.4%
+
+## Rest of Dough
+Salt percentage: 2.7%  
+Yeast percentage for the rest: 0%
