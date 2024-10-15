@@ -37,4 +37,4 @@
 8. Transfer the dough to a piping bag and pipe small round mounds onto a baking tray lined with parchment paper (they will puff up a lot, so make sure they're round, not kiss-shaped).
 9. Generously sprinkle crystal sugar on top and bake for 30-35 minutes, until the tops are golden brown.
 
-![Nice](../images/Chouquettes.jpeg)
+![Nice](../images/chouquettes.jpeg)
