@@ -9,15 +9,16 @@
     <img src="images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">
 </div>
 
-| Hebrew (he)                                 | English (en)                                   |
-|---------------------------------------------|------------------------------------------------|
-| [קינואה](he/quinoa.MD) 🍚 🅥                | [Quinoa](en/quinoa.MD) 🍚 🅥                   |
-| [פאו דה קייז'ו](he/paodequeijo.MD) 🧀       | [Pão de Queijo](en/paodequeijo.MD) 🧀          |
-| [בצק פיצה](he/pizza_dough.MD) 🍕            | [Pizza Dough](en/pizza_dough.MD) 🍕            |
-|  [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥     | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥           |
-| [טורטיות](he/tortillas.MD) 🌮🅥             | [Tortillas](en/tortillas.MD) 🌮 🅥             |
-| [פסטה פפריקה](he/paprikesh_pasta.MD) 🍝★ 🅥 | [Paprikes pasta](en/paprikesh_pasta.MD) 🍝★ 🅥 |
-| [בצק פילמני](he/pilmeni_dough.MD) 🥟        | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟        |
+| Hebrew (he)                                  | English (en)                                   |
+|----------------------------------------------|------------------------------------------------|
+| [קינואה](he/quinoa.MD) 🍚 🅥                 | [Quinoa](en/quinoa.MD) 🍚 🅥                   |
+| [פאו דה קייז'ו](he/paodequeijo.MD) 🧀        | [Pão de Queijo](en/paodequeijo.MD) 🧀          |
+| [בצק פיצה](he/pizza_dough.MD) 🍕             | [Pizza Dough](en/pizza_dough.MD) 🍕            |
+| [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥       | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥           |
+| [טורטיות](he/tortillas.MD) 🌮🅥              | [Tortillas](en/tortillas.MD) 🌮 🅥             |
+| [פסטה פפריקה](he/paprikesh_pasta.MD) 🍝★ 🅥  | [Paprikes pasta](en/paprikesh_pasta.MD) 🍝★ 🅥 |
+| [בצק פילמני](he/pilmeni_dough.MD) 🥟         | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟        |
+| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥 | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥 |
 
 <br>
 <br>

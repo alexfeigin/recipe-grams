@@ -1,7 +1,8 @@
 [Back to index](../index.MD)
 
 # Pizza Dough Recipe
-[Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)  
+[Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)
+[Vito another version](https://www.youtube.com/watch?v=OjsCEJ8CWlg&t=180s)
 [Stats for nerds](#for-nerds)
 
 ## What is Poolish
@@ -30,29 +31,31 @@ Salt: 9g
 
 1. **Poolish Preparation (the night before)**:
  - Mix the poolish ingredients (flour, water, yeast, and honey) until well combined.
- - Let the mixture rest at room temperature for 1 hour.
- - After 1 hour, cover and refrigerate overnight (12-18 hours).
+ - Cover and let the mixture rest at room temperature for 1 hour.
+ - After 1 hour, refrigerate overnight (12-18 hours).
 
 2. **Dough Preparation (next day)**:
+ - Start 2-4 hours before you want to bake to allow time for rising, depending on the room temp hotter is quicker rise
+ - An hour before you want to bake, preheat the oven with the stone or steel inside. preheat for at least 1 hour.
+ - take the poolish out of the fridge and let it come to room temperature 1 hour.
  - Mix the poolish with the remaining flour, water, and salt.
- - Knead the dough until smooth and elastic, about 10-15 minutes.
- - Let the dough rest for 1-2 hours at room temperature.
-
-3. **Preheat the Oven**:
- - Preheat the oven to its highest temperature with a pizza stone or steel inside.
- - preheat for at least 1 hour to ensure the stone or steel is fully heated.
-
+ - Knead until dough becomes tough and all the flower has hydrated, and you have a consistent shaggy dough, about 10-15 minutes.
+ - Slap the dough to spread a small amount of olive oil on the surface to keep it from drying out, and let it rest for 15 minutes.
+ - Work the dough with slap and fold method until it is smooth and elastic, and form it into a ball.
+ - Slap with olive oil, cover with damp towel, let it rest and rise for 1 hour.
+ 
 3. **Shaping**:
  - Divide and shape the dough into individual balls (around 283g each).
- - into individual olive oiled bowls, cover, and let rest for 1-3 hours at room temperature. until doubled in size. 
+ - Shaping the dough into balls by folding the edges into the center, then rolling the dough on the counter to create tension and a smooth surface.
+ - Into individual olive oiled containers seam side down, cover, and let rest for 1-2 hours at room temperature. until doubled in size. 
 
 4. **Stretching**:
- - empty one risen dough ball from the oiled container into a wide bowl with a half-and-half mix of 00 flour and semolina.
- - make sure the dough is well coated with the flour mix.
- - take the dough ball out onto a lightly floured surface and gently stretch it into a 12-inch pizza shape.
- - make sure the dough is not too thin in the center, and the edges are slightly thicker.
- - start from the center and work your way outwards, leaving a 1-inch border around the edge.
- - work with a flat fingers to avoid pressing a finger through the dough.
+ - Empty one risen dough ball from the oiled container into a wide bowl with a half-and-half mix of 00 flour and semolina.
+ - Make sure the dough is well coated with the flour mix.
+ - Take the dough ball out onto a lightly floured surface and gently stretch it into a 12-inch pizza shape.
+ - Make sure the dough is not too thin in the center, and the edges are slightly thicker.
+ - Start from the center and work your way outwards, leaving a 1-inch border around the edge.
+ - Work with a flat fingers to avoid pressing a finger through the dough.
 
 5. **Par-baking**:
  - Sprinkle some of your flour mix on the pizza peel to prevent sticking.
