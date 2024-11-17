@@ -10,7 +10,7 @@
 - 3 g salt
 - Optional flavorings:
     - 1 clove garlic, smashed
-    - 1 g crushed red pepper flakes
+    - 1 g black pepper corns
     - 1 g mustard seeds or coriander seeds
 
 ## Instructions:
