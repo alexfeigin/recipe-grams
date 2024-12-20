@@ -1,20 +1,21 @@
 [Back to index](../index.MD)
 
-# pão de queijo:
+# Pão de queijo:
 ## Ingredients
 
-* 160g tapioca flour, plus more as needed to adjust texture
-* 30g  lightly flavored olive oil and/or vegetable oil
-* 100g  milk
-* 40g  freshly grated mozzarella
-* 30g  freshly and finely grated Parmigiano-Reggiano
-* 3g   salt
-* 1    large beaten egg
+* 160g Tapioca flour, plus more as needed to adjust texture
+* 30g Lightly flavored olive oil and/or vegetable oil
+* 100g Milk
+* 40g Freshly grated low moisture mozzarella
+* 30g Finely grated parmesan (or pecorino)
+* 3g Salt
+* 1 Large beaten egg
 
-# instructions
+# Instructions
 * Preheat oven to 200C
-* Heat milk+oil to milk boil point, fork-mix with flour until lumpy but incorporated, let rest 5 min.
+* Heat milk+oil+salt to milk boil point, fork-mix in the flour until lumpy but incorporated, let rest 5 min (to cool before mixing with eggs).
 * Add all other ingredients and mix well to a soft sticky dough, ice-cream scoop to baking parchment.
-* Bake for 20 min, or until golden (not brown).
+* Bake for 20 min, or until golden (not brown).  
+
 ![Nice balls](../images/paude.jpeg)
 
