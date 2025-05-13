@@ -25,11 +25,13 @@
 
 <img src="images/titles_for_index/meat_on_bone.png" alt="prez" width="70" height="70">
 
-| Hebrew (he)                                                      | English (en)                                              |
-|------------------------------------------------------------------|-----------------------------------------------------------|
-| [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗                | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗 |
-| [קציצות עוף](he/chicken_meatballs.MD) 🐓★                        | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★          |
-| [מרק עוף של סש](he/chicken_soup.MD) 🍲★                          | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★             |
+| Hebrew (he)                                       | English (en)                                              |
+|---------------------------------------------------|-----------------------------------------------------------|
+| [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗 | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗 |
+| [קציצות עוף](he/chicken_meatballs.MD) 🐓★         | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★          |
+| [מרק עוף של סש](he/chicken_soup.MD) 🍲★           | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★             |
+| חסר                                               | [shnitzel](en/shnitzel.MD)                                |
+| חסר                                                | [borscht](en/borscht.MD)                                   |
 
 <br>
 <br>
@@ -52,12 +54,13 @@
 | [עוגיות חמאה לחיתוך צורות](he/cookie_cutter_cookies.MD) 🍪                 | [Cookie Cutter Butter Cookies](en/cookie_cutter_cookies.MD) 🍪                |
 | [עוגיות מנומרות](he/leopard_cookies.MD) 🐆                                 | [Leopard Cookies](en/leopard_cookies.MD)🐆                                    |
 | [קאפקייקס וניל](he/vanila_cupcakes.MD) 🧁★                                 | [Vanilla Cupcakes](en/vanila_cupcakes.MD) 🧁★                                 |
-| [שוקטים](he/chouquettes.MD) 🧈★                                                | [Chouquettes](en/chouquettes.MD) 🧈★                                 |
+| [שוקטים](he/chouquettes.MD) 🧈★                                            | [Chouquettes](en/chouquettes.MD) 🧈★                                          |
 | [בלילת פנקייק](he/pankcakebatter.MD) 🥞                                    | [Pancake Batter](en/pankcakebatter.MD) 🥞                                     |
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                                     | [Chocolate Cake](en/chocolate_cake.MD) 🥮                                     |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                                        | [Banana Bread](en/banana_bread.MD) 🥮★                                        |
 | [עוגיות דבש וסוכר](he/honey_sugar_cookies.MD) 🍯                           | [Honey Sugar Cookies](en/honey_sugar_cookies.MD) 🍯                           |
-| [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★🅥                                | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★🅥                          |
+| [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★🅥                             | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★🅥                        |
+| חסר                                                                        | [crepe](en/crepe.MD)                                                          |
 
 
 <br>
