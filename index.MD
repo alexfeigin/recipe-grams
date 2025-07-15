@@ -37,10 +37,11 @@
 <br>
 <img src="images/titles_for_index/green_salad.png" alt="prez" width="70" height="70">
 
-| Hebrew (he)                                                   | English (en)                                                |
-|---------------------------------------------------------------|-------------------------------------------------------------|
-| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬🅥             | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬🅥    |
-| [סלט גזר](he/carrot_salad.MD) 🥕★🅥                    | [carrot salad](en/carrot_salad.MD) 🥕★🅥                   |
+| Hebrew (he)                                      | English (en)                                            |
+|--------------------------------------------------|---------------------------------------------------------|
+| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬🅥 | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬🅥 |
+| [סלט גזר](he/carrot_salad.MD) 🥕★🅥              | [carrot salad](en/carrot_salad.MD) 🥕★🅥                |
+| [סלט קולסלו ויניגרט](he/colslaw_vinaigrette.MD) 🥗🅥 | [Coleslaw Vinaigrette](en/colslaw_vinaigrette.MD) 🥗🅥 |
 
 <br>
 <br>
