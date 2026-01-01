@@ -8,7 +8,7 @@
 - 60g chia seeds
 - 40g pumpkin seeds
 - 50g sesame seeds
-- 70g mixed seeds
+- 70g cornflour
 - 2 teaspoons white sugar
 - 1½ teaspoons fine salt
 - ¾ teaspoon ground black pepper
