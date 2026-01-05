@@ -3,23 +3,35 @@
 # Crêpe
 ## Ingredients (grams):
 
-### for 4 large crêpes:
+### for 5 large crêpes:
 
-* 300 g of lukewarm Liquids:
+* 260g of lukewarm Liquids:
   * 1 Large egg
-  * 120 g warm Milk 
-  * 120 g Water 
-  * eggs milk and water need to add up to 300g, so add water as needed.
+  * 100 g warm Milk 
+  * 100 g Water 
+  * eggs milk and water need to add up to 260g, so add water as needed.
 * 1 Large pinch of salt
 * 10 g Sugar
 * 50 g AP flour
-* 20 g Melted butter 
+* 10 g Melted butter 
+
+### for 10 large crêpes (2 eggs)
+
+* 520g of lukewarm liquids:
+    * 2 large eggs
+    * 200g warm milk
+    * 200g water
+    * eggs milk and water need to add up to 520g, so add water as needed.
+* 2 large pinches of salt
+* 20g sugar
+* 100g AP flour
+* 20g melted butter
 
 ## Instructions
 
 Recipe adapted from Jacques Pépin: https://www.youtube.com/watch?v=jVrRj5pS3sU
 
-I like the consistency of the batter with 300g of liquids. if you like you can start with less and thin it out as needed.
+I like the consistency of the batter with 260g of liquids. if you like you can start with less and thin it out as needed.
 
 * The point is to have a lukewarm batter so the butter doesn't solidify.
 * If the eggs are from the fridge, make the water and milk warmer to compensate. 
