@@ -12,6 +12,7 @@
 | Hebrew (he)                                  | English (en)                                   |
 |----------------------------------------------|------------------------------------------------|
 | [קינואה](he/quinoa.MD) 🍚 🅥                 | [Quinoa](en/quinoa.MD) 🍚 🅥                   |
+| [פילאף אורז](he/rice_pilaf.MD) 🍚              | [Rice Pilaf](en/rice_pilaf.MD) 🍚              |
 | [פאו דה קייז'ו](he/paodequeijo.MD) 🧀        | [Pão de Queijo](en/paodequeijo.MD) 🧀          |
 | [בצק פיצה](he/pizza_dough.MD) 🍕             | [Pizza Dough](en/pizza_dough.MD) 🍕            |
 | [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥       | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥           |
