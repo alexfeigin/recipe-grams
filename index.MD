@@ -32,7 +32,7 @@
 | [קציצות עוף](he/chicken_meatballs.MD) 🐓★         | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★          |
 | [מרק עוף של סש](he/chicken_soup.MD) 🍲★           | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★             |
 | [שניצל](he/shnitzel.MD)                           | [shnitzel](en/shnitzel.MD)                                |
-| חסר                                               | [borscht](en/borscht.MD)                                   |
+| [בורשט](he/borscht.MD) 🍲 | [Borscht](en/borscht.MD) 🍲 |
 
 <br>
 <br>
