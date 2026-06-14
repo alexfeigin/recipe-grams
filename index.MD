@@ -57,6 +57,7 @@
 | [עוגיות מנומרות](he/leopard_cookies.MD) 🐆                                      | [Leopard Cookies](en/leopard_cookies.MD)🐆                                    |
 | [קאפקייקס וניל](he/vanila_cupcakes.MD) 🧁★                                      | [Vanilla Cupcakes](en/vanila_cupcakes.MD) 🧁★                                 |
 | [שוקטים](he/chouquettes.MD) 🧈★                                                 | [Chouquettes](en/chouquettes.MD) 🧈★                                          |
+| [בצק רבוך](he/pateachoux.MD) 🧈                                                | [Pâte à choux](en/pateachoux.MD) 🧈                                          |
 | [בלילת פנקייק](he/pankcakebatter.MD) 🥞                                         | [Pancake Batter](en/pankcakebatter.MD) 🥞                                     |
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                                          | [Chocolate Cake](en/chocolate_cake.MD) 🥮                                     |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                                             | [Banana Bread](en/banana_bread.MD) 🥮★                                        |
