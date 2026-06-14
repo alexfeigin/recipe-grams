@@ -19,7 +19,6 @@
 | [טורטיות](he/tortillas.MD) 🌮🅥              | [Tortillas](en/tortillas.MD) 🌮 🅥             |
 | [פסטה פפריקה](he/paprikesh_pasta.MD) 🍝★ 🅥  | [Paprikes pasta](en/paprikesh_pasta.MD) 🍝★ 🅥 |
 | [בצק פילמני](he/pilmeni_dough.MD) 🥟         | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟        |
-| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥 | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥       |
 
 <br>
 <br>
@@ -42,6 +41,7 @@
 |--------------------------------------------------|---------------------------------------------------------|
 | [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬🅥 | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬🅥 |
 | [סלט גזר](he/carrot_salad.MD) 🥕★🅥              | [carrot salad](en/carrot_salad.MD) 🥕★🅥                |
+| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥      | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥   |
 | [סלט קולסלו ויניגרט](he/colslaw_vinaigrette.MD) 🥗🅥 | [Coleslaw Vinaigrette](en/colslaw_vinaigrette.MD) 🥗🅥 |
 
 <br>
