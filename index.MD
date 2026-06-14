@@ -19,7 +19,7 @@
 | [טורטיות](he/tortillas.MD) 🌮🅥              | [Tortillas](en/tortillas.MD) 🌮 🅥             |
 | [פסטה פפריקה](he/paprikesh_pasta.MD) 🍝★ 🅥  | [Paprikes pasta](en/paprikesh_pasta.MD) 🍝★ 🅥 |
 | [בצק פילמני](he/pilmeni_dough.MD) 🥟         | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟        |
-| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥 | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥 |
+| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥 | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥       |
 
 <br>
 <br>
@@ -32,7 +32,7 @@
 | [קציצות עוף](he/chicken_meatballs.MD) 🐓★         | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★          |
 | [מרק עוף של סש](he/chicken_soup.MD) 🍲★           | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★             |
 | [שניצל](he/shnitzel.MD)                           | [shnitzel](en/shnitzel.MD)                                |
-| חסר                                               | [borscht](en/borscht.MD)                                   |
+| [בורשט](he/borscht.MD) 🍲                         | [Borscht](en/borscht.MD) 🍲                                |
 
 <br>
 <br>
@@ -57,6 +57,7 @@
 | [עוגיות מנומרות](he/leopard_cookies.MD) 🐆                                      | [Leopard Cookies](en/leopard_cookies.MD)🐆                                    |
 | [קאפקייקס וניל](he/vanila_cupcakes.MD) 🧁★                                      | [Vanilla Cupcakes](en/vanila_cupcakes.MD) 🧁★                                 |
 | [שוקטים](he/chouquettes.MD) 🧈★                                                 | [Chouquettes](en/chouquettes.MD) 🧈★                                          |
+| [בצק רבוך](he/pateachoux.MD) 🧈                                                | [Pâte à choux](en/pateachoux.MD) 🧈                                         |
 | [בלילת פנקייק](he/pankcakebatter.MD) 🥞                                         | [Pancake Batter](en/pankcakebatter.MD) 🥞                                     |
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                                          | [Chocolate Cake](en/chocolate_cake.MD) 🥮                                     |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                                             | [Banana Bread](en/banana_bread.MD) 🥮★                                        |
