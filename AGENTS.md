@@ -11,3 +11,4 @@
 - Use gram measurements exclusively, not volume cups
 - Image paths are relative: `../images/…` from `he/` and `en/`
 - Hebrew recipes have no `<div dir="rtl">`
+- Do not assume every translated recipe should be linked from `index.MD`; only add index rows for recipes the user wants published.
