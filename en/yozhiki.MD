@@ -14,6 +14,7 @@ _Stuffed Cabbage Filling as Meatballs Because We're Lazy_
 - 200 g ice cubes
 - Salt, ground black pepper, and granulated garlic — to taste
 - Water (for the cooking liquid)
+- Oil for sautéing, as needed
 
 ## Instructions
 
