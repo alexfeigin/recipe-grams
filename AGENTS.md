@@ -12,3 +12,17 @@
 - Image paths are relative: `../images/…` from `he/` and `en/`
 - Hebrew recipes have no `<div dir="rtl">`
 - Do not assume every translated recipe should be linked from `index.MD`; only add index rows for recipes the user wants published.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` at the repo root + `docs/adr/` for ADRs. See `docs/agents/domain.md`.
