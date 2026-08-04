@@ -2,6 +2,8 @@
 
 # Air Fryer Teriyaki Salmon
 
+![Air Fryer Teriyaki Salmon](../images/teriyaki_salmon_air_fryer.png)
+
 ## Ingredients
 
 - 350 g skinless salmon fillet
