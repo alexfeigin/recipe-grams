@@ -22,6 +22,6 @@ this amount fills 2 oven trays. they freeze well, and reheat well in microwave o
 
 You can buy the meatball maker [here](https://a.aliexpress.com/_oD9yzu5).
 
-|                      ★                       |                     ★                     |
-| :------------------------------------------: | :---------------------------------------: |
-| ![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpg) |
+|                      ★                       |                     ★                      |
+| :------------------------------------------: | :----------------------------------------: |
+| ![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpeg) |

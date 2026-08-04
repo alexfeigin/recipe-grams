@@ -25,4 +25,4 @@
 
 If you plan to refrigerate the cooked salmon and reheat it later in the microwave, shorten the air fryer time slightly.
 
-![Air Fryer Teriyaki Salmon](../images/teriyaki_salmon_air_fryer.png)
+![Air Fryer Teriyaki Salmon](../images/teriyaki_salmon_air_fryer.jpg)

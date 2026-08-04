@@ -19,6 +19,6 @@
 
 ניתן לקנות את מכשיר הקציצות [כאן](https://a.aliexpress.com/_oD9yzu5)
 
-|                      ★                       |                     ★                     |
-| :------------------------------------------: | :---------------------------------------: |
-| ![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpg) |
+|                      ★                       |                     ★                      |
+| :------------------------------------------: | :----------------------------------------: |
+| ![Great for work](../images/meatballsc.jpeg) | ![from ali](../images/meatball_maker.jpeg) |
