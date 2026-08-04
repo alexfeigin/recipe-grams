@@ -4,7 +4,7 @@
 
 ### Ingredients (grams):
 
-- 1Kg sliced Ossobuco  (beef shank)
+- 1Kg sliced Ossobuco (beef shank)
 - water to cover
 - salt
 - black pepper
@@ -12,19 +12,19 @@
 ### Instructions
 
 1. In a large 5-6L pot, add the beef shank and cover with water.
-    1. the water should be about 3-4cm above the meat.
-    2. the pot should be a little more than half full.
-    3. the empty space is needed to finish the borscht recipe below
-    4. a lot of volume from the vegetables and some added water from deglazing the pan
+   1. the water should be about 3-4cm above the meat.
+   2. the pot should be a little more than half full.
+   3. the empty space is needed to finish the borscht recipe below
+   4. a lot of volume from the vegetables and some added water from deglazing the pan
 2. Salt and pepper to taste.
 3. Bring to a boil
 4. Skim foam as needed for the first 2 minutes of boiling.
 5. then reduce heat to a simmer.
 6. Simmer for 3.5 hours
-    1. If the stock is not to be used immediately, let it cool and store in the fridge.
-    2. If the stock does need to be used immediately, you can carefully skim the fat layer from the top of the stock.
-       that
-       fat can be reused.
+   1. If the stock is not to be used immediately, let it cool and store in the fridge.
+   2. If the stock does need to be used immediately, you can carefully skim the fat layer from the top of the stock.
+      that
+      fat can be reused.
 
 ## Borscht
 

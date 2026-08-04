@@ -3,15 +3,18 @@
 <div dir="ltr">
 
 # Delicious Quinoa with Sweet Potato
+
 ## Ingredients
-* Olive oil
-* Onion
-* Quinoa
-* Sweet potato
-* Salt
-* Garlic granules
+
+- Olive oil
+- Onion
+- Quinoa
+- Sweet potato
+- Salt
+- Garlic granules
 
 ## Instructions
+
 Chop the onion and sauté until cooked.
 Add the quinoa and stir with the oil and onion to lightly toast it. Add salt (about two teaspoons, as the sweet potato absorbs the salt) and garlic granules (the garlic is optional).
 Cut the sweet potatoes into thick slices and then into quarters, mixing them with everything else.

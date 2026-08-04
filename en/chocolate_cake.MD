@@ -3,23 +3,27 @@
 ## Round Cake Pan 22 cm
 
 ### For the Cake:
-* 3 large eggs at room temperature
-* 200 grams (1 cup) sugar
-* A pinch of salt
-* 125 ml (1/2 cup) refined olive oil
-* 125 ml (1/2 cup) water
-* 150 grams (1.5 cups) almond flour
-* 70 grams (1/2 cup) cocoa powder
-* 1/2 teaspoon baking soda
+
+- 3 large eggs at room temperature
+- 200 grams (1 cup) sugar
+- A pinch of salt
+- 125 ml (1/2 cup) refined olive oil
+- 125 ml (1/2 cup) water
+- 150 grams (1.5 cups) almond flour
+- 70 grams (1/2 cup) cocoa powder
+- 1/2 teaspoon baking soda
 
 ### For the Ganache:
-* 100 grams dark chocolate
-* 125 ml (1/2 container) heavy cream or coconut cream
+
+- 100 grams dark chocolate
+- 125 ml (1/2 container) heavy cream or coconut cream
 
 ### For Decoration:
-* Crushed caramelized hazelnuts (bress)
+
+- Crushed caramelized hazelnuts (bress)
 
 ### Instructions:
+
 1. Preheat the oven to 160°C (without turbo) and grease the pan well.
 2. In a mixer bowl, whisk the eggs, sugar, and salt at high speed until a fluffy, light, and airy mixture forms.
 3. Reduce the mixing speed and gradually add the oil in a thin stream while slowly mixing until fully incorporated.
@@ -34,15 +38,16 @@
 12. Serve the cake at room temperature.
 
 ### For Half the Cake:
-* 1.5 large eggs at room temperature (100 grams whisked eggs)
-* 100 grams (1/2 cup) sugar
-* A pinch of salt
-* 57 grams (1/4 cup) refined olive oil
-* 63 grams (1/4 cup) water
-* 75 grams (3/4 cup) almond flour
-* 35 grams (1/4 cup) cocoa powder
-* 1/4 teaspoon baking soda
 
- ★ | ★ 
-:--:|:--:
-![Chocolate cake1](../images/chocake.jpg) | ![Chocolate cake2](../images/chocake2.jpg)
+- 1.5 large eggs at room temperature (100 grams whisked eggs)
+- 100 grams (1/2 cup) sugar
+- A pinch of salt
+- 57 grams (1/4 cup) refined olive oil
+- 63 grams (1/4 cup) water
+- 75 grams (3/4 cup) almond flour
+- 35 grams (1/4 cup) cocoa powder
+- 1/4 teaspoon baking soda
+
+|                     ★                     |                     ★                      |
+| :---------------------------------------: | :----------------------------------------: |
+| ![Chocolate cake1](../images/chocake.jpg) | ![Chocolate cake2](../images/chocake2.jpg) |

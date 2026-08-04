@@ -4,6 +4,7 @@
 
 🅥=Vegan ★=Our favorites!
 <br>
+
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
     <img src="images/titles_for_index/spaghetti.png" alt="Pretzel" width="70" height="70" style="margin: 5px;">
     <img src="images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">

@@ -3,6 +3,7 @@
 # Seed and Nut Crackers
 
 ## Dry Ingredients:
+
 - 120g sunflower seeds
 - 120g flax seeds
 - 60g chia seeds
@@ -14,11 +15,13 @@
 - ¾ teaspoon ground black pepper
 
 ## Wet Ingredients:
+
 - 1½ cups (375ml) boiling water
 - 53g olive oil
 - 2 tablespoons raw tahini (whole or regular)
 
 ## Instructions:
+
 1. Mix all the dry ingredients in a medium bowl.
 2. In another bowl, mix all the wet ingredients.
 3. Pour the wet ingredients over the dry ingredients and stir vigorously for 1 minute. The mixture will be liquid.

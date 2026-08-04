@@ -25,6 +25,7 @@
 /build/
 
 .DS_Store
+node_modules/
 
 ### policy files ###
 /policy_backup.json

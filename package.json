@@ -1,0 +1,7 @@
+{
+  "name": "recipe-grams",
+  "private": true,
+  "devDependencies": {
+    "prettier": "3.9.6"
+  }
+}

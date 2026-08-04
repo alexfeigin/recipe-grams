@@ -3,6 +3,7 @@
 # Vegan Chocolate Chip Cookies
 
 ## Ingredients:
+
 - 110g coconut oil or canola oil
 - 90g white or brown sugar
 - 60g plant-based milk
@@ -13,6 +14,7 @@
 - 100g dark chocolate chips
 
 ## Instructions:
+
 1. Preheat the oven to 180°C and line a baking tray with parchment paper.
 2. In a bowl, whisk the oil and sugar until well combined.
 3. Add the plant-based milk and vanilla, and whisk again to combine the ingredients.

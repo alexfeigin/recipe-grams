@@ -3,6 +3,7 @@
 # Shouquettes
 
 ## Ingredients for x1 batch (makes 10-15 pieces)
+
 - 60g milk
 - 16g butter
 - A small pinch of salt
@@ -11,6 +12,7 @@
 - 1 large egg
 
 ## Ingredients for x2 batch (makes 20-25 pieces)
+
 - 120g milk
 - 32g butter
 - A medium pinch of salt
@@ -19,6 +21,7 @@
 - 2 large eggs
 
 ## Ingredients for x3 batch (makes 30-40 pieces)
+
 - 180g milk
 - 50g butter
 - A pinch of salt
@@ -27,6 +30,7 @@
 - 3 large eggs
 
 ## Instructions:
+
 1. Place the milk and butter in a small saucepan and prepare the flour and salt in a bowl on the side.
 2. Bring the milk and butter to a boil, then immediately turn off the heat.
 3. Stir in the flour with a flat wooden spoon until the mixture forms a grainy but cohesive dough.
