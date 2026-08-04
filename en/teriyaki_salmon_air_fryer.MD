@@ -2,8 +2,6 @@
 
 # Air Fryer Teriyaki Salmon
 
-![Air Fryer Teriyaki Salmon](../images/teriyaki_salmon_air_fryer.png)
-
 ## Ingredients
 
 - 350 g skinless salmon fillet
@@ -26,3 +24,5 @@
 6. Cook for 9 minutes, until the salmon is cooked through and lightly caramelized.
 
 If you plan to refrigerate the cooked salmon and reheat it later in the microwave, shorten the air fryer time slightly.
+
+![Air Fryer Teriyaki Salmon](../images/teriyaki_salmon_air_fryer.png)
