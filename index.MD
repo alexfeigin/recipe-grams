@@ -25,14 +25,15 @@
 
 <img src="images/titles_for_index/meat_on_bone.png" alt="prez" width="70" height="70">
 
-| Hebrew (he)                                       | English (en)                                              |
-| ------------------------------------------------- | --------------------------------------------------------- |
-| [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗 | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗 |
-| [קציצות עוף](he/chicken_meatballs.MD) 🐓★         | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★          |
-| [יוז'יקי](he/yozhiki.MD) 🦔                       | [Yozhiki](en/yozhiki.MD) 🦔                               |
-| [מרק עוף של סש](he/chicken_soup.MD) 🍲★           | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★             |
-| [שניצל](he/shnitzel.MD)                           | [shnitzel](en/shnitzel.MD)                                |
-| [בורשט](he/borscht.MD) 🍲                         | [Borscht](en/borscht.MD) 🍲                               |
+| Hebrew (he)                                                    | English (en)                                                    |
+| -------------------------------------------------------------- | --------------------------------------------------------------- |
+| [ירכי עוף בגריל](he/grilled_chicken_thighs.MD) 🍗              | [Grilled Chicken Thighs](en/grilled_chicken_thighs.MD) 🍗       |
+| [סלמון טריאקי באייר פרייר](he/teriyaki_salmon_air_fryer.MD) 🐟 | [Air Fryer Teriyaki Salmon](en/teriyaki_salmon_air_fryer.MD) 🐟 |
+| [קציצות עוף](he/chicken_meatballs.MD) 🐓★                      | [Chicken meatballs](en/chicken_meatballs.MD) 🐓★                |
+| [יוז'יקי](he/yozhiki.MD) 🦔                                    | [Yozhiki](en/yozhiki.MD) 🦔                                     |
+| [מרק עוף של סש](he/chicken_soup.MD) 🍲★                        | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★                   |
+| [שניצל](he/shnitzel.MD)                                        | [shnitzel](en/shnitzel.MD)                                      |
+| [בורשט](he/borscht.MD) 🍲                                      | [Borscht](en/borscht.MD) 🍲                                     |
 
 <br>
 <br>
