@@ -9,10 +9,10 @@
 - Black pepper, to taste
 - Garlic powder, to taste
 - Ginger powder, to taste
-- 60 g soy sauce
-- 60 g apple cider vinegar
-- 40 g honey
-- 3-5 g sesame oil
+- 30 g soy sauce
+- 30 g apple cider vinegar
+- 20 g honey
+- 1.5-2.5 g sesame oil
 
 ## Instructions
 
