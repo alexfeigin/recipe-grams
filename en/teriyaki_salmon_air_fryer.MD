@@ -17,9 +17,9 @@
 ## Instructions
 
 1. Cut the salmon into even 2-3 cm cubes so the pieces cook at the same rate.
-2. Season the salmon directly with salt, pepper, garlic powder, and ginger powder.
-3. In a bowl, mix the soy sauce, apple cider vinegar, honey, and sesame oil.
-4. Add the salmon to the marinade and let it sit for 15 minutes.
+2. Add the salmon to a bowl and season it with salt, pepper, garlic powder, and ginger powder.
+3. Add the soy sauce, apple cider vinegar, honey, and sesame oil to the same bowl and mix until the salmon is coated.
+4. Let the salmon marinate in the bowl for 15 minutes.
 5. Transfer the salmon to a Ninja Crispi or air fryer in a single layer.
 6. Cook for 9 minutes, until the salmon is cooked through and lightly caramelized.
 
