@@ -1,6 +1,6 @@
-#  תוכן עניינים | Table of Contents
-
 <div align="center" style="text-align: center;">
+<H1> תוכן עניינים | Table of Contents</H1>
+
 
 🅥=Vegan ★=Our favorites!
 <br>
