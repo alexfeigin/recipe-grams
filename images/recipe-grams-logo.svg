@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Recipe-Grams logo</title>
+  <rect width="512" height="512" rx="96" fill="#b43e2f" />
+  <path
+    fill="#fffdf8"
+    d="M128 135c0-13 10-23 23-23h210c13 0 23 10 23 23 0 56-45 102-101 102h-54c-56 0-101-46-101-102Z"
+  />
+  <path
+    fill="#fffdf8"
+    d="M211 226h90v35h33c30 0 56 22 61 52l23 135c3 19-12 36-31 36H125c-19 0-34-17-31-36l23-135c5-30 31-52 61-52h33v-35Z"
+  />
+  <circle cx="256" cy="372" r="84" fill="#b43e2f" />
+  <circle cx="256" cy="372" r="61" fill="#fffdf8" />
+  <g fill="#b43e2f">
+    <rect x="248" y="298" width="16" height="33" rx="8" />
+    <rect x="248" y="413" width="16" height="33" rx="8" />
+    <rect x="297" y="319" width="16" height="33" rx="8" transform="rotate(45 305 336)" />
+    <rect x="199" y="417" width="16" height="33" rx="8" transform="rotate(45 207 434)" />
+    <rect x="314" y="364" width="33" height="16" rx="8" />
+    <rect x="165" y="364" width="33" height="16" rx="8" />
+    <rect x="199" y="319" width="16" height="33" rx="8" transform="rotate(-45 207 336)" />
+    <rect x="297" y="417" width="16" height="33" rx="8" transform="rotate(-45 305 434)" />
+  </g>
+  <circle cx="256" cy="372" r="18" fill="#687449" />
+</svg>

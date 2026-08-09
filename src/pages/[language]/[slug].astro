@@ -1,4 +1,5 @@
 ---
+import FaviconLinks from "../../components/FaviconLinks.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import {
   findLocalizedRecipe,
@@ -56,6 +57,7 @@ const navItems = [{ label: homeLabel, href: homeHref }];
     <meta property="og:description" content={metadata.description} />
     {socialImage && <meta property="og:image" content={socialImage} />}
     <link rel="canonical" href={canonicalPath} />
+    <FaviconLinks />
     <title>{metadata.title} | Recipe-Grams</title>
   </head>
   <body>
