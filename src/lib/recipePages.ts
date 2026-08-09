@@ -19,7 +19,7 @@ export type RecipeCategoryId =
   | "sweets"
   | "snacks";
 
-export type RecipeMarkerId = "favorite" | "vegan" | "grill";
+export type RecipeMarkerId = "favorite" | "vegan";
 
 export type LocalizedRecipeMetadata = {
   title: string;
@@ -142,7 +142,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     markerLabels: {
       favorite: "Favorite",
       vegan: "Vegan",
-      grill: "Grill",
     },
   },
   he: {
@@ -195,7 +194,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     markerLabels: {
       favorite: "אהוב",
       vegan: "טבעוני",
-      grill: "גריל",
     },
   },
 };
@@ -376,22 +374,17 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "בראוניז בננה ושוקולד ללא גלוטן.",
     ),
   }),
-  grill_rub: defineCatalogEntry(
-    "doughs_starches",
-    ["favorite", "vegan", "grill"],
-    5,
-    {
-      en: localizedMetadata(
-        "Grill Rub",
-        "A vegan spice blend for seasoning grilled food.",
-      ),
-      he: localizedMetadata(
-        "תערובת תיבול לגריל",
-        "תערובת תבלינים טבעונית לגריל.",
-      ),
-    },
-  ),
-  grilled_chicken_thighs: defineCatalogEntry("mains", ["grill"], 9, {
+  grill_rub: defineCatalogEntry("doughs_starches", ["favorite", "vegan"], 5, {
+    en: localizedMetadata(
+      "Grill Rub",
+      "A vegan spice blend for seasoning grilled food.",
+    ),
+    he: localizedMetadata(
+      "תערובת תיבול לגריל",
+      "תערובת תבלינים טבעונית לגריל.",
+    ),
+  }),
+  grilled_chicken_thighs: defineCatalogEntry("mains", [], 9, {
     en: localizedMetadata(
       "Grilled Chicken Thighs",
       "High-heat chicken thighs with repeatable seasoning and juicy results.",
