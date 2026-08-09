@@ -11,10 +11,10 @@ const basePath = import.meta.env.BASE_URL;
 const data = getLandingPageData(Astro.props.language, basePath);
 const homeHref =
   data.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
-const navItems = [
-  { label: data.labels.nav.categories, href: "#categories" },
-  { label: data.labels.nav.sourceIndex, href: data.sourceIndexHref },
-];
+const navItems = data.categorySections.map((section) => ({
+  label: section.label,
+  href: `#${section.id}`,
+}));
 ---
 
 <html lang={data.language} dir={data.direction}>
@@ -84,6 +84,7 @@ const navItems = [
             data.categorySections.map((section) => (
               <section
                 class="category-section"
+                id={section.id}
                 aria-labelledby={`${section.id}-title`}
               >
                 <div class="category-heading">
