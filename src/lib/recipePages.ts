@@ -112,15 +112,14 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     hero: {
       title: "Recipe-Grams",
       description:
-        "A bilingual recipe collection for cooks who want ingredient weights, stable links, and a faster way to choose what to make.",
-      recipeCount: "Recipe pairs",
+        "Practical family recipes measured in grams, built for repeatable everyday cooking.",
+      recipeCount: "Recipes",
       categoryCount: "Categories",
       gramFirst: "Gram-first",
     },
     sections: {
       title: "Browse Recipes",
-      description:
-        "Real recipes from the Markdown source tree, grouped by stable catalog metadata.",
+      description: "Choose a category and find something practical to cook.",
     },
     categoryLabels: {
       basics: "Basics",
@@ -165,15 +164,14 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     hero: {
       title: "Recipe-Grams",
       description:
-        "אוסף מתכונים דו-לשוני לטבחים שרוצים כמויות בגרמים, קישורים יציבים ודרך מהירה לבחור מה להכין.",
-      recipeCount: "זוגות מתכונים",
+        "מתכונים משפחתיים פרקטיים בגרמים, לבישול יומיומי שאפשר לחזור עליו.",
+      recipeCount: "מתכונים",
       categoryCount: "קטגוריות",
       gramFirst: "מבוסס גרמים",
     },
     sections: {
       title: "עיון במתכונים",
-      description:
-        "מתכונים אמיתיים מעץ קבצי ה-Markdown, מסודרים לפי מטא-דאטה יציב.",
+      description: "בחרו קטגוריה ומצאו משהו פרקטי לבשל.",
     },
     categoryLabels: {
       basics: "בסיסים",
@@ -709,6 +707,17 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     })
     .sort((a, b) => a.featuredOrder - b.featuredOrder);
 
+  const categorySections = (
+    Object.keys(labels.categoryLabels) as RecipeCategoryId[]
+  )
+    .map((categoryId) => ({
+      id: categoryId,
+      label: labels.categoryLabels[categoryId],
+      description: labels.categoryDescriptions[categoryId],
+      recipes: cards.filter((recipe) => recipe.categoryId === categoryId),
+    }))
+    .filter((section) => section.recipes.length > 0);
+
   return {
     labels,
     direction: language === "he" ? "rtl" : "ltr",
@@ -719,15 +728,8 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     sourceIndexHref:
       "https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/index.MD",
     recipePairCount: pairedSlugs.size,
-    categoryCount: Object.keys(labels.categoryLabels).length,
-    categorySections: (Object.keys(labels.categoryLabels) as RecipeCategoryId[])
-      .map((categoryId) => ({
-        id: categoryId,
-        label: labels.categoryLabels[categoryId],
-        description: labels.categoryDescriptions[categoryId],
-        recipes: cards.filter((recipe) => recipe.categoryId === categoryId),
-      }))
-      .filter((section) => section.recipes.length > 0),
+    categoryCount: categorySections.length,
+    categorySections,
   };
 }
 
