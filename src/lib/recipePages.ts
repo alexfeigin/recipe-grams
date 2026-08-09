@@ -740,7 +740,7 @@ export async function renderRecipeBody(
   const rawMarkdown = stripLegacyBackLink(
     readFileSync(recipe.sourcePath, "utf8"),
   );
-  const siteMarkdown = rewriteMarkdownAssetLinks(rawMarkdown, basePath);
+  const siteMarkdown = rewriteMarkdownLinks(rawMarkdown, recipe, basePath);
   const rendered = await markdownRenderer.render(siteMarkdown, {
     fileURL: new URL(`file://${recipe.sourcePath}`),
     frontmatter: {},
@@ -823,12 +823,72 @@ function warnForIncompleteMetadata(
   );
 }
 
-function rewriteMarkdownAssetLinks(markdown: string, basePath: string): string {
+function rewriteMarkdownLinks(
+  markdown: string,
+  recipe: LocalizedRecipe,
+  basePath: string,
+): string {
+  return rewriteMarkdownRecipeLinks(
+    rewriteMarkdownImageLinks(markdown, basePath),
+    recipe,
+    basePath,
+  );
+}
+
+function rewriteMarkdownImageLinks(markdown: string, basePath: string): string {
   return markdown.replace(
     /(!\[[^\]]*\]\()\.\.\/images\/([^)]+)(\))/g,
     (_match, prefix: string, imagePath: string, suffix: string) =>
       `${prefix}${sitePath(basePath, imagePath)}${suffix}`,
   );
+}
+
+function rewriteMarkdownRecipeLinks(
+  markdown: string,
+  recipe: LocalizedRecipe,
+  basePath: string,
+): string {
+  return markdown.replace(
+    /(?<!!)(\[[^\]]+\]\()([^)\s]+\.MD)(#[^)]+)?(\))/g,
+    (
+      match,
+      prefix: string,
+      recipePath: string,
+      hash: string | undefined,
+      suffix: string,
+    ) => {
+      const target = parseRecipeLinkTarget(recipePath, recipe.language);
+
+      if (!target) {
+        return match;
+      }
+
+      return `${prefix}${sitePath(
+        basePath,
+        `${target.language}/${target.slug}/${hash ?? ""}`,
+      )}${suffix}`;
+    },
+  );
+}
+
+function parseRecipeLinkTarget(
+  recipePath: string,
+  fallbackLanguage: RecipeLanguage,
+): { language: RecipeLanguage; slug: string } | undefined {
+  const parsed = path.posix.parse(recipePath);
+
+  if (parsed.ext !== ".MD" || parsed.name === "index") {
+    return undefined;
+  }
+
+  const pathLanguage = recipePath
+    .split("/")
+    .find((segment): segment is RecipeLanguage => isRecipeLanguage(segment));
+
+  return {
+    language: pathLanguage ?? fallbackLanguage,
+    slug: parsed.name,
+  };
 }
 
 function stripLegacyBackLink(markdown: string): string {
