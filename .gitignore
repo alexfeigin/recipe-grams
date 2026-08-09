@@ -38,3 +38,10 @@ application-vault.properties
 
 ## compile frontend ##
 server/src/main/resources/static/public/onboarding/
+
+
+.agents/
+.claude/
+.gemini/
+.opencode/
+skills-lock.json
