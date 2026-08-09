@@ -624,11 +624,14 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   @media (max-width: 880px) {
     .site-header {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns:
+        auto minmax(8.5rem, clamp(8.5rem, 42vw, 11rem))
+        auto;
       width: min(100% - 2rem, 1180px);
       min-height: 68px;
       align-items: center;
-      gap: 0.55rem;
+      justify-content: space-between;
+      column-gap: clamp(0.55rem, 2.4vw, 0.85rem);
       padding: 0.7rem 0;
     }
 
@@ -642,8 +645,8 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     }
 
     .brand-mark {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
     }
 
     .mobile-actions {
@@ -652,7 +655,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       grid-row: 1;
       flex: 0 0 auto;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.42rem;
       margin-left: auto;
     }
 
@@ -664,8 +667,8 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
     .menu-button {
       display: grid;
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       place-content: center;
       gap: 5px;
       border-radius: 10px;
@@ -710,6 +713,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       grid-row: 1;
       width: 100%;
       min-width: 0;
+      max-width: 11rem;
       flex-basis: auto;
       min-height: 34px;
       padding: 0.18rem 0.55rem;
@@ -732,25 +736,31 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   @media (max-width: 380px) {
     .site-header {
       width: min(100% - 1.5rem, 1180px);
-      gap: 0.45rem;
+      grid-template-columns: auto minmax(0, 6.6rem) auto;
+      column-gap: 0.48rem;
     }
 
     .brand-mark {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
     }
 
     .mobile-actions {
-      gap: 0.4rem;
+      gap: 0.32rem;
     }
 
     .mobile-actions .language-picker {
       font-size: 0.82rem;
     }
 
+    .search-control {
+      max-width: 6.6rem;
+      padding-inline: 0.45rem;
+    }
+
     .menu-button {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
     }
   }
 </style>
