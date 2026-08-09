@@ -57,6 +57,46 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     </span>
   </a>
 
+  <input class="nav-toggle" type="checkbox" id="nav-toggle" />
+
+  <nav class="nav-panel" aria-label={navLabel}>
+    {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+  </nav>
+
+  <label class="search-control">
+    <input
+      class="search-input"
+      type="search"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label={searchLabels.placeholder}
+      aria-controls="search-results-panel"
+      placeholder={searchLabels.placeholder}
+      data-search-input
+    />
+  </label>
+
+  <div
+    class="language-picker desktop-language-picker"
+    aria-label={languagePickerLabel}
+  >
+    {
+      language === "he" ? (
+        <span aria-current="page">{hebrewLabel}</span>
+      ) : (
+        <a href={languageHref}>{hebrewLabel}</a>
+      )
+    }
+    <span class="language-divider" aria-hidden="true">|</span>
+    {
+      language === "en" ? (
+        <span aria-current="page">{englishLabel}</span>
+      ) : (
+        <a href={languageHref}>{englishLabel}</a>
+      )
+    }
+  </div>
+
   <div class="mobile-actions">
     <div class="language-picker" aria-label={languagePickerLabel}>
       {
@@ -86,41 +126,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       <span></span>
     </label>
   </div>
-
-  <input class="nav-toggle" type="checkbox" id="nav-toggle" />
-
-  <nav class="nav-panel" aria-label={navLabel}>
-    {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
-    <label class="search-control">
-      <input
-        class="search-input"
-        type="search"
-        autocomplete="off"
-        spellcheck="false"
-        aria-label={searchLabels.placeholder}
-        aria-controls="search-results-panel"
-        placeholder={searchLabels.placeholder}
-        data-search-input
-      />
-    </label>
-    <div class="language-picker" aria-label={languagePickerLabel}>
-      {
-        language === "he" ? (
-          <span aria-current="page">{hebrewLabel}</span>
-        ) : (
-          <a href={languageHref}>{hebrewLabel}</a>
-        )
-      }
-      <span class="language-divider" aria-hidden="true">|</span>
-      {
-        language === "en" ? (
-          <span aria-current="page">{englishLabel}</span>
-        ) : (
-          <a href={languageHref}>{englishLabel}</a>
-        )
-      }
-    </div>
-  </nav>
 
   <script is:inline>
     if (window.location.hash === "#nav-open") {
@@ -444,6 +449,10 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     white-space: nowrap;
   }
 
+  .desktop-language-picker {
+    margin-left: -0.2rem;
+  }
+
   .language-picker a {
     border-radius: 8px;
     color: var(--ink);
@@ -614,33 +623,49 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   @media (max-width: 880px) {
     .site-header {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       width: min(100% - 2rem, 1180px);
       min-height: 68px;
-      gap: 0.75rem;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.7rem 0;
+    }
+
+    .brand {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .brand span {
+      display: none;
     }
 
     .brand-mark {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
     }
 
     .mobile-actions {
       display: inline-flex;
+      grid-column: 3;
+      grid-row: 1;
       flex: 0 0 auto;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.5rem;
       margin-left: auto;
     }
 
     .mobile-actions .language-picker {
-      min-height: 44px;
+      min-height: 40px;
       padding: 0;
+      font-size: 0.86rem;
     }
 
     .menu-button {
       display: grid;
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       place-content: center;
       gap: 5px;
       border-radius: 10px;
@@ -674,25 +699,58 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       width: 100%;
     }
 
-    .nav-panel .search-control {
-      width: 100%;
-      min-width: 0;
-      flex-basis: auto;
-      min-height: 44px;
-      padding: 0.55rem 0.65rem;
-    }
-
-    .nav-panel .search-input {
+    .nav-panel > a {
+      min-height: 38px;
+      padding: 0.5rem 0.65rem;
       font-size: 0.95rem;
     }
 
-    .nav-panel .language-picker {
+    .search-control {
+      grid-column: 2;
+      grid-row: 1;
+      width: 100%;
+      min-width: 0;
+      flex-basis: auto;
+      min-height: 34px;
+      padding: 0.18rem 0.55rem;
+    }
+
+    .search-input {
+      font-size: 0.88rem;
+    }
+
+    .desktop-language-picker {
       display: none;
     }
 
     .nav-toggle:checked ~ .nav-panel {
       display: grid;
       gap: 0.2rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .site-header {
+      width: min(100% - 1.5rem, 1180px);
+      gap: 0.45rem;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+    }
+
+    .mobile-actions {
+      gap: 0.4rem;
+    }
+
+    .mobile-actions .language-picker {
+      font-size: 0.82rem;
+    }
+
+    .menu-button {
+      width: 40px;
+      height: 40px;
     }
   }
 </style>

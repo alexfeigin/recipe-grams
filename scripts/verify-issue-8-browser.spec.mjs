@@ -85,10 +85,9 @@ test("Search results dim the page and close from an outside click", async ({
   await expect(overlay).toBeHidden();
 });
 
-test("Mobile drawer exposes the same search popup", async ({ page }) => {
+test("Mobile navbar exposes the same search popup", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
-  await page.getByLabel("Toggle navigation").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("salmon");
 
   const result = page
