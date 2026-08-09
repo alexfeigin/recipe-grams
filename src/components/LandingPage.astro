@@ -330,10 +330,9 @@ const navItems = data.categorySections.map((section) => ({
   }
 
   .image-placeholder img {
-    width: 54px;
-    height: 54px;
-    border-radius: 10px;
-    object-fit: cover;
+    width: min(74%, 154px);
+    max-height: 82%;
+    object-fit: contain;
   }
 
   .card-body {
