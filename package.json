@@ -3,20 +3,22 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "verify:issue5": "node scripts/verify-issue-5.mjs",
     "verify:issue6": "node scripts/verify-issue-6.mjs",
     "verify:issue7": "node scripts/verify-issue-7.mjs",
-    "verify:issue7:browser": "playwright test scripts/verify-issue-7-browser.spec.mjs --reporter=line"
+    "verify:issue7:browser": "playwright test scripts/verify-issue-7-browser.spec.mjs --reporter=line",
+    "verify:issue8:browser": "playwright test scripts/verify-issue-8-browser.spec.mjs --reporter=line"
   },
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.3.5",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
     "astro": "^7.2.0",
+    "pagefind": "^1.5.2",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^7.0.2"

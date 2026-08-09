@@ -71,6 +71,16 @@ type LocalizedLabels = {
     categories: string;
     sourceIndex: string;
   };
+  search: {
+    button: string;
+    close: string;
+    empty: string;
+    loading: string;
+    placeholder: string;
+    resultsLabel: string;
+    title: string;
+    waiting: string;
+  };
   hero: {
     title: string;
     description: string;
@@ -108,6 +118,16 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     nav: {
       categories: "Categories",
       sourceIndex: "Legacy Index",
+    },
+    search: {
+      button: "Search",
+      close: "Close search",
+      empty: "No recipes found",
+      loading: "Searching",
+      placeholder: "Search recipes",
+      resultsLabel: "Search results",
+      title: "Search recipes",
+      waiting: "Type at least 2 characters",
     },
     hero: {
       title: "Recipe-Grams",
@@ -160,6 +180,16 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     nav: {
       categories: "קטגוריות",
       sourceIndex: "אינדקס ישן",
+    },
+    search: {
+      button: "חיפוש",
+      close: "סגירת חיפוש",
+      empty: "לא נמצאו מתכונים",
+      loading: "מחפש",
+      placeholder: "חיפוש מתכונים",
+      resultsLabel: "תוצאות חיפוש",
+      title: "חיפוש מתכונים",
+      waiting: "הקלידו לפחות 2 תווים",
     },
     hero: {
       title: "Recipe-Grams",
@@ -675,6 +705,18 @@ export function getRecipeMetadata(
     title: "Recipe-Grams Recipe",
     description:
       "A Recipe-Grams page rendered from the localized Markdown recipe source.",
+  };
+}
+
+export function getRecipeSearchMetadata(recipe: LocalizedRecipe) {
+  const labels = labelsByLanguage[recipe.language];
+  const entry = recipeCatalog[recipe.slug];
+
+  return {
+    category: entry?.categoryId ? labels.categoryLabels[entry.categoryId] : "",
+    markers: entry?.markerIds
+      .map((markerId) => labels.markerLabels[markerId])
+      .join(", "),
   };
 }
 

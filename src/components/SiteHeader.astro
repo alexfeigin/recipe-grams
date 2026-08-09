@@ -1,5 +1,5 @@
 ---
-import { sitePath } from "../lib/recipePages";
+import { labelsByLanguage, sitePath } from "../lib/recipePages";
 import type { RecipeLanguage } from "../lib/recipePages";
 
 type NavItem = {
@@ -32,6 +32,12 @@ const languagePickerLabel = language === "he" ? "בחירת שפה" : "Language"
 const hebrewLabel = "עב";
 const englishLabel = "EN";
 const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
+const searchLabels = labelsByLanguage[language].search;
+const pagefindBundle = sitePath(
+  import.meta.env.BASE_URL,
+  "pagefind/pagefind.js",
+);
+const searchDirection = language === "he" ? "rtl" : "ltr";
 ---
 
 <header class="site-header">
@@ -85,6 +91,14 @@ const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
 
   <nav class="nav-panel" aria-label={navLabel}>
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+    <button
+      class="search-button"
+      type="button"
+      data-search-open
+      aria-haspopup="dialog"
+    >
+      {searchLabels.button}
+    </button>
     <div class="language-picker" aria-label={languagePickerLabel}>
       {
         language === "he" ? (
@@ -108,6 +122,179 @@ const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
     if (window.location.hash === "#nav-open") {
       document.getElementById("nav-toggle")?.setAttribute("checked", "");
     }
+  </script>
+
+  <div
+    class="search-overlay"
+    data-search-overlay
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="search-title"
+    dir={searchDirection}
+  >
+    <div class="search-panel">
+      <div class="search-header">
+        <h2 id="search-title">{searchLabels.title}</h2>
+        <button class="search-close" type="button" data-search-close>
+          {searchLabels.close}
+        </button>
+      </div>
+      <input
+        class="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label={searchLabels.placeholder}
+        placeholder={searchLabels.placeholder}
+        data-search-input
+      />
+      <p class="search-status" data-search-status>{searchLabels.waiting}</p>
+      <div
+        class="search-results"
+        data-search-results
+        aria-label={searchLabels.resultsLabel}
+      >
+      </div>
+    </div>
+  </div>
+
+  <script
+    is:inline
+    define:vars={{
+      language,
+      pagefindBundle,
+      searchLabels,
+      basePath: import.meta.env.BASE_URL,
+    }}
+  >
+    const overlay = document.querySelector("[data-search-overlay]");
+    const input = document.querySelector("[data-search-input]");
+    const status = document.querySelector("[data-search-status]");
+    const results = document.querySelector("[data-search-results]");
+    const openButtons = document.querySelectorAll("[data-search-open]");
+    const closeButton = document.querySelector("[data-search-close]");
+    let pagefindPromise;
+    let lastSearchId = 0;
+
+    function normalizeResultUrl(url) {
+      const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+      if (url.startsWith(normalizedBase)) {
+        return url;
+      }
+      return `${normalizedBase}${url.replace(/^\/+/, "")}`;
+    }
+
+    async function getPagefind() {
+      pagefindPromise ??= import(pagefindBundle).then((pagefind) => {
+        pagefind.init?.();
+        return pagefind;
+      });
+      return pagefindPromise;
+    }
+
+    function openSearch() {
+      overlay.hidden = false;
+      document.getElementById("nav-toggle")?.removeAttribute("checked");
+      input.focus();
+      getPagefind().catch(() => {
+        status.textContent = searchLabels.empty;
+      });
+    }
+
+    function closeSearch() {
+      overlay.hidden = true;
+    }
+
+    function clearResults(message) {
+      results.replaceChildren();
+      status.textContent = message;
+    }
+
+    function renderResults(searchResults) {
+      results.replaceChildren();
+
+      for (const result of searchResults) {
+        const link = document.createElement("a");
+        link.className = "search-result";
+        link.href = normalizeResultUrl(result.url);
+
+        const title = document.createElement("strong");
+        title.textContent = result.meta.title ?? link.href;
+        link.append(title);
+
+        const details = [result.meta.category, result.meta.markers]
+          .filter(Boolean)
+          .join(" | ");
+        if (details) {
+          const meta = document.createElement("span");
+          meta.className = "search-result-meta";
+          meta.textContent = details;
+          link.append(meta);
+        }
+
+        const excerpt = document.createElement("span");
+        excerpt.className = "search-result-excerpt";
+        excerpt.innerHTML = result.excerpt;
+        link.append(excerpt);
+
+        results.append(link);
+      }
+    }
+
+    async function runSearch() {
+      const query = input.value.trim();
+      const searchId = ++lastSearchId;
+
+      if (query.length < 2) {
+        clearResults(searchLabels.waiting);
+        return;
+      }
+
+      status.textContent = searchLabels.loading;
+      const pagefind = await getPagefind();
+      const search = await pagefind.search(query, {
+        filters: { language },
+      });
+      const searchResults = await Promise.all(
+        search.results.slice(0, 8).map((result) => result.data()),
+      );
+
+      if (searchId !== lastSearchId) {
+        return;
+      }
+
+      if (searchResults.length === 0) {
+        clearResults(searchLabels.empty);
+        return;
+      }
+
+      status.textContent = "";
+      renderResults(searchResults);
+    }
+
+    openButtons.forEach((button) => {
+      button.addEventListener("click", openSearch);
+      button.addEventListener("focus", () => {
+        getPagefind().catch(() => {});
+      });
+    });
+    closeButton.addEventListener("click", closeSearch);
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        closeSearch();
+      }
+    });
+    input.addEventListener("input", () => {
+      runSearch().catch(() => {
+        clearResults(searchLabels.empty);
+      });
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !overlay.hidden) {
+        closeSearch();
+      }
+    });
   </script>
 </header>
 
@@ -201,8 +388,22 @@ const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
     text-decoration: none;
   }
 
+  .search-button {
+    min-height: 42px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 720;
+    cursor: pointer;
+  }
+
   .nav-panel > a:hover,
-  .nav-panel > a:focus-visible {
+  .nav-panel > a:focus-visible,
+  .search-button:hover,
+  .search-button:focus-visible {
     background: rgba(104, 116, 73, 0.15);
     outline: none;
   }
@@ -242,6 +443,120 @@ const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
 
   .mobile-actions {
     display: none;
+  }
+
+  .search-overlay[hidden] {
+    display: none;
+  }
+
+  .search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: start center;
+    padding: clamp(4.5rem, 10vh, 7rem) 1rem 1rem;
+    background: rgba(37, 33, 28, 0.34);
+  }
+
+  .search-panel {
+    width: min(680px, 100%);
+    max-height: min(760px, calc(100vh - 5.5rem));
+    overflow: auto;
+    border: 1px solid rgba(112, 104, 94, 0.22);
+    border-radius: 8px;
+    padding: 1rem;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .search-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: 0;
+  }
+
+  .search-close {
+    border: 0;
+    border-radius: 8px;
+    padding: 0.45rem 0.65rem;
+    background: rgba(104, 116, 73, 0.12);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 760;
+    cursor: pointer;
+  }
+
+  .search-input {
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid rgba(112, 104, 94, 0.35);
+    border-radius: 8px;
+    padding: 0.75rem 0.85rem;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .search-status {
+    min-height: 1.4rem;
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .search-results {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+  }
+
+  :global(.search-result) {
+    display: grid;
+    gap: 0.32rem;
+    border: 1px solid rgba(112, 104, 94, 0.18);
+    border-radius: 8px;
+    padding: 0.85rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :global(.search-result:hover),
+  :global(.search-result:focus-visible) {
+    border-color: rgba(180, 62, 47, 0.42);
+    outline: none;
+  }
+
+  :global(.search-result strong) {
+    font-size: 1rem;
+  }
+
+  :global(.search-result-meta) {
+    color: var(--olive);
+    font-size: 0.8rem;
+    font-weight: 780;
+  }
+
+  :global(.search-result-excerpt) {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  :global(.search-result-excerpt mark) {
+    border-radius: 4px;
+    background: rgba(180, 62, 47, 0.14);
+    color: var(--ink);
   }
 
   @media (max-width: 820px) {
@@ -308,6 +623,12 @@ const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
     .nav-panel a {
       justify-content: flex-start;
       width: 100%;
+    }
+
+    .nav-panel .search-button {
+      justify-content: flex-start;
+      width: 100%;
+      text-align: start;
     }
 
     .nav-panel .language-picker {

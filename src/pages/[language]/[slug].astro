@@ -4,6 +4,7 @@ import SiteHeader from "../../components/SiteHeader.astro";
 import {
   findLocalizedRecipe,
   getRecipeMetadata,
+  getRecipeSearchMetadata,
   labelsByLanguage,
   listLocalizedRecipes,
   renderRecipeBody,
@@ -27,6 +28,7 @@ if (!recipe) {
 
 const basePath = import.meta.env.BASE_URL;
 const metadata = getRecipeMetadata(recipe);
+const searchMetadata = getRecipeSearchMetadata(recipe);
 const recipeHtml = await renderRecipeBody(recipe, basePath);
 const canonicalPath = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
 const socialImageSource = metadata.socialImage ?? metadata.image;
@@ -55,6 +57,25 @@ const navItems = [{ label: homeLabel, href: homeHref }];
     <meta name="description" content={metadata.description} />
     <meta property="og:title" content={metadata.title} />
     <meta property="og:description" content={metadata.description} />
+    <meta data-pagefind-filter={`language:${recipe.language}`} />
+    {
+      searchMetadata.category && (
+        <meta
+          name="category"
+          content={searchMetadata.category}
+          data-pagefind-meta="category[content]"
+        />
+      )
+    }
+    {
+      searchMetadata.markers && (
+        <meta
+          name="markers"
+          content={searchMetadata.markers}
+          data-pagefind-meta="markers[content]"
+        />
+      )
+    }
     {socialImage && <meta property="og:image" content={socialImage} />}
     <link rel="canonical" href={canonicalPath} />
     <FaviconLinks />
@@ -72,7 +93,7 @@ const navItems = [{ label: homeLabel, href: homeHref }];
     />
 
     <main>
-      <article class="recipe-shell">
+      <article class="recipe-shell" data-pagefind-body>
         <div class="recipe-body" set:html={recipeHtml} />
       </article>
     </main>
