@@ -7,7 +7,8 @@
     "preview": "astro preview",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "verify:issue5": "node scripts/verify-issue-5.mjs"
+    "verify:issue5": "node scripts/verify-issue-5.mjs",
+    "verify:issue6": "node scripts/verify-issue-6.mjs"
   },
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.3.5",

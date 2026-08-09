@@ -1,0 +1,215 @@
+---
+import type { RecipeLanguage } from "../lib/recipePages";
+
+type NavItem = {
+  label: string;
+  href: string;
+};
+
+type Props = {
+  language: RecipeLanguage;
+  brandLine: string;
+  homeHref: string;
+  languageHref: string;
+  languageLabel: string;
+  homeLabel: string;
+  toggleNavigationLabel: string;
+  navItems: NavItem[];
+};
+
+const {
+  language,
+  brandLine,
+  homeHref,
+  languageHref,
+  languageLabel,
+  homeLabel,
+  toggleNavigationLabel,
+  navItems,
+} = Astro.props;
+
+const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
+---
+
+<header class="site-header">
+  <a class="brand" href={homeHref} aria-label={homeLabel}>
+    <span class="brand-mark" aria-hidden="true">Rg</span>
+    <span>
+      <strong>Recipe-Grams</strong>
+      <small>{brandLine}</small>
+    </span>
+  </a>
+
+  <input class="nav-toggle" type="checkbox" id="nav-toggle" />
+  <label
+    class="menu-button"
+    for="nav-toggle"
+    aria-label={toggleNavigationLabel}
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </label>
+
+  <nav class="nav-panel" aria-label={navLabel}>
+    <a href={languageHref}>{languageLabel}</a>
+    {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+  </nav>
+
+  <script is:inline>
+    if (window.location.hash === "#nav-open") {
+      document.getElementById("nav-toggle")?.setAttribute("checked", "");
+    }
+  </script>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: min(1180px, calc(100% - 2rem));
+    min-height: 78px;
+    margin: 0 auto;
+    padding: 0.8rem 0;
+    background: rgba(248, 244, 236, 0.92);
+    border-bottom: 1px solid rgba(112, 104, 94, 0.22);
+    backdrop-filter: blur(16px);
+  }
+
+  .brand {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.8rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    display: grid;
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--tomato);
+    color: #fffdf8;
+    font-weight: 850;
+    letter-spacing: 0;
+  }
+
+  .brand strong,
+  .brand small {
+    display: block;
+  }
+
+  .brand strong {
+    font-size: 1.08rem;
+  }
+
+  .brand small {
+    max-width: 34vw;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-toggle {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .menu-button {
+    display: none;
+  }
+
+  .nav-panel {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .nav-panel a {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 0.65rem 0.9rem;
+    color: var(--ink);
+    font-weight: 720;
+    text-decoration: none;
+  }
+
+  .nav-panel a:hover,
+  .nav-panel a:focus-visible {
+    background: rgba(104, 116, 73, 0.15);
+    outline: none;
+  }
+
+  @media (max-width: 640px) {
+    .site-header {
+      width: min(100% - 2rem, 1180px);
+      min-height: 68px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+    }
+
+    .brand small {
+      display: none;
+    }
+
+    .menu-button {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-content: center;
+      gap: 5px;
+      border-radius: 10px;
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgba(61, 43, 28, 0.12);
+      cursor: pointer;
+    }
+
+    .menu-button span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--ink);
+    }
+
+    .nav-panel {
+      position: absolute;
+      top: calc(100% + 0.55rem);
+      right: 0;
+      left: 0;
+      display: none;
+      align-items: stretch;
+      border-radius: 14px;
+      padding: 0.55rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .nav-panel a {
+      justify-content: flex-start;
+      width: 100%;
+    }
+
+    .nav-toggle:checked ~ .nav-panel {
+      display: grid;
+      gap: 0.2rem;
+    }
+  }
+</style>

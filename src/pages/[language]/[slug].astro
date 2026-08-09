@@ -26,13 +26,20 @@ const basePath = import.meta.env.BASE_URL;
 const metadata = getRecipeMetadata(recipe);
 const recipeHtml = await renderRecipeBody(recipe, basePath);
 const canonicalPath = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
-const socialImage = metadata.image
-  ? sitePath(basePath, metadata.image)
+const socialImageSource = metadata.socialImage ?? metadata.image;
+const socialImage = socialImageSource
+  ? sitePath(basePath, socialImageSource)
   : undefined;
 const direction = recipe.language === "he" ? "rtl" : "ltr";
 const homeLabel = recipe.language === "he" ? "עמוד הבית" : "Home";
+const homeHref =
+  recipe.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
 const sourceLabel =
   recipe.language === "he" ? "מקור Markdown" : "Markdown Source";
+const homeAriaLabel =
+  recipe.language === "he" ? "עמוד הבית של Recipe-Grams" : "Recipe-Grams home";
+const recipeNavLabel =
+  recipe.language === "he" ? "ניווט מתכון" : "Recipe navigation";
 ---
 
 <html lang={recipe.language} dir={direction}>
@@ -48,11 +55,7 @@ const sourceLabel =
   </head>
   <body>
     <header class="site-header">
-      <a
-        class="brand"
-        href={sitePath(basePath, "")}
-        aria-label="Recipe-Grams home"
-      >
+      <a class="brand" href={homeHref} aria-label={homeAriaLabel}>
         <span class="brand-mark" aria-hidden="true">Rg</span>
         <span>
           <strong>Recipe-Grams</strong>
@@ -60,8 +63,8 @@ const sourceLabel =
         </span>
       </a>
 
-      <nav class="nav-panel" aria-label="Recipe navigation">
-        <a href={sitePath(basePath, "")}>{homeLabel}</a>
+      <nav class="nav-panel" aria-label={recipeNavLabel}>
+        <a href={homeHref}>{homeLabel}</a>
         <a
           href={`https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/${recipe.language}/${recipe.slug}.MD`}
         >
