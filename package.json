@@ -5,11 +5,16 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "verify:issue5": "node scripts/verify-issue-5.mjs"
   },
   "devDependencies": {
+    "@astrojs/markdown-satteri": "^0.3.5",
+    "@types/node": "^26.2.0",
     "astro": "^7.2.0",
     "prettier": "3.9.6",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^7.0.2"
   }
 }

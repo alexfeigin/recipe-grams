@@ -1,0 +1,295 @@
+---
+import {
+  findLocalizedRecipe,
+  getRecipeMetadata,
+  listLocalizedRecipes,
+  renderRecipeBody,
+  sitePath,
+} from "../../lib/recipePages";
+
+export function getStaticPaths() {
+  return listLocalizedRecipes().map((recipe) => ({
+    params: {
+      language: recipe.language,
+      slug: recipe.slug,
+    },
+  }));
+}
+
+const recipe = findLocalizedRecipe(Astro.params.language, Astro.params.slug);
+
+if (!recipe) {
+  return Astro.redirect("/");
+}
+
+const basePath = import.meta.env.BASE_URL;
+const metadata = getRecipeMetadata(recipe);
+const recipeHtml = await renderRecipeBody(recipe, basePath);
+const canonicalPath = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
+const socialImage = metadata.image
+  ? sitePath(basePath, metadata.image)
+  : undefined;
+const direction = recipe.language === "he" ? "rtl" : "ltr";
+const homeLabel = recipe.language === "he" ? "עמוד הבית" : "Home";
+const sourceLabel =
+  recipe.language === "he" ? "מקור Markdown" : "Markdown Source";
+---
+
+<html lang={recipe.language} dir={direction}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={metadata.description} />
+    <meta property="og:title" content={metadata.title} />
+    <meta property="og:description" content={metadata.description} />
+    {socialImage && <meta property="og:image" content={socialImage} />}
+    <link rel="canonical" href={canonicalPath} />
+    <title>{metadata.title} | Recipe-Grams</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a
+        class="brand"
+        href={sitePath(basePath, "")}
+        aria-label="Recipe-Grams home"
+      >
+        <span class="brand-mark" aria-hidden="true">Rg</span>
+        <span>
+          <strong>Recipe-Grams</strong>
+          <small>{metadata.title}</small>
+        </span>
+      </a>
+
+      <nav class="nav-panel" aria-label="Recipe navigation">
+        <a href={sitePath(basePath, "")}>{homeLabel}</a>
+        <a
+          href={`https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/${recipe.language}/${recipe.slug}.MD`}
+        >
+          {sourceLabel}
+        </a>
+      </nav>
+    </header>
+
+    <main>
+      <article class="recipe-shell">
+        <div class="recipe-body" set:html={recipeHtml} />
+      </article>
+    </main>
+  </body>
+</html>
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f8f4ec;
+    --surface: #fffdf8;
+    --ink: #25211c;
+    --muted: #70685e;
+    --tomato: #b43e2f;
+    --olive: #687449;
+    --steel: #d8d0c3;
+    --shadow: 0 18px 48px rgba(61, 43, 28, 0.14);
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: linear-gradient(
+      180deg,
+      #fbf7ef 0%,
+      var(--paper) 48%,
+      #efe7d9 100%
+    );
+    color: var(--ink);
+  }
+
+  a {
+    color: var(--tomato);
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    width: min(980px, calc(100% - 2rem));
+    min-height: 72px;
+    margin: 0 auto;
+    padding: 0.75rem 0;
+    background: rgba(248, 244, 236, 0.92);
+    border-bottom: 1px solid rgba(112, 104, 94, 0.22);
+    backdrop-filter: blur(16px);
+  }
+
+  .brand {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.8rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .brand-mark {
+    display: grid;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--tomato);
+    color: #fffdf8;
+    font-weight: 850;
+    letter-spacing: 0;
+  }
+
+  .brand strong,
+  .brand small {
+    display: block;
+  }
+
+  .brand small {
+    max-width: 42vw;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-panel {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .nav-panel a {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    color: var(--ink);
+    font-weight: 720;
+    text-decoration: none;
+  }
+
+  .nav-panel a:hover,
+  .nav-panel a:focus-visible {
+    background: rgba(104, 116, 73, 0.15);
+    outline: none;
+  }
+
+  main {
+    width: min(980px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2.2rem 0 4rem;
+  }
+
+  .recipe-shell {
+    overflow: hidden;
+    border: 1px solid rgba(112, 104, 94, 0.22);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .recipe-body {
+    width: min(100%, 760px);
+    margin: 0 auto;
+    padding: clamp(1.25rem, 4vw, 3rem);
+    line-height: 1.65;
+  }
+
+  .recipe-body :global(h1) {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 6vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .recipe-body :global(h2) {
+    margin: 2rem 0 0.75rem;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  .recipe-body :global(h3) {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.12rem;
+    letter-spacing: 0;
+  }
+
+  .recipe-body :global(p),
+  .recipe-body :global(ul),
+  .recipe-body :global(ol) {
+    margin: 0.8rem 0;
+  }
+
+  .recipe-body :global(li + li) {
+    margin-top: 0.35rem;
+  }
+
+  .recipe-body :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .recipe-body :global(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+
+  .recipe-body :global(td),
+  .recipe-body :global(th) {
+    padding: 0.35rem;
+    vertical-align: top;
+  }
+
+  @media (max-width: 640px) {
+    .site-header,
+    main {
+      width: min(100% - 1rem, 980px);
+    }
+
+    .site-header {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .brand small {
+      max-width: none;
+    }
+
+    .nav-panel {
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }
+
+    .nav-panel a {
+      min-height: 38px;
+      padding: 0.55rem 0.65rem;
+      font-size: 0.9rem;
+    }
+  }
+</style>

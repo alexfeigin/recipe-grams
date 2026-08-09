@@ -1,7 +1,8 @@
 ---
+import { sitePath as toSitePath } from "../lib/recipePages";
+
 const base = import.meta.env.BASE_URL;
-const basePath = base.endsWith("/") ? base : `${base}/`;
-const sitePath = (path) => `${basePath}${path}`;
+const sitePath = (path) => toSitePath(base, path);
 const sourceUrl =
   "https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog";
 
@@ -32,8 +33,7 @@ const recipes = [
     description:
       "A reliable gram-based dough for weeknight pizza or a slow weekend bake.",
     image: "pizza.jpg",
-    // Temporary source link until issue #5 creates generated recipe pages.
-    href: `${sourceUrl}/en/pizza_dough.MD`,
+    href: sitePath("en/pizza_dough/"),
     time: "Hands-on dough",
     markerIds: ["staple"],
   },
@@ -43,7 +43,7 @@ const recipes = [
     description:
       "A high-heat chicken recipe built for repeatable seasoning and juicy results.",
     image: "grilledchicken.jpeg",
-    href: `${sourceUrl}/en/grilled_chicken_thighs.MD`,
+    href: sitePath("en/grilled_chicken_thighs/"),
     time: "Dinner anchor",
     markerIds: ["grill"],
   },
@@ -53,7 +53,7 @@ const recipes = [
     description:
       "A plant-based cookie that keeps the familiar crisp edge and soft middle.",
     image: "Veganchoc.jpeg",
-    href: `${sourceUrl}/en/choclatechip_vegan.MD`,
+    href: sitePath("en/choclatechip_vegan/"),
     time: "Bakeable today",
     markerIds: ["vegan"],
   },
@@ -63,7 +63,7 @@ const recipes = [
     description:
       "A simple base recipe for fluffy quinoa measured by weight, not cups.",
     image: "quinoa.jpg",
-    href: `${sourceUrl}/en/quinoa.MD`,
+    href: sitePath("en/quinoa/"),
     time: "Pantry base",
     markerIds: ["vegan"],
   },
@@ -90,7 +90,7 @@ const recipes = [
       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
     -->
     <header class="site-header">
-      <a class="brand" href={basePath} aria-label="Recipe-Grams home">
+      <a class="brand" href={sitePath("")} aria-label="Recipe-Grams home">
         <span class="brand-mark" aria-hidden="true">Rg</span>
         <span>
           <strong>Recipe-Grams</strong>
