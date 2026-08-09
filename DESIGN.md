@@ -12,3 +12,9 @@ The first Astro English home page uses a restrained light palette with warm pape
 - Use real recipe imagery from `images/` whenever a card shows food.
 - Keep cards shallow and scannable; avoid marketing sections.
 - Keep interactive targets stable and readable on small phones.
+
+## Supported Viewports
+
+- Desktop/tablet browse: use the full navigation and multi-column content layout for widths above `640px`.
+- Modern phone browse: use the compact hamburger navigation and single-column card layout at `640px` and below.
+- Do not add tablet-only visual modes unless real content or controls break in the shared desktop/tablet layout.
