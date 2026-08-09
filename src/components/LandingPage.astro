@@ -13,6 +13,10 @@ const data = getLandingPageData(Astro.props.language, basePath);
 const homeHref =
   data.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
 const logoHref = sitePath(basePath, "recipe-grams-logo.png");
+const placeholderLogoHref = sitePath(
+  basePath,
+  "recipe-grams-card-placeholder.png",
+);
 const navItems = data.categorySections.map((section) => ({
   label: section.label,
   href: `#${section.id}`,
@@ -111,7 +115,11 @@ const navItems = data.categorySections.map((section) => ({
                         )}
                         {!recipe.image && (
                           <div class="image-placeholder" aria-hidden="true">
-                            <img src={logoHref} alt="" loading="lazy" />
+                            <img
+                              src={placeholderLogoHref}
+                              alt=""
+                              loading="lazy"
+                            />
                           </div>
                         )}
                         <div class="card-body">
@@ -324,14 +332,16 @@ const navItems = data.categorySections.map((section) => ({
 
   .image-placeholder {
     display: grid;
+    overflow: hidden;
     place-items: center;
     background:
       linear-gradient(135deg, rgba(104, 116, 73, 0.24), transparent), #eee5d6;
   }
 
   .image-placeholder img {
-    width: min(74%, 154px);
-    max-height: 82%;
+    width: auto;
+    height: 85%;
+    max-width: 92%;
     object-fit: contain;
   }
 
