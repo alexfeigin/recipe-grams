@@ -91,14 +91,19 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   <nav class="nav-panel" aria-label={navLabel}>
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
-    <button
-      class="search-button"
-      type="button"
-      data-search-open
-      aria-haspopup="dialog"
-    >
-      {searchLabels.button}
-    </button>
+    <label class="search-control">
+      <span>{searchLabels.button}</span>
+      <input
+        class="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label={searchLabels.placeholder}
+        aria-controls="search-results-panel"
+        placeholder={searchLabels.placeholder}
+        data-search-input
+      />
+    </label>
     <div class="language-picker" aria-label={languagePickerLabel}>
       {
         language === "he" ? (
@@ -133,23 +138,14 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     aria-labelledby="search-title"
     dir={searchDirection}
   >
-    <div class="search-panel">
+    <div class="search-panel" id="search-results-panel">
       <div class="search-header">
-        <h2 id="search-title">{searchLabels.title}</h2>
+        <h2 id="search-title">{searchLabels.resultsLabel}</h2>
         <button class="search-close" type="button" data-search-close>
           {searchLabels.close}
         </button>
       </div>
-      <input
-        class="search-input"
-        type="search"
-        autocomplete="off"
-        spellcheck="false"
-        aria-label={searchLabels.placeholder}
-        placeholder={searchLabels.placeholder}
-        data-search-input
-      />
-      <p class="search-status" data-search-status>{searchLabels.waiting}</p>
+      <p class="search-status" data-search-status></p>
       <div
         class="search-results"
         data-search-results
@@ -172,7 +168,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     const input = document.querySelector("[data-search-input]");
     const status = document.querySelector("[data-search-status]");
     const results = document.querySelector("[data-search-results]");
-    const openButtons = document.querySelectorAll("[data-search-open]");
     const closeButton = document.querySelector("[data-search-close]");
     let pagefindPromise;
     let lastSearchId = 0;
@@ -193,17 +188,13 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       return pagefindPromise;
     }
 
-    function openSearch() {
+    function showResultsLayer() {
       overlay.hidden = false;
-      document.getElementById("nav-toggle")?.removeAttribute("checked");
-      input.focus();
-      getPagefind().catch(() => {
-        status.textContent = searchLabels.empty;
-      });
     }
 
-    function closeSearch() {
+    function closeResultsLayer() {
       overlay.hidden = true;
+      input.focus();
     }
 
     function clearResults(message) {
@@ -247,10 +238,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       const searchId = ++lastSearchId;
 
       if (query.length < 2) {
+        overlay.hidden = true;
         clearResults(searchLabels.waiting);
         return;
       }
 
+      showResultsLayer();
       status.textContent = searchLabels.loading;
       const pagefind = await getPagefind();
       const search = await pagefind.search(query, {
@@ -273,16 +266,15 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       renderResults(searchResults);
     }
 
-    openButtons.forEach((button) => {
-      button.addEventListener("click", openSearch);
-      button.addEventListener("focus", () => {
-        getPagefind().catch(() => {});
+    input.addEventListener("focus", () => {
+      getPagefind().catch(() => {
+        status.textContent = searchLabels.empty;
       });
     });
-    closeButton.addEventListener("click", closeSearch);
+    closeButton.addEventListener("click", closeResultsLayer);
     overlay.addEventListener("click", (event) => {
       if (event.target === overlay) {
-        closeSearch();
+        closeResultsLayer();
       }
     });
     input.addEventListener("input", () => {
@@ -292,7 +284,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !overlay.hidden) {
-        closeSearch();
+        closeResultsLayer();
       }
     });
   </script>
@@ -388,24 +380,49 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     text-decoration: none;
   }
 
-  .search-button {
+  .nav-panel > a:hover,
+  .nav-panel > a:focus-visible {
+    background: rgba(104, 116, 73, 0.15);
+    outline: none;
+  }
+
+  .search-control {
+    display: inline-flex;
+    min-width: min(18rem, 26vw);
+    align-items: center;
+    gap: 0.45rem;
     min-height: 42px;
-    border: 0;
+    border: 1px solid rgba(112, 104, 94, 0.28);
     border-radius: 10px;
-    padding: 0.65rem 0.9rem;
+    padding: 0.32rem 0.55rem;
+    background: rgba(255, 253, 248, 0.78);
+  }
+
+  .search-control span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 780;
+    white-space: nowrap;
+  }
+
+  .search-input {
+    width: 100%;
+    min-width: 7rem;
+    border: 0;
+    padding: 0.3rem 0;
     background: transparent;
     color: var(--ink);
     font: inherit;
-    font-weight: 720;
-    cursor: pointer;
+    font-size: 0.95rem;
   }
 
-  .nav-panel > a:hover,
-  .nav-panel > a:focus-visible,
-  .search-button:hover,
-  .search-button:focus-visible {
-    background: rgba(104, 116, 73, 0.15);
+  .search-input:focus {
     outline: none;
+  }
+
+  .search-control:focus-within {
+    border-color: rgba(180, 62, 47, 0.52);
+    box-shadow: 0 0 0 3px rgba(180, 62, 47, 0.12);
   }
 
   .language-picker {
@@ -496,21 +513,9 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     cursor: pointer;
   }
 
-  .search-input {
-    width: 100%;
-    min-height: 48px;
-    border: 1px solid rgba(112, 104, 94, 0.35);
-    border-radius: 8px;
-    padding: 0.75rem 0.85rem;
-    background: #fff;
-    color: var(--ink);
-    font: inherit;
-    font-size: 1rem;
-  }
-
   .search-status {
     min-height: 1.4rem;
-    margin: 0.75rem 0 0;
+    margin: 0;
     color: var(--muted);
     font-size: 0.92rem;
   }
@@ -625,10 +630,10 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       width: 100%;
     }
 
-    .nav-panel .search-button {
-      justify-content: flex-start;
+    .nav-panel .search-control {
       width: 100%;
-      text-align: start;
+      min-width: 0;
+      padding: 0.55rem 0.65rem;
     }
 
     .nav-panel .language-picker {

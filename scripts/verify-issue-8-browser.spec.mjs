@@ -18,7 +18,6 @@ test("English search finds a body term and opens the recipe", async ({
   page,
 }) => {
   await page.goto(baseUrl);
-  await page.getByRole("button", { name: "Search" }).first().click();
   await page.getByRole("searchbox", { name: "Search recipes" }).fill("onion");
 
   const result = page.getByRole("link", { name: /Rice Pilaf/ }).first();
@@ -40,7 +39,6 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   page,
 }) => {
   await page.goto(`${baseUrl}he/`);
-  await page.getByRole("button", { name: "חיפוש" }).first().click();
   await page.getByRole("searchbox", { name: "חיפוש מתכונים" }).fill("בצל");
 
   const result = page.getByRole("link", { name: /פילאף אורז/ }).first();
@@ -62,7 +60,6 @@ test("Mobile drawer exposes the same search popup", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
   await page.getByLabel("Toggle navigation").click();
-  await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("searchbox", { name: "Search recipes" }).fill("salmon");
 
   const result = page
