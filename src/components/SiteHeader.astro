@@ -402,11 +402,11 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     flex: 0 1 clamp(6.75rem, 10vw, 10rem);
     min-width: 6.75rem;
     align-items: center;
-    min-height: 42px;
-    border: 1px solid rgba(112, 104, 94, 0.28);
-    border-radius: 10px;
-    padding: 0.32rem 0.65rem;
-    background: rgba(255, 253, 248, 0.78);
+    min-height: 34px;
+    border: 1px solid rgba(112, 104, 94, 0.2);
+    border-radius: 8px;
+    padding: 0.18rem 0.55rem;
+    background: rgba(255, 253, 248, 0.55);
   }
 
   .search-input {
@@ -417,7 +417,8 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     background: transparent;
     color: var(--ink);
     font: inherit;
-    font-size: 0.95rem;
+    font-size: 0.88rem;
+    line-height: 1.2;
   }
 
   .search-input:focus {
@@ -595,12 +596,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     .search-control {
       flex-basis: clamp(5.8rem, 9vw, 7.5rem);
       min-width: 5.8rem;
-      min-height: 40px;
-      padding-inline: 0.55rem;
+      min-height: 32px;
+      padding-inline: 0.5rem;
     }
 
     .search-input {
-      font-size: 0.9rem;
+      font-size: 0.84rem;
     }
 
     .language-picker {
@@ -677,7 +678,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       width: 100%;
       min-width: 0;
       flex-basis: auto;
+      min-height: 44px;
       padding: 0.55rem 0.65rem;
+    }
+
+    .nav-panel .search-input {
+      font-size: 0.95rem;
     }
 
     .nav-panel .language-picker {
