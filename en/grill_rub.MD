@@ -1,4 +1,4 @@
-[Back to index](../index.MD)
+[Back to Menu](../index.MD)
 
 # Grill Rub
 

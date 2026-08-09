@@ -1,4 +1,4 @@
-[Back to index](../index.MD)
+[Back to Menu](../index.MD)
 
 # Sweet and sour carrot salad, a recipe of Dina, Sash's mom
 

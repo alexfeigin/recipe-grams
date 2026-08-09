@@ -1,4 +1,4 @@
-[Back to index](../index.MD)
+[Back to Menu](../index.MD)
 
 # Pão de queijo:
 
@@ -12,7 +12,7 @@
 - 3g Salt
 - 1 Large beaten egg
 
-# Instructions
+## Instructions
 
 - Preheat oven to 200C
 - Heat milk+oil+salt to milk boil point, fork-mix in the flour until lumpy but incorporated, let rest 5 min (to cool before mixing with eggs).

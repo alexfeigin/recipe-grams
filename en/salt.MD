@@ -1,3 +1,5 @@
+[Back to Menu](../index.MD)
+
 # Salt
 
 Salting your food properly is essential for both flavor and texture.  

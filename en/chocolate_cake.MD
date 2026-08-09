@@ -1,6 +1,12 @@
 [Back to Menu](../index.MD)
 
-## Round Cake Pan 22 cm
+# Chocolate Cake
+
+## Pan
+
+Round cake pan, 22 cm.
+
+## Ingredients
 
 ### For the Cake:
 
@@ -22,7 +28,7 @@
 
 - Crushed caramelized hazelnuts (bress)
 
-### Instructions:
+## Instructions
 
 1. Preheat the oven to 160°C (without turbo) and grease the pan well.
 2. In a mixer bowl, whisk the eggs, sugar, and salt at high speed until a fluffy, light, and airy mixture forms.
@@ -37,7 +43,7 @@
 11. Remove from the pan and decorate with crushed hazelnuts.
 12. Serve the cake at room temperature.
 
-### For Half the Cake:
+## Half Recipe
 
 - 1.5 large eggs at room temperature (100 grams whisked eggs)
 - 100 grams (1/2 cup) sugar

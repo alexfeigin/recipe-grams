@@ -1,8 +1,8 @@
-[Back to index](../index.MD)
+[Back to Menu](../index.MD)
 
-## Pelmeni Dough Recipe
+# Pelmeni Dough Recipe
 
-### Ingredients
+## Ingredients
 
 - 300g “00” pasta flour or bread flour
 - 6g salt (2% of the flour weight)
@@ -10,7 +10,7 @@
 - 1 egg yolk
 - Cold water (to complement wet ingrediants to 185g)
 
-### Instructions
+## Instructions
 
 1. In a food processor, buzz the flour and salt for 10 seconds.
 2. Weigh out wet ingrediants eggs, egg yolks, and enough cold water to reach a total weight of 185g.

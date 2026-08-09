@@ -1,8 +1,10 @@
 [Back to Menu](../index.MD)
 
+# Banana Bread
+
 2 English cake pans, 25 cm long
 
-# For the Cake:
+## Ingredients
 
 - 100g (1 cup) sugar
 - 115g (1/2 cup) oil
@@ -14,7 +16,7 @@
 - 10g (2 teaspoons) baking powder
 - 200g chopped dark chocolate
 
-# Instructions:
+## Instructions
 
 1. Preheat the oven to 170°C (340°F) and grease the pans well.
 2. In a bowl, whisk together sugar, oil, eggs, vanilla, salt, and mashed bananas until smooth.
@@ -24,7 +26,7 @@
 6. Bake for 30-40 minutes or until the cakes are golden, set, and a toothpick inserted in the center comes out with moist crumbs.
 7. Let cool completely at room temperature and serve.
 
-# Double Recipe
+## Double Recipe
 
 - 200g (2 cups) sugar
 - 230g (1 cup) oil

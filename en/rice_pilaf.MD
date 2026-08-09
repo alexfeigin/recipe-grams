@@ -1,4 +1,4 @@
-[Back to index](../index.MD)
+[Back to Menu](../index.MD)
 
 # Rice Pilaf
 
@@ -15,7 +15,7 @@
 - Water
 - Optional: cooked chicken pieces from [Grilled Chicken Thighs](./grilled_chicken_thighs.MD)
 
-# Instructions
+## Instructions
 
 - Make [Grilled Chicken Thighs](./grilled_chicken_thighs.MD), and save the pan liquids.
 - Chill the pan liquids in the fridge until they separate.
