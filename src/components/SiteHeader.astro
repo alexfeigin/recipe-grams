@@ -11,7 +11,6 @@ type Props = {
   brandLine: string;
   homeHref: string;
   languageHref: string;
-  languageLabel: string;
   homeLabel: string;
   toggleNavigationLabel: string;
   navItems: NavItem[];
@@ -22,13 +21,15 @@ const {
   brandLine,
   homeHref,
   languageHref,
-  languageLabel,
   homeLabel,
   toggleNavigationLabel,
   navItems,
 } = Astro.props;
 
 const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
+const languagePickerLabel = language === "he" ? "בחירת שפה" : "Language";
+const hebrewLabel = "עב";
+const englishLabel = "EN";
 ---
 
 <header class="site-header">
@@ -40,20 +41,57 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
     </span>
   </a>
 
+  <div class="mobile-actions">
+    <div class="language-picker" aria-label={languagePickerLabel}>
+      {
+        language === "he" ? (
+          <span aria-current="page">{hebrewLabel}</span>
+        ) : (
+          <a href={languageHref}>{hebrewLabel}</a>
+        )
+      }
+      <span class="language-divider" aria-hidden="true">|</span>
+      {
+        language === "en" ? (
+          <span aria-current="page">{englishLabel}</span>
+        ) : (
+          <a href={languageHref}>{englishLabel}</a>
+        )
+      }
+    </div>
+
+    <label
+      class="menu-button"
+      for="nav-toggle"
+      aria-label={toggleNavigationLabel}
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </label>
+  </div>
+
   <input class="nav-toggle" type="checkbox" id="nav-toggle" />
-  <label
-    class="menu-button"
-    for="nav-toggle"
-    aria-label={toggleNavigationLabel}
-  >
-    <span></span>
-    <span></span>
-    <span></span>
-  </label>
 
   <nav class="nav-panel" aria-label={navLabel}>
-    <a href={languageHref}>{languageLabel}</a>
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+    <div class="language-picker" aria-label={languagePickerLabel}>
+      {
+        language === "he" ? (
+          <span aria-current="page">{hebrewLabel}</span>
+        ) : (
+          <a href={languageHref}>{hebrewLabel}</a>
+        )
+      }
+      <span class="language-divider" aria-hidden="true">|</span>
+      {
+        language === "en" ? (
+          <span aria-current="page">{englishLabel}</span>
+        ) : (
+          <a href={languageHref}>{englishLabel}</a>
+        )
+      }
+    </div>
   </nav>
 
   <script is:inline>
@@ -69,6 +107,7 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
     top: 0;
     z-index: 10;
     display: flex;
+    direction: ltr;
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
@@ -138,9 +177,17 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
     flex: 0 0 auto;
     align-items: center;
     gap: 0.35rem;
+    margin-left: auto;
   }
 
-  .nav-panel a {
+  .nav-panel a,
+  .language-picker a,
+  .language-picker span {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .nav-panel > a {
     min-height: 42px;
     border-radius: 10px;
     padding: 0.65rem 0.9rem;
@@ -149,16 +196,54 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
     text-decoration: none;
   }
 
-  .nav-panel a:hover,
-  .nav-panel a:focus-visible {
+  .nav-panel > a:hover,
+  .nav-panel > a:focus-visible {
     background: rgba(104, 116, 73, 0.15);
     outline: none;
+  }
+
+  .language-picker {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0 0.55rem 0.7rem;
+    color: var(--muted);
+    direction: ltr;
+    font-size: 0.92rem;
+    font-weight: 820;
+    white-space: nowrap;
+  }
+
+  .language-picker a {
+    border-radius: 8px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .language-picker a:hover,
+  .language-picker a:focus-visible {
+    color: var(--tomato);
+    outline: none;
+  }
+
+  .language-picker span[aria-current="page"] {
+    color: var(--muted);
+  }
+
+  .language-divider {
+    color: rgba(112, 104, 94, 0.55);
+  }
+
+  .mobile-actions {
+    display: none;
   }
 
   @media (max-width: 640px) {
     .site-header {
       width: min(100% - 2rem, 1180px);
       min-height: 68px;
+      gap: 0.75rem;
     }
 
     .brand-mark {
@@ -168,6 +253,19 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
 
     .brand small {
       display: none;
+    }
+
+    .mobile-actions {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 0.65rem;
+      margin-left: auto;
+    }
+
+    .mobile-actions .language-picker {
+      min-height: 44px;
+      padding: 0;
     }
 
     .menu-button {
@@ -205,6 +303,10 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
     .nav-panel a {
       justify-content: flex-start;
       width: 100%;
+    }
+
+    .nav-panel .language-picker {
+      display: none;
     }
 
     .nav-toggle:checked ~ .nav-panel {
