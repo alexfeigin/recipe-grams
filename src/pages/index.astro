@@ -7,7 +7,6 @@ const sourceUrl =
 
 const navItems = [
   { label: "Featured", href: "#featured" },
-  { label: "Categories", href: "#categories" },
   { label: "Legacy Index", href: `${sourceUrl}/index.MD` },
 ];
 
@@ -68,15 +67,6 @@ const recipes = [
     time: "Pantry base",
     markerIds: ["vegan"],
   },
-];
-
-const categoryOrder = [
-  "basics",
-  "doughs_starches",
-  "mains",
-  "salads_pickles",
-  "sweets",
-  "snacks",
 ];
 ---
 
@@ -148,14 +138,6 @@ const categoryOrder = [
             Gram-first
           </div>
         </div>
-      </section>
-
-      <section class="category-strip" id="categories" aria-label="Categories">
-        {
-          categoryOrder.map((categoryId) => (
-            <a href="#featured">{categoryLabels[categoryId]}</a>
-          ))
-        }
       </section>
 
       <section
@@ -389,25 +371,6 @@ const categoryOrder = [
     color: var(--ink);
     font-size: 1.55rem;
     font-weight: 850;
-  }
-
-  .category-strip {
-    display: flex;
-    gap: 0.55rem;
-    overflow-x: auto;
-    padding: 0.4rem 0 1.2rem;
-    scrollbar-width: thin;
-  }
-
-  .category-strip a {
-    flex: 0 0 auto;
-    border: 1px solid rgba(104, 116, 73, 0.28);
-    border-radius: 999px;
-    padding: 0.65rem 0.9rem;
-    background: rgba(255, 253, 248, 0.66);
-    color: #3f4829;
-    font-weight: 740;
-    text-decoration: none;
   }
 
   .recipe-board {
