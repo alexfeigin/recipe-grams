@@ -92,7 +92,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   <nav class="nav-panel" aria-label={navLabel}>
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
     <label class="search-control">
-      <span>{searchLabels.button}</span>
       <input
         class="search-input"
         type="search"
@@ -388,26 +387,19 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   .search-control {
     display: inline-flex;
-    min-width: min(18rem, 26vw);
+    flex: 0 1 clamp(7.5rem, 12vw, 10.5rem);
+    min-width: 7.5rem;
     align-items: center;
-    gap: 0.45rem;
     min-height: 42px;
     border: 1px solid rgba(112, 104, 94, 0.28);
     border-radius: 10px;
-    padding: 0.32rem 0.55rem;
+    padding: 0.32rem 0.65rem;
     background: rgba(255, 253, 248, 0.78);
-  }
-
-  .search-control span {
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 780;
-    white-space: nowrap;
   }
 
   .search-input {
     width: 100%;
-    min-width: 7rem;
+    min-width: 0;
     border: 0;
     padding: 0.3rem 0;
     background: transparent;
@@ -633,6 +625,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     .nav-panel .search-control {
       width: 100%;
       min-width: 0;
+      flex-basis: auto;
       padding: 0.55rem 0.65rem;
     }
 

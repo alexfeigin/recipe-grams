@@ -18,7 +18,7 @@ test("English search finds a body term and opens the recipe", async ({
   page,
 }) => {
   await page.goto(baseUrl);
-  await page.getByRole("searchbox", { name: "Search recipes" }).fill("onion");
+  await page.getByRole("searchbox", { name: "Search" }).fill("onion");
 
   const result = page.getByRole("link", { name: /Rice Pilaf/ }).first();
   await expect(result).toBeVisible();
@@ -39,7 +39,7 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   page,
 }) => {
   await page.goto(`${baseUrl}he/`);
-  await page.getByRole("searchbox", { name: "חיפוש מתכונים" }).fill("בצל");
+  await page.getByRole("searchbox", { name: "חיפוש" }).fill("בצל");
 
   const result = page.getByRole("link", { name: /פילאף אורז/ }).first();
   await expect(result).toBeVisible();
@@ -60,7 +60,7 @@ test("Mobile drawer exposes the same search popup", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
   await page.getByLabel("Toggle navigation").click();
-  await page.getByRole("searchbox", { name: "Search recipes" }).fill("salmon");
+  await page.getByRole("searchbox", { name: "Search" }).fill("salmon");
 
   const result = page
     .getByRole("link", { name: /Air Fryer Teriyaki Salmon/ })
