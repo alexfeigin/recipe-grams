@@ -1,7 +1,9 @@
 ---
+import SiteHeader from "../../components/SiteHeader.astro";
 import {
   findLocalizedRecipe,
   getRecipeMetadata,
+  labelsByLanguage,
   listLocalizedRecipes,
   renderRecipeBody,
   sitePath,
@@ -31,15 +33,26 @@ const socialImage = socialImageSource
   ? sitePath(basePath, socialImageSource)
   : undefined;
 const direction = recipe.language === "he" ? "rtl" : "ltr";
+const alternateLanguage = recipe.language === "he" ? "en" : "he";
+const alternateRecipe = findLocalizedRecipe(alternateLanguage, recipe.slug);
+const labels = labelsByLanguage[recipe.language];
 const homeLabel = recipe.language === "he" ? "עמוד הבית" : "Home";
 const homeHref =
   recipe.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
 const sourceLabel =
   recipe.language === "he" ? "מקור Markdown" : "Markdown Source";
-const homeAriaLabel =
-  recipe.language === "he" ? "עמוד הבית של Recipe-Grams" : "Recipe-Grams home";
-const recipeNavLabel =
-  recipe.language === "he" ? "ניווט מתכון" : "Recipe navigation";
+const languageHref = alternateRecipe
+  ? sitePath(basePath, `${alternateLanguage}/${recipe.slug}/`)
+  : alternateLanguage === "he"
+    ? sitePath(basePath, "he/")
+    : sitePath(basePath, "");
+const navItems = [
+  { label: homeLabel, href: homeHref },
+  {
+    label: sourceLabel,
+    href: `https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/${recipe.language}/${recipe.slug}.MD`,
+  },
+];
 ---
 
 <html lang={recipe.language} dir={direction}>
@@ -54,24 +67,15 @@ const recipeNavLabel =
     <title>{metadata.title} | Recipe-Grams</title>
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href={homeHref} aria-label={homeAriaLabel}>
-        <span class="brand-mark" aria-hidden="true">Rg</span>
-        <span>
-          <strong>Recipe-Grams</strong>
-          <small>{metadata.title}</small>
-        </span>
-      </a>
-
-      <nav class="nav-panel" aria-label={recipeNavLabel}>
-        <a href={homeHref}>{homeLabel}</a>
-        <a
-          href={`https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/${recipe.language}/${recipe.slug}.MD`}
-        >
-          {sourceLabel}
-        </a>
-      </nav>
-    </header>
+    <SiteHeader
+      language={recipe.language}
+      brandLine={metadata.title}
+      homeHref={homeHref}
+      languageHref={languageHref}
+      homeLabel={labels.accessibility.home}
+      toggleNavigationLabel={labels.accessibility.toggleNavigation}
+      navItems={navItems}
+    />
 
     <main>
       <article class="recipe-shell">
@@ -119,81 +123,6 @@ const recipeNavLabel =
 
   a {
     color: var(--tomato);
-  }
-
-  .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    width: min(980px, calc(100% - 2rem));
-    min-height: 72px;
-    margin: 0 auto;
-    padding: 0.75rem 0;
-    background: rgba(248, 244, 236, 0.92);
-    border-bottom: 1px solid rgba(112, 104, 94, 0.22);
-    backdrop-filter: blur(16px);
-  }
-
-  .brand {
-    display: inline-flex;
-    min-width: 0;
-    align-items: center;
-    gap: 0.8rem;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .brand-mark {
-    display: grid;
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    place-items: center;
-    border-radius: 10px;
-    background: var(--tomato);
-    color: #fffdf8;
-    font-weight: 850;
-    letter-spacing: 0;
-  }
-
-  .brand strong,
-  .brand small {
-    display: block;
-  }
-
-  .brand small {
-    max-width: 42vw;
-    overflow: hidden;
-    color: var(--muted);
-    font-size: 0.82rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .nav-panel {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .nav-panel a {
-    min-height: 42px;
-    border-radius: 10px;
-    padding: 0.65rem 0.85rem;
-    color: var(--ink);
-    font-weight: 720;
-    text-decoration: none;
-  }
-
-  .nav-panel a:hover,
-  .nav-panel a:focus-visible {
-    background: rgba(104, 116, 73, 0.15);
-    outline: none;
   }
 
   main {
@@ -267,32 +196,8 @@ const recipeNavLabel =
   }
 
   @media (max-width: 640px) {
-    .site-header,
     main {
       width: min(100% - 1rem, 980px);
-    }
-
-    .site-header {
-      display: grid;
-      grid-template-columns: 1fr;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-
-    .brand small {
-      max-width: none;
-    }
-
-    .nav-panel {
-      width: 100%;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-    }
-
-    .nav-panel a {
-      min-height: 38px;
-      padding: 0.55rem 0.65rem;
-      font-size: 0.9rem;
     }
   }
 </style>
