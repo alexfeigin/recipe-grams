@@ -127,167 +127,174 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       document.getElementById("nav-toggle")?.setAttribute("checked", "");
     }
   </script>
+</header>
 
-  <div
-    class="search-overlay"
-    data-search-overlay
-    hidden
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="search-title"
-    dir={searchDirection}
-  >
-    <div class="search-panel" id="search-results-panel">
-      <div class="search-header">
-        <h2 id="search-title">{searchLabels.resultsLabel}</h2>
-        <button class="search-close" type="button" data-search-close>
-          {searchLabels.close}
-        </button>
-      </div>
-      <p class="search-status" data-search-status></p>
-      <div
-        class="search-results"
-        data-search-results
-        aria-label={searchLabels.resultsLabel}
-      >
-      </div>
+<div
+  class="search-overlay"
+  data-search-overlay
+  hidden
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="search-title"
+  dir={searchDirection}
+>
+  <div class="search-panel" id="search-results-panel">
+    <div class="search-header">
+      <h2 id="search-title">{searchLabels.resultsLabel}</h2>
+      <button class="search-close" type="button" data-search-close>
+        {searchLabels.close}
+      </button>
+    </div>
+    <p class="search-status" data-search-status></p>
+    <div
+      class="search-results"
+      data-search-results
+      aria-label={searchLabels.resultsLabel}
+    >
     </div>
   </div>
+</div>
 
-  <script
-    is:inline
-    define:vars={{
-      language,
-      pagefindBundle,
-      searchLabels,
-      basePath: import.meta.env.BASE_URL,
-    }}
-  >
-    const overlay = document.querySelector("[data-search-overlay]");
-    const input = document.querySelector("[data-search-input]");
-    const status = document.querySelector("[data-search-status]");
-    const results = document.querySelector("[data-search-results]");
-    const closeButton = document.querySelector("[data-search-close]");
-    let pagefindPromise;
-    let lastSearchId = 0;
+<script
+  is:inline
+  define:vars={{
+    language,
+    pagefindBundle,
+    searchLabels,
+    basePath: import.meta.env.BASE_URL,
+  }}
+>
+  const overlay = document.querySelector("[data-search-overlay]");
+  const input = document.querySelector("[data-search-input]");
+  const status = document.querySelector("[data-search-status]");
+  const results = document.querySelector("[data-search-results]");
+  const closeButton = document.querySelector("[data-search-close]");
+  let pagefindPromise;
+  let lastSearchId = 0;
 
-    function normalizeResultUrl(url) {
-      const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-      if (url.startsWith(normalizedBase)) {
-        return url;
-      }
-      return `${normalizedBase}${url.replace(/^\/+/, "")}`;
+  function normalizeResultUrl(url) {
+    const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+    if (url.startsWith(normalizedBase)) {
+      return url;
     }
+    return `${normalizedBase}${url.replace(/^\/+/, "")}`;
+  }
 
-    async function getPagefind() {
-      pagefindPromise ??= import(pagefindBundle).then((pagefind) => {
-        pagefind.init?.();
-        return pagefind;
-      });
-      return pagefindPromise;
-    }
+  async function getPagefind() {
+    pagefindPromise ??= import(pagefindBundle).then((pagefind) => {
+      pagefind.init?.();
+      return pagefind;
+    });
+    return pagefindPromise;
+  }
 
-    function showResultsLayer() {
-      overlay.hidden = false;
-    }
+  function showResultsLayer() {
+    overlay.hidden = false;
+  }
 
-    function closeResultsLayer() {
-      overlay.hidden = true;
+  function closeResultsLayer(restoreFocus = true) {
+    overlay.hidden = true;
+    if (restoreFocus) {
       input.focus();
     }
+  }
 
-    function clearResults(message) {
-      results.replaceChildren();
-      status.textContent = message;
+  function clearResults(message) {
+    results.replaceChildren();
+    status.textContent = message;
+  }
+
+  function renderResults(searchResults) {
+    results.replaceChildren();
+
+    for (const result of searchResults) {
+      const link = document.createElement("a");
+      link.className = "search-result";
+      link.href = normalizeResultUrl(result.url);
+
+      const title = document.createElement("strong");
+      title.textContent = result.meta.title ?? link.href;
+      link.append(title);
+
+      const details = [result.meta.category, result.meta.markers]
+        .filter(Boolean)
+        .join(" | ");
+      if (details) {
+        const meta = document.createElement("span");
+        meta.className = "search-result-meta";
+        meta.textContent = details;
+        link.append(meta);
+      }
+
+      const excerpt = document.createElement("span");
+      excerpt.className = "search-result-excerpt";
+      excerpt.innerHTML = result.excerpt;
+      link.append(excerpt);
+
+      results.append(link);
+    }
+  }
+
+  async function runSearch() {
+    const query = input.value.trim();
+    const searchId = ++lastSearchId;
+
+    if (query.length < 2) {
+      overlay.hidden = true;
+      clearResults(searchLabels.waiting);
+      return;
     }
 
-    function renderResults(searchResults) {
-      results.replaceChildren();
+    showResultsLayer();
+    status.textContent = searchLabels.loading;
+    const pagefind = await getPagefind();
+    const search = await pagefind.search(query, {
+      filters: { language },
+    });
+    const searchResults = await Promise.all(
+      search.results.slice(0, 8).map((result) => result.data()),
+    );
 
-      for (const result of searchResults) {
-        const link = document.createElement("a");
-        link.className = "search-result";
-        link.href = normalizeResultUrl(result.url);
-
-        const title = document.createElement("strong");
-        title.textContent = result.meta.title ?? link.href;
-        link.append(title);
-
-        const details = [result.meta.category, result.meta.markers]
-          .filter(Boolean)
-          .join(" | ");
-        if (details) {
-          const meta = document.createElement("span");
-          meta.className = "search-result-meta";
-          meta.textContent = details;
-          link.append(meta);
-        }
-
-        const excerpt = document.createElement("span");
-        excerpt.className = "search-result-excerpt";
-        excerpt.innerHTML = result.excerpt;
-        link.append(excerpt);
-
-        results.append(link);
-      }
+    if (searchId !== lastSearchId) {
+      return;
     }
 
-    async function runSearch() {
-      const query = input.value.trim();
-      const searchId = ++lastSearchId;
-
-      if (query.length < 2) {
-        overlay.hidden = true;
-        clearResults(searchLabels.waiting);
-        return;
-      }
-
-      showResultsLayer();
-      status.textContent = searchLabels.loading;
-      const pagefind = await getPagefind();
-      const search = await pagefind.search(query, {
-        filters: { language },
-      });
-      const searchResults = await Promise.all(
-        search.results.slice(0, 8).map((result) => result.data()),
-      );
-
-      if (searchId !== lastSearchId) {
-        return;
-      }
-
-      if (searchResults.length === 0) {
-        clearResults(searchLabels.empty);
-        return;
-      }
-
-      status.textContent = "";
-      renderResults(searchResults);
+    if (searchResults.length === 0) {
+      clearResults(searchLabels.empty);
+      return;
     }
 
-    input.addEventListener("focus", () => {
-      getPagefind().catch(() => {
-        status.textContent = searchLabels.empty;
-      });
+    status.textContent = "";
+    renderResults(searchResults);
+  }
+
+  input.addEventListener("focus", () => {
+    getPagefind().catch(() => {
+      status.textContent = searchLabels.empty;
     });
-    closeButton.addEventListener("click", closeResultsLayer);
-    overlay.addEventListener("click", (event) => {
-      if (event.target === overlay) {
-        closeResultsLayer();
-      }
+  });
+  closeButton.addEventListener("click", () => {
+    closeResultsLayer();
+  });
+  overlay.addEventListener("click", (event) => {
+    if (
+      event.target instanceof Element &&
+      !event.target.closest(".search-panel")
+    ) {
+      closeResultsLayer(false);
+    }
+  });
+  input.addEventListener("input", () => {
+    runSearch().catch(() => {
+      clearResults(searchLabels.empty);
     });
-    input.addEventListener("input", () => {
-      runSearch().catch(() => {
-        clearResults(searchLabels.empty);
-      });
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !overlay.hidden) {
-        closeResultsLayer();
-      }
-    });
-  </script>
-</header>
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !overlay.hidden) {
+      closeResultsLayer();
+    }
+  });
+</script>
 
 <style>
   .site-header {
