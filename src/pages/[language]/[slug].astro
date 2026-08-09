@@ -39,20 +39,12 @@ const labels = labelsByLanguage[recipe.language];
 const homeLabel = recipe.language === "he" ? "עמוד הבית" : "Home";
 const homeHref =
   recipe.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
-const sourceLabel =
-  recipe.language === "he" ? "מקור Markdown" : "Markdown Source";
 const languageHref = alternateRecipe
   ? sitePath(basePath, `${alternateLanguage}/${recipe.slug}/`)
   : alternateLanguage === "he"
     ? sitePath(basePath, "he/")
     : sitePath(basePath, "");
-const navItems = [
-  { label: homeLabel, href: homeHref },
-  {
-    label: sourceLabel,
-    href: `https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/${recipe.language}/${recipe.slug}.MD`,
-  },
-];
+const navItems = [{ label: homeLabel, href: homeHref }];
 ---
 
 <html lang={recipe.language} dir={direction}>
