@@ -59,7 +59,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   <input class="nav-toggle" type="checkbox" id="nav-toggle" />
 
-  <nav class="nav-panel" aria-label={navLabel}>
+  <nav class="nav-panel" aria-label={navLabel} dir={searchDirection}>
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
   </nav>
 
@@ -128,8 +128,20 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   </div>
 
   <script is:inline>
-    if (window.location.hash === "#nav-open") {
-      document.getElementById("nav-toggle")?.setAttribute("checked", "");
+    const navToggle = document.getElementById("nav-toggle");
+
+    if (navToggle instanceof HTMLInputElement) {
+      if (window.location.hash === "#nav-open") {
+        navToggle.checked = true;
+      }
+
+      document
+        .querySelector(".nav-panel")
+        ?.addEventListener("click", (event) => {
+          if (event.target instanceof Element && event.target.closest("a")) {
+            navToggle.checked = false;
+          }
+        });
     }
   </script>
 </header>
@@ -382,6 +394,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   .language-picker a,
   .language-picker span {
     display: inline-flex;
+    box-sizing: border-box;
     align-items: center;
   }
 
@@ -688,9 +701,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       position: absolute;
       top: calc(100% + 0.55rem);
       right: 0;
-      left: 0;
+      left: auto;
       display: none;
+      width: min(15rem, calc(100vw - 2rem));
       align-items: stretch;
+      justify-content: stretch;
+      justify-items: stretch;
       border-radius: 14px;
       padding: 0.55rem;
       background: var(--surface);
@@ -699,11 +715,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
     .nav-panel a {
       justify-content: flex-start;
+      text-align: start;
       width: 100%;
     }
 
     .nav-panel > a {
-      min-height: 38px;
+      min-height: 44px;
       padding: 0.5rem 0.65rem;
       font-size: 0.95rem;
     }
