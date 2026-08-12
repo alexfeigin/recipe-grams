@@ -103,8 +103,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
   en: {
     brandLine: "Measured family recipes",
     pageTitle: "Recipe-Grams",
-    pageDescription:
-      "Recipe-Grams is a bilingual gram-based recipe collection.",
+    pageDescription: "Recipe-Grams is a gram-based family recipe collection.",
     home: "Home",
     languageSwitch: "עברית",
     markdownSource: "Markdown Source",
@@ -166,7 +165,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
   he: {
     brandLine: "מתכונים משפחתיים בגרמים",
     pageTitle: "Recipe-Grams",
-    pageDescription: "Recipe-Grams הוא אוסף מתכונים דו-לשוני המבוסס על גרמים.",
+    pageDescription: "Recipe-Grams הוא אוסף מתכונים משפחתיים המבוסס על גרמים.",
     home: "עמוד הבית",
     languageSwitch: "English",
     markdownSource: "מקור Markdown",

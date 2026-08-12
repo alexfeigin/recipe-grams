@@ -1,6 +1,7 @@
 ---
 import FaviconLinks from "../../components/FaviconLinks.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
+import SocialMeta from "../../components/SocialMeta.astro";
 import {
   findLocalizedRecipe,
   getRecipeMetadata,
@@ -31,11 +32,17 @@ const metadata = getRecipeMetadata(recipe);
 const searchMetadata = getRecipeSearchMetadata(recipe);
 const recipeHtml = await renderRecipeBody(recipe, basePath);
 const canonicalPath = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
-const socialImageSource = metadata.socialImage ?? metadata.image;
-const socialImage = socialImageSource
-  ? sitePath(basePath, socialImageSource)
-  : undefined;
+const canonicalUrl = new URL(canonicalPath, Astro.site ?? Astro.url).href;
+const fallbackSocialImageSource = "recipe-grams-card-placeholder.png";
+const socialImageSource =
+  metadata.socialImage ?? metadata.image ?? fallbackSocialImageSource;
+const socialImage = new URL(
+  sitePath(basePath, socialImageSource),
+  Astro.site ?? Astro.url,
+).href;
+const usesFallbackSocialImage = socialImageSource === fallbackSocialImageSource;
 const direction = recipe.language === "he" ? "rtl" : "ltr";
+const locale = recipe.language === "he" ? "he_IL" : "en_US";
 const alternateLanguage = recipe.language === "he" ? "en" : "he";
 const alternateRecipe = findLocalizedRecipe(alternateLanguage, recipe.slug);
 const labels = labelsByLanguage[recipe.language];
@@ -55,8 +62,18 @@ const navItems = [{ label: homeLabel, href: homeHref }];
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={metadata.description} />
-    <meta property="og:title" content={metadata.title} />
-    <meta property="og:description" content={metadata.description} />
+    <SocialMeta
+      title={`${metadata.title} | Recipe-Grams`}
+      description={metadata.description}
+      url={canonicalUrl}
+      image={socialImage}
+      imageAlt={metadata.title}
+      locale={locale}
+      type="article"
+      imageWidth={usesFallbackSocialImage ? 562 : undefined}
+      imageHeight={usesFallbackSocialImage ? 480 : undefined}
+      imageType={usesFallbackSocialImage ? "image/png" : undefined}
+    />
     <meta data-pagefind-filter={`language:${recipe.language}`} />
     {
       searchMetadata.category && (
@@ -76,8 +93,7 @@ const navItems = [{ label: homeLabel, href: homeHref }];
         />
       )
     }
-    {socialImage && <meta property="og:image" content={socialImage} />}
-    <link rel="canonical" href={canonicalPath} />
+    <link rel="canonical" href={canonicalUrl} />
     <FaviconLinks />
     <title>{metadata.title} | Recipe-Grams</title>
   </head>

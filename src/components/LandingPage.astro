@@ -1,6 +1,7 @@
 ---
 import FaviconLinks from "./FaviconLinks.astro";
 import SiteHeader from "./SiteHeader.astro";
+import SocialMeta from "./SocialMeta.astro";
 import { getLandingPageData, sitePath } from "../lib/recipePages";
 import type { RecipeLanguage } from "../lib/recipePages";
 
@@ -17,6 +18,10 @@ const placeholderLogoHref = sitePath(
   basePath,
   "recipe-grams-card-placeholder.png",
 );
+const socialImageUrl = new URL(placeholderLogoHref, Astro.site ?? Astro.url)
+  .href;
+const pageUrl = new URL(homeHref, Astro.site ?? Astro.url).href;
+const locale = data.language === "he" ? "he_IL" : "en_US";
 const navItems = data.categorySections.map((section) => ({
   label: section.label,
   href: `#${section.id}`,
@@ -28,6 +33,17 @@ const navItems = data.categorySections.map((section) => ({
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={data.labels.pageDescription} />
+    <SocialMeta
+      title={data.labels.pageTitle}
+      description={data.labels.pageDescription}
+      url={pageUrl}
+      image={socialImageUrl}
+      imageAlt="Recipe-Grams"
+      locale={locale}
+      imageWidth={562}
+      imageHeight={480}
+      imageType="image/png"
+    />
     <FaviconLinks />
     <title>{data.labels.pageTitle}</title>
   </head>
