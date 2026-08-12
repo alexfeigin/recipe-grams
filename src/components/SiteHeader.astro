@@ -87,7 +87,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
         <a href={languageHref}>{hebrewLabel}</a>
       )
     }
-    <span class="language-divider" aria-hidden="true">|</span>
     {
       language === "en" ? (
         <span aria-current="page">{englishLabel}</span>
@@ -106,7 +105,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
           <a href={languageHref}>{hebrewLabel}</a>
         )
       }
-      <span class="language-divider" aria-hidden="true">|</span>
       {
         language === "en" ? (
           <span aria-current="page">{englishLabel}</span>
@@ -452,11 +450,14 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   .language-picker {
     display: inline-flex;
     flex: 0 0 auto;
-    min-height: 42px;
+    min-height: 34px;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.55rem 0 0.55rem 0.7rem;
-    color: var(--muted);
+    gap: 0.16rem;
+    border: 1px solid rgba(112, 104, 94, 0.22);
+    border-radius: 8px;
+    padding: 0.16rem;
+    background: rgba(255, 253, 248, 0.62);
+    color: var(--ink);
     direction: ltr;
     font-size: 0.92rem;
     font-weight: 820;
@@ -468,23 +469,31 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   .language-picker a {
-    border-radius: 8px;
+    min-width: 2rem;
+    min-height: 30px;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 0.22rem 0.46rem;
     color: var(--ink);
     text-decoration: none;
   }
 
   .language-picker a:hover,
   .language-picker a:focus-visible {
+    background: rgba(104, 116, 73, 0.14);
     color: var(--tomato);
     outline: none;
   }
 
   .language-picker span[aria-current="page"] {
-    color: var(--muted);
-  }
-
-  .language-divider {
-    color: rgba(112, 104, 94, 0.55);
+    min-width: 2rem;
+    min-height: 30px;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 0.22rem 0.46rem;
+    background: var(--tomato);
+    color: var(--surface);
+    box-shadow: 0 4px 10px rgba(180, 62, 47, 0.18);
   }
 
   .mobile-actions {
@@ -628,9 +637,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     }
 
     .language-picker {
-      min-height: 40px;
-      gap: 0.35rem;
-      padding-inline-start: 0.45rem;
+      min-height: 32px;
       font-size: 0.88rem;
     }
   }
@@ -674,8 +681,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     }
 
     .mobile-actions .language-picker {
-      min-height: 40px;
-      padding: 0;
+      min-height: 32px;
       font-size: 0.86rem;
     }
 
