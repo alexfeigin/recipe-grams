@@ -1,0 +1,859 @@
+---
+import FaviconLinks from "../components/FaviconLinks.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SocialMeta from "../components/SocialMeta.astro";
+import { labelsByLanguage, sitePath } from "../lib/recipePages";
+
+const basePath = import.meta.env.BASE_URL;
+const homeHref = sitePath(basePath, "");
+const pagePath = sitePath(basePath, "poolish/");
+const pageUrl = new URL(pagePath, Astro.site ?? Astro.url).href;
+const socialImage = new URL(
+  sitePath(basePath, "pizza.jpg"),
+  Astro.site ?? Astro.url,
+).href;
+const labels = labelsByLanguage.en;
+---
+
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A hidden Recipe-Grams poolish calculator for generic dough and the house pizza preset."
+    />
+    <SocialMeta
+      title="Poolish Calculator | Recipe-Grams"
+      description="A hidden Recipe-Grams poolish calculator for generic dough and the house pizza preset."
+      url={pageUrl}
+      image={socialImage}
+      imageAlt="Pizza dough"
+      locale="en_US"
+    />
+    <link rel="canonical" href={pageUrl} />
+    <meta name="robots" content="noindex" />
+    <FaviconLinks />
+    <title>Poolish Calculator | Recipe-Grams</title>
+  </head>
+  <body>
+    <!--
+      THESIS: Poolish opens as a working kitchen calculator, refusing a generic recipe article or promotional tool page.
+      OWN-WORLD: warm kitchen paper, tomato action states, olive mode controls, steel table rules, compact measurement panels.
+      STORY: cooks switch between the generic dough formula and the house pizza preset, adjust grams, and copy phase weights.
+      FIRST VIEWPORT: Recipe-Grams header sits above a focused calculator with controls on the left and live poolish/final dough results on the right.
+      FORM: hidden operate surface for the repo poolish shell logic; seed key: poolish-calc-existing-world.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
+    <SiteHeader
+      language="en"
+      brandLine="Poolish Calculator"
+      homeHref={homeHref}
+      languageHref={homeHref}
+      homeLabel={labels.accessibility.home}
+      toggleNavigationLabel={labels.accessibility.toggleNavigation}
+      navItems={[{ label: "Home", href: homeHref }]}
+    />
+
+    <main class="calculator-shell">
+      <section class="tool-intro" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">Poolish Calculator</h1>
+          <p>
+            Scale the repo's dough formula in grams, then switch to the pizza
+            preset when you want the house poolish ratio.
+          </p>
+        </div>
+      </section>
+
+      <section class="calculator-grid" aria-label="Poolish calculator">
+        <form class="input-panel" data-calculator-form>
+          <fieldset class="mode-switch">
+            <legend>Calculator mode</legend>
+            <label>
+              <input
+                type="radio"
+                name="mode"
+                value="generic"
+                checked
+                data-mode-input
+              />
+              <span>Generic</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="pizza" data-mode-input />
+              <span>Pizza preset</span>
+            </label>
+          </fieldset>
+
+          <div class="pizza-controls" data-pizza-controls hidden>
+            <label>
+              <span>Pizza count</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value="3"
+                inputmode="numeric"
+                data-field="pizzaCount"
+              />
+            </label>
+            <p>
+              Pizza mode uses about <strong>283g of dough per pizza</strong>.
+              Three pizzas make an 850g batch.
+            </p>
+          </div>
+
+          <div class="field-grid" data-generic-controls>
+            <label>
+              <span>Desired dough</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value="1700"
+                inputmode="decimal"
+                data-field="desiredDough"
+              />
+            </label>
+            <label>
+              <span>Hydration</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value="0.70"
+                inputmode="decimal"
+                data-field="hydration"
+              />
+            </label>
+            <label>
+              <span>Poolish share</span>
+              <input
+                type="number"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.667"
+                inputmode="decimal"
+                data-field="poolishShare"
+              />
+            </label>
+            <label>
+              <span>Poolish hydration</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value="1.00"
+                inputmode="decimal"
+                data-field="poolishHydration"
+              />
+            </label>
+            <label>
+              <span>Poolish yeast</span>
+              <input
+                type="number"
+                min="0"
+                step="0.001"
+                value="0.013"
+                inputmode="decimal"
+                data-field="poolishYeast"
+              />
+            </label>
+            <label>
+              <span>Final yeast</span>
+              <input
+                type="number"
+                min="0"
+                step="0.001"
+                value="0"
+                inputmode="decimal"
+                data-field="restYeast"
+              />
+            </label>
+            <label>
+              <span>Salt</span>
+              <input
+                type="number"
+                min="0"
+                step="0.001"
+                value="0.027"
+                inputmode="decimal"
+                data-field="salt"
+              />
+            </label>
+          </div>
+
+          <dl class="preset-list" data-preset-list hidden>
+            <div>
+              <dt>Hydration</dt>
+              <dd>70%</dd>
+            </div>
+            <div>
+              <dt>Poolish share</dt>
+              <dd>2/3 of flour</dd>
+            </div>
+            <div>
+              <dt>Poolish yeast</dt>
+              <dd>1.3% of poolish flour, minimum 3g</dd>
+            </div>
+            <div>
+              <dt>Salt</dt>
+              <dd>2.7% of total flour</dd>
+            </div>
+          </dl>
+        </form>
+
+        <section class="results-panel" aria-live="polite">
+          <div class="result-summary">
+            <span>Total flour</span>
+            <strong data-output="totalFlour">0g</strong>
+          </div>
+          <div class="result-summary">
+            <span>Total water</span>
+            <strong data-output="totalWater">0g</strong>
+          </div>
+          <div class="result-summary">
+            <span>Target base</span>
+            <strong data-output="targetDough">0g</strong>
+          </div>
+
+          <div class="phase-grid">
+            <article>
+              <h2>Poolish</h2>
+              <dl>
+                <div>
+                  <dt>Flour</dt>
+                  <dd data-output="poolishFlour">0g</dd>
+                </div>
+                <div>
+                  <dt>Water</dt>
+                  <dd data-output="poolishWater">0g</dd>
+                </div>
+                <div>
+                  <dt>Yeast</dt>
+                  <dd data-output="poolishYeast">0g</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article>
+              <h2>Final Dough</h2>
+              <dl>
+                <div>
+                  <dt>Flour</dt>
+                  <dd data-output="restFlour">0g</dd>
+                </div>
+                <div>
+                  <dt>Water</dt>
+                  <dd data-output="restWater">0g</dd>
+                </div>
+                <div>
+                  <dt>Yeast</dt>
+                  <dd data-output="restYeast">0g</dd>
+                </div>
+                <div>
+                  <dt>Salt</dt>
+                  <dd data-output="salt">0g</dd>
+                </div>
+              </dl>
+            </article>
+          </div>
+
+          <button class="copy-button" type="button" data-copy-button>
+            Copy weights
+          </button>
+          <p class="copy-status" data-copy-status aria-live="polite"></p>
+          <p class="validation-message" data-validation-message></p>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector("[data-calculator-form]");
+      const genericControls = document.querySelector("[data-generic-controls]");
+      const pizzaControls = document.querySelector("[data-pizza-controls]");
+      const presetList = document.querySelector("[data-preset-list]");
+      const validationMessage = document.querySelector(
+        "[data-validation-message]",
+      );
+      const copyButton = document.querySelector("[data-copy-button]");
+      const copyStatus = document.querySelector("[data-copy-status]");
+      const outputs = Object.fromEntries(
+        Array.from(document.querySelectorAll("[data-output]")).map(
+          (element) => [element.dataset.output, element],
+        ),
+      );
+
+      const pizzaPreset = {
+        hydration: 0.7,
+        poolishShare: 2 / 3,
+        poolishHydration: 1,
+        poolishYeast: 0.013,
+        restYeast: 0,
+        salt: 0.027,
+      };
+
+      function fieldValue(name) {
+        const field = form?.querySelector(`[data-field="${name}"]`);
+        if (!(field instanceof HTMLInputElement)) {
+          return Number.NaN;
+        }
+        return Number(field.value);
+      }
+
+      function currentMode() {
+        const selected = form?.querySelector('input[name="mode"]:checked');
+        return selected instanceof HTMLInputElement
+          ? selected.value
+          : "generic";
+      }
+
+      function setMode(mode) {
+        const modeInput = form?.querySelector(
+          `input[name="mode"][value="${mode}"]`,
+        );
+        if (modeInput instanceof HTMLInputElement) {
+          modeInput.checked = true;
+        }
+      }
+
+      function applyUrlMode() {
+        const mode = new URLSearchParams(window.location.search).get("mode");
+        if (mode === "pizza" || mode === "generic") {
+          setMode(mode);
+        }
+      }
+
+      function syncUrlMode() {
+        const mode = currentMode();
+        const url = new URL(window.location.href);
+        url.searchParams.set("mode", mode);
+        window.history.replaceState({}, "", url);
+      }
+
+      function grams(value, digits = 0) {
+        return `${value.toFixed(digits)}g`;
+      }
+
+      function getInputs() {
+        if (currentMode() === "pizza") {
+          const pizzaCount = fieldValue("pizzaCount");
+          return {
+            desiredDough: Math.round((850 / 3) * pizzaCount),
+            ...pizzaPreset,
+          };
+        }
+
+        return {
+          desiredDough: fieldValue("desiredDough"),
+          hydration: fieldValue("hydration"),
+          poolishShare: fieldValue("poolishShare"),
+          poolishHydration: fieldValue("poolishHydration"),
+          poolishYeast: fieldValue("poolishYeast"),
+          restYeast: fieldValue("restYeast"),
+          salt: fieldValue("salt"),
+        };
+      }
+
+      function calculateRecipe(inputs) {
+        const totalFlour = Math.round(
+          inputs.desiredDough / (1 + inputs.hydration),
+        );
+        const totalWater = Math.round(inputs.desiredDough - totalFlour);
+        const poolishFlour = Math.round(totalFlour * inputs.poolishShare);
+        const poolishWater = Math.round(poolishFlour * inputs.poolishHydration);
+        const poolishYeast = Math.max(
+          Math.round(poolishFlour * inputs.poolishYeast),
+          3,
+        );
+        const restFlour = Math.round(totalFlour - poolishFlour);
+        const restWater = Math.round(totalWater - poolishWater);
+        const restYeast = Math.round(totalFlour * inputs.restYeast);
+        const salt = Number((totalFlour * inputs.salt).toFixed(1));
+
+        return {
+          targetDough: inputs.desiredDough,
+          totalFlour,
+          totalWater,
+          poolishFlour,
+          poolishWater,
+          poolishYeast,
+          restFlour,
+          restWater,
+          restYeast,
+          salt,
+        };
+      }
+
+      function updateModeVisibility() {
+        const isPizza = currentMode() === "pizza";
+        if (genericControls instanceof HTMLElement) {
+          genericControls.hidden = isPizza;
+        }
+        if (pizzaControls instanceof HTMLElement) {
+          pizzaControls.hidden = !isPizza;
+        }
+        if (presetList instanceof HTMLElement) {
+          presetList.hidden = !isPizza;
+        }
+      }
+
+      function render() {
+        updateModeVisibility();
+        const inputs = getInputs();
+        const inputValues = Object.values(inputs);
+
+        if (
+          inputValues.some((value) => !Number.isFinite(value)) ||
+          inputs.desiredDough <= 0 ||
+          inputs.hydration < 0 ||
+          inputs.poolishShare < 0 ||
+          inputs.poolishShare > 1 ||
+          inputs.poolishHydration < 0
+        ) {
+          validationMessage.textContent =
+            "Use positive numbers. Poolish share must stay between 0 and 1.";
+          return;
+        }
+
+        const result = calculateRecipe(inputs);
+        outputs.totalFlour.textContent = grams(result.totalFlour);
+        outputs.totalWater.textContent = grams(result.totalWater);
+        outputs.targetDough.textContent = grams(result.targetDough);
+        outputs.poolishFlour.textContent = grams(result.poolishFlour);
+        outputs.poolishWater.textContent = grams(result.poolishWater);
+        outputs.poolishYeast.textContent = grams(result.poolishYeast);
+        outputs.restFlour.textContent = grams(result.restFlour);
+        outputs.restWater.textContent = grams(result.restWater);
+        outputs.restYeast.textContent = grams(result.restYeast);
+        outputs.salt.textContent = grams(result.salt, 1);
+        validationMessage.textContent = "";
+      }
+
+      function copyWeights() {
+        const text = [
+          "Poolish:",
+          `Flour: ${outputs.poolishFlour.textContent}`,
+          `Water: ${outputs.poolishWater.textContent}`,
+          `Yeast: ${outputs.poolishYeast.textContent}`,
+          "",
+          "Final dough:",
+          `Flour: ${outputs.restFlour.textContent}`,
+          `Water: ${outputs.restWater.textContent}`,
+          `Yeast: ${outputs.restYeast.textContent}`,
+          `Salt: ${outputs.salt.textContent}`,
+        ].join("\n");
+
+        navigator.clipboard
+          ?.writeText(text)
+          .then(() => {
+            copyStatus.textContent = "Copied";
+          })
+          .catch(() => {
+            copyStatus.textContent = "Copy failed";
+          });
+      }
+
+      form?.addEventListener("input", render);
+      form?.addEventListener("change", () => {
+        syncUrlMode();
+        render();
+      });
+      copyButton?.addEventListener("click", copyWeights);
+      applyUrlMode();
+      render();
+    </script>
+  </body>
+</html>
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f8f4ec;
+    --surface: #fffdf8;
+    --ink: #25211c;
+    --muted: #70685e;
+    --tomato: #b43e2f;
+    --tomato-dark: #7f2f24;
+    --olive: #687449;
+    --olive-dark: #40492c;
+    --steel: #d8d0c3;
+    --blue: #395f6f;
+    --shadow: 0 18px 48px rgba(61, 43, 28, 0.14);
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    overflow-x: hidden;
+    background:
+      linear-gradient(135deg, rgba(104, 116, 73, 0.14), transparent 28rem),
+      linear-gradient(180deg, #fbf7ef 0%, var(--paper) 52%, #efe7d9 100%);
+    color: var(--ink);
+  }
+
+  a {
+    color: var(--tomato);
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  .calculator-shell {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2.2rem 0 4rem;
+  }
+
+  .tool-intro {
+    padding: 1.8rem 0 1.5rem;
+  }
+
+  .tool-intro h1 {
+    max-width: 10ch;
+    margin: 0;
+    font-size: clamp(2.8rem, 8vw, 5.8rem);
+    line-height: 0.92;
+    letter-spacing: 0;
+  }
+
+  .tool-intro p {
+    max-width: 64ch;
+    margin: 1rem 0 0;
+    color: #4f463c;
+    font-size: clamp(1.02rem, 1.8vw, 1.2rem);
+    line-height: 1.5;
+  }
+
+  .result-summary span {
+    display: block;
+    color: var(--olive-dark);
+    font-size: 0.78rem;
+    font-weight: 820;
+  }
+
+  .calculator-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .input-panel,
+  .results-panel,
+  .phase-grid article {
+    border-radius: 8px;
+    background: rgba(255, 253, 248, 0.92);
+    box-shadow: 0 14px 32px rgba(61, 43, 28, 0.12);
+  }
+
+  .input-panel {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .mode-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+    min-width: 0;
+    margin: 0;
+    border: 1px solid rgba(112, 104, 94, 0.22);
+    border-radius: 8px;
+    padding: 0.25rem;
+    background: rgba(248, 244, 236, 0.84);
+  }
+
+  .mode-switch legend {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .mode-switch label {
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .mode-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mode-switch span {
+    display: grid;
+    min-height: 42px;
+    place-items: center;
+    border-radius: 6px;
+    padding: 0.55rem;
+    color: var(--olive-dark);
+    font-weight: 850;
+    text-align: center;
+    cursor: pointer;
+    pointer-events: none;
+  }
+
+  .mode-switch input:checked + span {
+    background: var(--olive);
+    color: var(--surface);
+    box-shadow: 0 5px 12px rgba(64, 73, 44, 0.18);
+  }
+
+  .mode-switch input:focus-visible + span,
+  input:focus-visible {
+    outline: 3px solid rgba(180, 62, 47, 0.28);
+    outline-offset: 2px;
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+
+  .field-grid[hidden],
+  .pizza-controls[hidden],
+  .preset-list[hidden] {
+    display: none;
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  label span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 760;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(112, 104, 94, 0.32);
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    background: #fffdf8;
+    color: var(--ink);
+  }
+
+  input[type="number"]:focus {
+    border-color: rgba(180, 62, 47, 0.55);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(180, 62, 47, 0.12);
+  }
+
+  .pizza-controls {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .pizza-controls p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .preset-list {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+  }
+
+  .preset-list div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid rgba(112, 104, 94, 0.18);
+    padding-top: 0.6rem;
+  }
+
+  .preset-list dt,
+  .preset-list dd {
+    margin: 0;
+  }
+
+  .preset-list dt {
+    color: var(--muted);
+  }
+
+  .preset-list dd {
+    font-weight: 820;
+    text-align: right;
+  }
+
+  .results-panel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .result-summary {
+    min-width: 0;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #efe7d9;
+  }
+
+  .result-summary strong {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--tomato-dark);
+    font-size: clamp(1.55rem, 4vw, 2.4rem);
+    line-height: 1;
+  }
+
+  .phase-grid {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .phase-grid article {
+    box-shadow: none;
+    border: 1px solid rgba(112, 104, 94, 0.2);
+    padding: 1rem;
+  }
+
+  .phase-grid h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    line-height: 1.1;
+  }
+
+  .phase-grid dl {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .phase-grid div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid rgba(112, 104, 94, 0.18);
+    padding-top: 0.75rem;
+  }
+
+  .phase-grid dt,
+  .phase-grid dd {
+    margin: 0;
+  }
+
+  .phase-grid dt {
+    color: var(--muted);
+    font-weight: 720;
+  }
+
+  .phase-grid dd {
+    color: var(--blue);
+    font-size: 1.35rem;
+    font-weight: 880;
+  }
+
+  .validation-message {
+    grid-column: 1 / -1;
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--tomato-dark);
+    font-weight: 760;
+  }
+
+  .copy-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+    min-height: 42px;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    background: var(--tomato);
+    color: var(--surface);
+    font-weight: 850;
+    box-shadow: 0 8px 18px rgba(180, 62, 47, 0.18);
+    cursor: pointer;
+  }
+
+  .copy-button:hover,
+  .copy-button:focus-visible {
+    background: var(--tomato-dark);
+    outline: none;
+  }
+
+  .copy-button:focus-visible {
+    box-shadow:
+      0 8px 18px rgba(180, 62, 47, 0.18),
+      0 0 0 3px rgba(180, 62, 47, 0.18);
+  }
+
+  .copy-status {
+    grid-column: 1 / -1;
+    min-height: 1.4em;
+    margin: -0.6rem 0 0;
+    color: var(--olive-dark);
+    font-weight: 760;
+  }
+
+  @media (max-width: 820px) {
+    .calculator-grid,
+    .phase-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-intro {
+      gap: 1rem;
+      padding-top: 1rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .calculator-shell {
+      width: min(100% - 1rem, 1180px);
+      padding-top: 1.2rem;
+    }
+
+    .tool-intro h1 {
+      max-width: 8ch;
+    }
+
+    .field-grid,
+    .results-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .phase-grid div,
+    .preset-list div {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .preset-list dd {
+      text-align: left;
+    }
+  }
+</style>
