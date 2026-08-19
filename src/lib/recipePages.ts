@@ -419,7 +419,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "בראוניז בננה ושוקולד ללא גלוטן.",
     ),
   }),
-  grill_rub: defineCatalogEntry("doughs_starches", ["favorite", "vegan"], 5, {
+  grill_rub: defineCatalogEntry("basics", ["favorite", "vegan"], 1, {
     en: localizedMetadata(
       "Grill Rub",
       "A vegan spice blend for seasoning grilled food.",

@@ -5,6 +5,17 @@
 <br>
 
 <div align="center" style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="images/titles_for_index/chestnut.png" alt="Basics" width="70" height="70" style="margin: 5px;">
+</div>
+
+| Hebrew (he)                          | English (en)                       |
+| ------------------------------------ | ---------------------------------- |
+| [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥 | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥 |
+
+<br>
+<br>
+
+<div align="center" style="display: flex; flex-wrap: wrap; justify-content: center;">
     <img src="images/titles_for_index/spaghetti.png" alt="Pretzel" width="70" height="70" style="margin: 5px;">
     <img src="images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">
 </div>
@@ -15,7 +26,6 @@
 | [פילאף אורז](he/rice_pilaf.MD) 🍚          | [Rice Pilaf](en/rice_pilaf.MD) 🍚             |
 | [פאו דה קייז'ו](he/paodequeijo.MD) 🧀      | [Pão de Queijo](en/paodequeijo.MD) 🧀         |
 | [בצק פיצה](he/pizza_dough.MD) 🍕           | [Pizza Dough](en/pizza_dough.MD) 🍕           |
-| [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥       | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥            |
 | [טורטיות](he/tortillas.MD) 🌮🅥             | [Tortillas](en/tortillas.MD) 🌮 🅥             |
 | [פסטה פפריקה](he/paprikesh_pasta.MD) 🍝★ 🅥 | [Paprikes pasta](en/paprikesh_pasta.MD) 🍝★ 🅥 |
 | [בצק פילמני](he/pilmeni_dough.MD) 🥟       | [Pilmeni Dough](en/pilmeni_dough.MD) 🥟       |
