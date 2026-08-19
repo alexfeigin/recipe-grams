@@ -53,6 +53,7 @@ When the user supplies a recipe in English or Hebrew and asks to add it, publish
    - Put site-ready recipe images in `images/` with clear filenames, regardless of where the user-provided source image starts.
    - Sanitize each new image before linking it: make a web-ready copy with dimensions large enough for recipe pages, cards, and social previews, while resizing/compressing oversized originals so the static site stays fast.
    - Link useful body images from both localized Markdown files with the Markdown path `../images/file-name.ext`.
+   - Place body image links at the bottom of each localized recipe by default, after the recipe text, unless the surrounding recipe already uses a more specific local image layout.
    - If an image should appear on the landing card and social preview, pass only the image filename, such as `"file-name.ext"`, as the third argument to each localized `localizedMetadata(...)` call in `src/lib/recipePages.ts`.
 6. Add a `recipeCatalog` entry in `src/lib/recipePages.ts` with category, markers, featured order, localized titles, localized descriptions, and optional image filename.
 7. Add the recipe to `index.MD` in the most appropriate existing category unless the user explicitly says not to publish it there. Include both Hebrew and English links in the same row.
@@ -65,7 +66,7 @@ When the user supplies a recipe in English or Hebrew and asks to add it, publish
 When changing an existing recipe, update every source that owns the changed behavior:
 
 - Body-only change: edit the relevant `en/*.MD` and/or `he/*.MD`; update the paired translation when the recipe content should stay aligned.
-- New or changed body image: sanitize the image, store the site-ready copy in `images/`, link it from the Markdown recipe body as `../images/file-name.ext`, and verify the path exists.
+- New or changed body image: sanitize the image, store the site-ready copy in `images/`, link it from the Markdown recipe body as `../images/file-name.ext`, place the image link at the bottom of each localized recipe by default, and verify the path exists.
 - Card/social image change: update the recipe’s `localizedMetadata(...)` image argument in `src/lib/recipePages.ts` with only `file-name.ext`; body images alone are not enough.
 - Title, description, category, featured order, favorite, or vegan state: update `src/lib/recipePages.ts`; also update `index.MD` markers/category row when the legacy index should match.
 - New localized Markdown file for an existing slug: make sure the paired language exists, metadata has both localizations, and the generated language switch will have a target.
