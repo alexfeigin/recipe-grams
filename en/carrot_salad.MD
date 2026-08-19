@@ -21,3 +21,5 @@
 
 1. In a shaker, mix all the dressing ingredients well, drizzle over the carrots, and mix thoroughly. Let it sit in the refrigerator for at least 15 minutes before serving; the flavors improve over time and can be prepared a few hours in advance.
 2. Before serving, mix everything together with the chives and pecans.
+
+![Sweet and sour carrot salad](../images/carrot_salad.jpg)

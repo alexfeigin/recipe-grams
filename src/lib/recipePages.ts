@@ -258,10 +258,12 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       en: localizedMetadata(
         "Sweet and Sour Carrot Salad",
         "Dina's bright carrot salad with a sweet-sour dressing.",
+        "carrot_salad.jpg",
       ),
       he: localizedMetadata(
         "סלט גזר חמוץ מתוק",
         "סלט הגזר של דינה עם רוטב חמוץ-מתוק.",
+        "carrot_salad.jpg",
       ),
     },
   ),
