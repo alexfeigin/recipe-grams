@@ -281,8 +281,13 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     en: localizedMetadata(
       "Chicken and Vegetable Soup",
       "A homestyle chicken soup with vegetables.",
+      "chicken_soup.jpg",
     ),
-    he: localizedMetadata("מרק עוף וירקות", "מרק עוף וירקות ביתי ומנחם."),
+    he: localizedMetadata(
+      "מרק עוף וירקות",
+      "מרק עוף וירקות ביתי ומנחם.",
+      "chicken_soup.jpg",
+    ),
   }),
   choclatechip_vegan: defineCatalogEntry("sweets", ["vegan"], 22, {
     en: localizedMetadata(
