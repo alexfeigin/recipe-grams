@@ -555,8 +555,13 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     en: localizedMetadata(
       "Purple Cabbage Salad",
       "A crunchy purple cabbage salad with soy dressing.",
+      "purple_cabbage_salad.jpg",
     ),
-    he: localizedMetadata("סלט כרוב סגול", "סלט כרוב סגול פריך עם רוטב סויה."),
+    he: localizedMetadata(
+      "סלט כרוב סגול",
+      "סלט כרוב סגול פריך עם רוטב סויה.",
+      "purple_cabbage_salad.jpg",
+    ),
   }),
   quick_pickle_carrot: defineCatalogEntry("salads_pickles", ["vegan"], 18, {
     en: localizedMetadata(
