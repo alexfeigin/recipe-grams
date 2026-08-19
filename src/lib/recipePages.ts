@@ -578,10 +578,12 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     en: localizedMetadata(
       "Simple Oven-Baked Schnitzel",
       "Oven-baked schnitzel using the slurry method.",
+      "shnitzel.jpg",
     ),
     he: localizedMetadata(
       "שניצל פשוט אפוי בתנור",
       "שניצל אפוי בתנור בשיטת בלילה.",
+      "shnitzel.jpg",
     ),
   }),
   simple_vinaigrette: defineCatalogEntry(undefined, ["vegan"], undefined, {

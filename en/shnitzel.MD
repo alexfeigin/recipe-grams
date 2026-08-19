@@ -4,6 +4,8 @@
 
 A quick, no-fry schnitzel recipe using a flour-egg slurry and baked in the oven.
 
+![Oven-baked schnitzel](../images/shnitzel.jpg)
+
 ## Ingredients
 
 - 800g Chicken breast thinly sliced
