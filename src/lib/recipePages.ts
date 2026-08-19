@@ -381,8 +381,16 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     ),
   }),
   crepe: defineCatalogEntry("sweets", [], 31, {
-    en: localizedMetadata("Crepe", "Thin crepes for sweet or savory fillings."),
-    he: localizedMetadata("קרפ", "קרפים דקים למילוי מתוק או מלוח."),
+    en: localizedMetadata(
+      "Crepe",
+      "Thin crepes for sweet or savory fillings.",
+      "crepe.jpg",
+    ),
+    he: localizedMetadata(
+      "קרפ",
+      "קרפים דקים למילוי מתוק או מלוח.",
+      "crepe.jpg",
+    ),
   }),
   frozen_banana: defineCatalogEntry("sweets", ["favorite", "vegan"], 29, {
     en: localizedMetadata(
