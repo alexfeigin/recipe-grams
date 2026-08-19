@@ -58,3 +58,5 @@
 10. coarse grate the ready to eat beets and add them to the beef stock.
 11. add the cubed potatoes to the beef stock.
 12. bring to a boil and simmer for 5 minutes to let all the flavors combine.
+
+![Borscht](../images/borscht.jpg)

@@ -242,8 +242,13 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     en: localizedMetadata(
       "Borscht",
       "A comforting beet soup with a deep red broth.",
+      "borscht.jpg",
     ),
-    he: localizedMetadata("בורשט", "מרק סלק מנחם עם צבע וטעם עמוקים."),
+    he: localizedMetadata(
+      "בורשט",
+      "מרק סלק מנחם עם צבע וטעם עמוקים.",
+      "borscht.jpg",
+    ),
   }),
   carrot_salad: defineCatalogEntry(
     "salads_pickles",
