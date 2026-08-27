@@ -6,16 +6,16 @@ Makes one muffin tin or 2 loaf pans.
 
 ## Ingredients
 
-- 1 large sweet potato, about 500g after peeling
-- 2 large onions, about 400g after peeling
-- 6 large eggs, about 300g without shells
-- 70g whole-wheat or white self-rising flour
-- 4g baking powder
-- 55g olive oil
-- 5g salt
-- 0.2g black pepper
-- 0.3g garlic powder
-- 0.3g ground cinnamon
+- 1 large sweet potato, peeled
+- 2 large onions
+- 6 eggs
+- 1/2 cup (70g) whole-wheat or white self-rising flour
+- 1 teaspoon baking powder
+- 4 tablespoons olive oil
+- 1 level teaspoon salt
+- A pinch of black pepper
+- A pinch of garlic powder
+- A pinch of ground cinnamon
 
 ## Instructions
 
@@ -26,9 +26,5 @@ Makes one muffin tin or 2 loaf pans.
 5. Transfer the onions and sweet potato to a bowl and let the mixture cool slightly.
 6. Add the eggs, flour, baking powder, remaining olive oil, and seasonings. Mix well.
 7. Pour into the prepared pan or pans and bake for 30-35 minutes, until golden and set in the center.
-
-## Note
-
-The small spice weights are approximate; adjust them to taste.
 
 ![Sweet Potato Bake](../images/sweet_potato_bake.jpg)
