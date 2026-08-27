@@ -83,7 +83,7 @@ Before finalizing, check the rendered site behavior when the change touches meta
 
 ## Publishing The Astro Site
 
-- after commiting recipe-grams changes, we can deploy to the https://alexfeigin.github.io/recipe-grams/ github pages with these steps:
+after commiting recipe-grams changes, we can deploy to the https://alexfeigin.github.io/recipe-grams/ github pages with these steps:
 
 1. From ~/sources/recipe-grams/:
 
@@ -101,4 +101,5 @@ git commit -m "{short commit message}"
 git push
 ```
 
-After pushing, do not run tests or poll the deployment. Tell the user it is deployed and GitHub Pages may take a little time to update.
+3. After pushing, do not run tests or poll the deployment. Tell the user it is deployed and GitHub Pages may take a little time to update.
+   Add the link(s) to whatever changed. if it's many or all pages that have changed, just link the main page, use your judgment.

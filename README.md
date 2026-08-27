@@ -6,7 +6,7 @@ Get yourself a good kitchen scale and start cooking!
 
 ## now in a website
 
- - https://alexfeigin.github.io/recipe-grams/
+- https://alexfeigin.github.io/recipe-grams/
 
 ## available recipes
 
