@@ -618,6 +618,18 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
     ),
     he: localizedMetadata("ויניגרט פשוט", "מתכון עזר לויניגרט בסיסי."),
   }),
+  sweet_potato_bake: defineCatalogEntry("mains", [], 16, {
+    en: localizedMetadata(
+      "Sweet Potato Bake",
+      "A savory sweet potato and onion bake with eggs and warm spices.",
+      "sweet_potato_bake.jpg",
+    ),
+    he: localizedMetadata(
+      "פשטידת בטטה",
+      "פשטידת בטטה ובצל מלוחה עם ביצים ותבלינים חמים.",
+      "sweet_potato_bake.jpg",
+    ),
+  }),
   teriyaki_salmon_air_fryer: defineCatalogEntry("mains", [], 10, {
     en: localizedMetadata(
       "Air Fryer Teriyaki Salmon",

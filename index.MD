@@ -33,6 +33,7 @@
 | [מרק עוף של סש](he/chicken_soup.MD) 🍲★                        | [Sash's Chicken Soup](en/chicken_soup.MD) 🍲★                   |
 | [שניצל](he/shnitzel.MD)                                        | [shnitzel](en/shnitzel.MD)                                      |
 | [בורשט](he/borscht.MD) 🍲                                      | [Borscht](en/borscht.MD) 🍲                                     |
+| [פשטידת בטטה](he/sweet_potato_bake.MD) 🍠                      | [Sweet Potato Bake](en/sweet_potato_bake.MD) 🍠                 |
 
 <br>
 <br>
