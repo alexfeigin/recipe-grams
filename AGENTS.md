@@ -9,6 +9,7 @@ Recipe-Grams is a bilingual Markdown recipe collection with a static Astro site 
 - `images/` — source images used by Markdown and the generated site.
 - `index.MD` — legacy GitHub-readable index, still maintained for published recipes.
 - `src/lib/recipePages.ts` — site recipe catalog, localized metadata, category placement, markers, card images, and social images.
+- `~/sources/alexfeigin.github.io/recipe-grams/` — deployed Astro output in the separate GitHub Pages repository. Every workstation must keep that repository at `~/sources/alexfeigin.github.io/`.
 
 ## Shared Repo Safety
 
@@ -58,7 +59,7 @@ When the user supplies a recipe in English or Hebrew and asks to add it, publish
 6. Add a `recipeCatalog` entry in `src/lib/recipePages.ts` with category, markers, featured order, localized titles, localized descriptions, and optional image filename.
 7. Add the recipe to `index.MD` in the most appropriate existing category unless the user explicitly says not to publish it there. Include both Hebrew and English links in the same row.
 8. Pick existing markers consistently: add `🅥` / `vegan` only when the recipe is vegan, and `★` / `favorite` only when the user says it is a favorite.
-9. Run formatting and verification, then commit and push so the recipe is visible on GitHub.
+9. Run formatting and verification, commit and push the Recipe-Grams changes, then publish the Astro site with the workflow below.
 10. Finish in the user’s language with links to the Hebrew recipe, English recipe, and index.
 
 ## Changing A Recipe
@@ -79,3 +80,35 @@ Before finalizing, check the rendered site behavior when the change touches meta
 - Verify Markdown image links point to real files under `images/`.
 - For catalog or Astro changes, run the relevant project checks from `package.json`; at minimum prefer `npm run typecheck` and `npm run build` when site generation could be affected.
 - For recipe publishing work, commit and push the current branch after checks pass.
+
+## Publishing The Astro Site
+
+Publish changes that should appear on the public Astro site after the Recipe-Grams changes have been committed locally. For recipe publishing work, push the Recipe-Grams commit before deploying the site.
+
+1. From `~/sources/recipe-grams/`, make a clean production build:
+
+   ```bash
+   rm -rf dist/ && npm run build
+   ```
+
+2. From `~/sources/alexfeigin.github.io/`, replace the local deployment repository state with the latest `origin/master` before copying the new build:
+
+   ```bash
+   git fetch origin && git reset --hard origin/master
+   ```
+
+3. Sync the clean build into the deployed `recipe-grams/` directory, including removal of obsolete generated files:
+
+   ```bash
+   rsync -av --delete ~/sources/recipe-grams/dist/ ~/sources/alexfeigin.github.io/recipe-grams/
+   ```
+
+4. From `~/sources/alexfeigin.github.io/`, stage only the deployed site directory, commit it with a short publishing message, and push it so the GitHub Pages pipeline can deploy it:
+
+   ```bash
+   git add recipe-grams
+   git commit -m "Publish Recipe-Grams site"
+   git push
+   ```
+
+5. After the push finishes, run no further tests and do not poll the deployment. Tell the user the deploy is done, allow the GitHub Pages pipeline some time to finish, and invite them to visit the site to see the changes.
