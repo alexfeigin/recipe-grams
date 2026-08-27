@@ -85,13 +85,13 @@ Before finalizing, check the rendered site behavior when the change touches meta
 
 after commiting recipe-grams changes, we can deploy to the https://alexfeigin.github.io/recipe-grams/ github pages with these steps:
 
-1. From ~/sources/recipe-grams/:
+1. From `~/sources/recipe-grams/`:
 
 ```bash
 rm -rf dist/ && npm run build
 ```
 
-2. From ~/sources/alexfeigin.github.io/:
+2. From `~/sources/alexfeigin.github.io/`:
 
 ```bash
 git fetch origin && git reset --hard origin/master
