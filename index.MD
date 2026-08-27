@@ -75,6 +75,7 @@
 | [בלילת פנקייק](he/pankcakebatter.MD) 🥞                                         | [Pancake Batter](en/pankcakebatter.MD) 🥞                                               |
 | [עוגת שוקולד](he/chocolate_cake.MD) 🥮                                          | [Chocolate Cake](en/chocolate_cake.MD) 🥮                                               |
 | [עוגת בננה](he/banana_bread.MD) 🥮★                                             | [Banana Bread](en/banana_bread.MD) 🥮★                                                  |
+| [עוגת בננה סופר קלה](he/super_easy_banana_cake.MD) 🍌                           | [Super-Easy Banana Cake](en/super_easy_banana_cake.MD) 🍌                               |
 | [עוגיות דבש וסוכר](he/honey_sugar_cookies.MD) 🍯                                | [Honey Sugar Cookies](en/honey_sugar_cookies.MD) 🍯                                     |
 | [ארטיק בננה שוקולד](he/frozen_banana.MD) 🍌★🅥                                   | [Frozen banana n' choclate](en/frozen_banana.MD) 🍌★🅥                                   |
 | [בראוניז בננה שוקולד ללא גלוטן](he/gluten_free_chocolate_banana_brownies.MD) 🥮 | [Gluten-Free Chocolate Banana Brownies](en/gluten_free_chocolate_banana_brownies.MD) 🥮 |

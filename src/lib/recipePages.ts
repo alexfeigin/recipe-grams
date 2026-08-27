@@ -630,6 +630,16 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "sweet_potato_bake.jpg",
     ),
   }),
+  super_easy_banana_cake: defineCatalogEntry("sweets", [], 28.25, {
+    en: localizedMetadata(
+      "Super-Easy Banana Cake",
+      "A quick, tender blender banana cake with dark chocolate.",
+    ),
+    he: localizedMetadata(
+      "עוגת בננה סופר קלה",
+      "עוגת בננה מהירה ורכה שמכינים בבלנדר עם שוקולד מריר.",
+    ),
+  }),
   teriyaki_salmon_air_fryer: defineCatalogEntry("mains", [], 10, {
     en: localizedMetadata(
       "Air Fryer Teriyaki Salmon",
