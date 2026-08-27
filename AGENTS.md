@@ -83,32 +83,22 @@ Before finalizing, check the rendered site behavior when the change touches meta
 
 ## Publishing The Astro Site
 
-Publish changes that should appear on the public Astro site after the Recipe-Grams changes have been committed locally. For recipe publishing work, push the Recipe-Grams commit before deploying the site.
+- after commiting recipe-grams changes, we can deploy to the https://alexfeigin.github.io/recipe-grams/ github pages with these steps:
 
-1. From `~/sources/recipe-grams/`, make a clean production build:
+1. From ~/sources/recipe-grams/:
 
-   ```bash
-   rm -rf dist/ && npm run build
-   ```
+```bash
+rm -rf dist/ && npm run build
+```
 
-2. From `~/sources/alexfeigin.github.io/`, replace the local deployment repository state with the latest `origin/master` before copying the new build:
+2. From ~/sources/alexfeigin.github.io/:
 
-   ```bash
-   git fetch origin && git reset --hard origin/master
-   ```
+```bash
+git fetch origin && git reset --hard origin/master
+rsync -av --delete ~/sources/recipe-grams/dist/ ~/sources/alexfeigin.github.io/recipe-grams/
+git add recipe-grams
+git commit -m "{short commit message}"
+git push
+```
 
-3. Sync the clean build into the deployed `recipe-grams/` directory, including removal of obsolete generated files:
-
-   ```bash
-   rsync -av --delete ~/sources/recipe-grams/dist/ ~/sources/alexfeigin.github.io/recipe-grams/
-   ```
-
-4. From `~/sources/alexfeigin.github.io/`, stage only the deployed site directory, commit it with a short publishing message, and push it so the GitHub Pages pipeline can deploy it:
-
-   ```bash
-   git add recipe-grams
-   git commit -m "Publish Recipe-Grams site"
-   git push
-   ```
-
-5. After the push finishes, run no further tests and do not poll the deployment. Tell the user the deploy is done, allow the GitHub Pages pipeline some time to finish, and invite them to visit the site to see the changes.
+After pushing, do not run tests or poll the deployment. Tell the user it is deployed and GitHub Pages may take a little time to update.
