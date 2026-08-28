@@ -104,7 +104,7 @@ const navItems = data.categorySections.map((section) => ({
             <ul>
               {
                 data.categorySections.map((section) => (
-                  <li>
+                  <li data-category={section.id}>
                     <a href={`#${section.id}`}>{section.label}</a>
                   </li>
                 ))
@@ -119,6 +119,7 @@ const navItems = data.categorySections.map((section) => ({
               <section
                 class="category-section"
                 id={section.id}
+                data-category={section.id}
                 aria-labelledby={`${section.id}-title`}
               >
                 <div class="category-heading">
@@ -151,7 +152,7 @@ const navItems = data.categorySections.map((section) => ({
                         )}
                         <div class="card-body">
                           <div class="card-meta">
-                            <span>{section.label}</span>
+                            <span class="card-category">{section.label}</span>
                             <span>{recipe.slug.replaceAll("_", " ")}</span>
                           </div>
                           <h4>{recipe.title}</h4>
@@ -307,7 +308,13 @@ const navItems = data.categorySections.map((section) => ({
   }
 
   .category-heading h3 {
+    border: 1px solid var(--category-border);
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+    background: var(--category-fill);
+    color: var(--category-ink);
     font-size: clamp(1.35rem, 3vw, 2rem);
+    line-height: 1.1;
   }
 
   .category-heading p {
@@ -328,11 +335,11 @@ const navItems = data.categorySections.map((section) => ({
 
   .category-links a {
     display: block;
-    border: 1px solid rgba(112, 104, 94, 0.28);
-    border-radius: 999px;
+    border: 1px solid var(--category-border);
+    border-radius: 10px;
     padding: 0.55rem 0.8rem;
-    background: rgba(255, 253, 248, 0.72);
-    color: #4f463c;
+    background: var(--category-fill);
+    color: var(--category-ink);
     font-size: 0.9rem;
     font-weight: 760;
     line-height: 1.2;
@@ -344,14 +351,53 @@ const navItems = data.categorySections.map((section) => ({
   }
 
   .category-links a:hover {
-    border-color: var(--control-accent);
-    background: var(--control-accent);
-    color: var(--control-on-accent);
+    border-color: var(--category-ink);
+    background: color-mix(
+      in srgb,
+      var(--category-fill),
+      var(--category-border) 18%
+    );
   }
 
   .category-links a:focus-visible {
-    outline: 2px solid var(--control-accent);
+    outline: 2px solid var(--category-border);
     outline-offset: 3px;
+  }
+
+  [data-category="doughs_starches"] {
+    --category-fill: #f5e6bd;
+    --category-border: #c7962f;
+    --category-ink: #684607;
+  }
+
+  [data-category="mains"] {
+    --category-fill: #f3d5ce;
+    --category-border: #bf6b58;
+    --category-ink: #742f22;
+  }
+
+  [data-category="salads_pickles"] {
+    --category-fill: #dbeacf;
+    --category-border: #78a65e;
+    --category-ink: #34592c;
+  }
+
+  [data-category="basics"] {
+    --category-fill: #dceaf0;
+    --category-border: #729daa;
+    --category-ink: #315b67;
+  }
+
+  [data-category="sweets"] {
+    --category-fill: #efd8e3;
+    --category-border: #b77a98;
+    --category-ink: #703b56;
+  }
+
+  [data-category="snacks"] {
+    --category-fill: #f4dfc2;
+    --category-border: #c88a3e;
+    --category-ink: #70440e;
   }
 
   .category-stack {
@@ -425,6 +471,7 @@ const navItems = data.categorySections.map((section) => ({
   .card-meta {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.45rem;
     color: var(--olive);
     font-size: 0.78rem;
@@ -435,6 +482,15 @@ const navItems = data.categorySections.map((section) => ({
     content: "/";
     margin-inline-end: 0.45rem;
     color: var(--steel);
+  }
+
+  .card-category {
+    border: 1px solid var(--category-border);
+    border-radius: 8px;
+    padding: 0.28rem 0.46rem;
+    background: var(--category-fill);
+    color: var(--category-ink);
+    line-height: 1.1;
   }
 
   .recipe-card h4 {
