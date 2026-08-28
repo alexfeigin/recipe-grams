@@ -123,7 +123,9 @@ const navItems = data.categorySections.map((section) => ({
                 aria-labelledby={`${section.id}-title`}
               >
                 <div class="category-heading">
-                  <h3 id={`${section.id}-title`}>{section.label}</h3>
+                  <h3 id={`${section.id}-title`} tabindex="-1">
+                    {section.label}
+                  </h3>
                   <p>{section.description}</p>
                 </div>
 
@@ -179,6 +181,164 @@ const navItems = data.categorySections.map((section) => ({
     </main>
   </body>
 </html>
+
+<script>
+  const categoryLinks = document.querySelectorAll('a[href^="#"]');
+  const reducedMotionQuery = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
+  let categoryScrollFrame = 0;
+
+  function cancelCategoryScroll() {
+    if (!categoryScrollFrame) {
+      return;
+    }
+
+    window.cancelAnimationFrame(categoryScrollFrame);
+    categoryScrollFrame = 0;
+  }
+
+  function easeOutQuint(progress: number) {
+    return 1 - Math.pow(1 - progress, 5);
+  }
+
+  function easeInOutCubic(progress: number) {
+    return progress < 0.5
+      ? 4 * Math.pow(progress, 3)
+      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+  }
+
+  function getCategoryScrollTop(target: HTMLElement) {
+    const viewportAnchor = Math.min(
+      190,
+      Math.max(132, window.innerHeight * 0.24),
+    );
+    const targetTop = window.scrollY + target.getBoundingClientRect().top;
+    const maximumScroll =
+      document.documentElement.scrollHeight - window.innerHeight;
+
+    return Math.min(maximumScroll, Math.max(0, targetTop - viewportAnchor));
+  }
+
+  function scrollToCategory(target: HTMLElement, focusHeading: boolean) {
+    cancelCategoryScroll();
+
+    const finalScrollTop = getCategoryScrollTop(target);
+    const initialScrollTop = window.scrollY;
+    const travelDistance = finalScrollTop - initialScrollTop;
+    const heading = target.querySelector("h3");
+
+    if (reducedMotionQuery.matches || Math.abs(travelDistance) < 2) {
+      window.scrollTo({ top: finalScrollTop, behavior: "auto" });
+      if (focusHeading && heading instanceof HTMLElement) {
+        heading.focus({ preventScroll: true });
+      }
+      return;
+    }
+
+    const direction = Math.sign(travelDistance);
+    const approachOffset = Math.min(
+      38,
+      Math.max(24, Math.abs(travelDistance) * 0.035),
+    );
+    const approachScrollTop = finalScrollTop - direction * approachOffset;
+    const approachDuration = Math.min(
+      540,
+      Math.max(360, Math.abs(travelDistance) * 0.24),
+    );
+    const pauseDuration = 55;
+    const settleDuration = 170;
+    const totalDuration = approachDuration + pauseDuration + settleDuration;
+    const startTime = performance.now();
+
+    function animateScroll(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      let nextScrollTop = finalScrollTop;
+
+      if (elapsed < approachDuration) {
+        const progress = easeOutQuint(elapsed / approachDuration);
+        nextScrollTop =
+          initialScrollTop + (approachScrollTop - initialScrollTop) * progress;
+      } else if (elapsed < approachDuration + pauseDuration) {
+        nextScrollTop = approachScrollTop;
+      } else if (elapsed < totalDuration) {
+        const progress = easeInOutCubic(
+          (elapsed - approachDuration - pauseDuration) / settleDuration,
+        );
+        nextScrollTop =
+          approachScrollTop + (finalScrollTop - approachScrollTop) * progress;
+      }
+
+      window.scrollTo(0, nextScrollTop);
+
+      if (elapsed < totalDuration) {
+        categoryScrollFrame = window.requestAnimationFrame(animateScroll);
+        return;
+      }
+
+      categoryScrollFrame = 0;
+      if (focusHeading && heading instanceof HTMLElement) {
+        heading.focus({ preventScroll: true });
+      }
+    }
+
+    categoryScrollFrame = window.requestAnimationFrame(animateScroll);
+  }
+
+  for (const link of categoryLinks) {
+    const hash = link.getAttribute("href");
+    const target = hash ? document.querySelector(hash) : null;
+
+    if (
+      !(target instanceof HTMLElement) ||
+      !target.matches(".category-section")
+    ) {
+      continue;
+    }
+
+    link.addEventListener("click", (event) => {
+      if (
+        event instanceof MouseEvent &&
+        (event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      if (window.location.hash !== hash) {
+        window.history.pushState(null, "", hash);
+      }
+      scrollToCategory(
+        target,
+        event instanceof MouseEvent && event.detail === 0,
+      );
+    });
+  }
+
+  window.addEventListener("wheel", cancelCategoryScroll, { passive: true });
+  window.addEventListener("touchstart", cancelCategoryScroll, {
+    passive: true,
+  });
+  window.addEventListener("keydown", (event) => {
+    if (
+      [
+        "ArrowDown",
+        "ArrowUp",
+        "PageDown",
+        "PageUp",
+        "Home",
+        "End",
+        " ",
+      ].includes(event.key)
+    ) {
+      cancelCategoryScroll();
+    }
+  });
+</script>
 
 <style>
   :root {
