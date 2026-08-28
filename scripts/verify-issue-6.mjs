@@ -35,14 +35,34 @@ assert.match(englishHome, /<html[^>]+lang="en"[^>]+dir="ltr"/);
 assert.match(hebrewHome, /<html[^>]+lang="he"[^>]+dir="rtl"/);
 assert.match(englishHome, /href="\/recipe-grams\/he\/"/);
 assert.match(hebrewHome, /href="\/recipe-grams\/"/);
-assert.match(englishHome, /Browse Recipes/);
-assert.match(hebrewHome, /עיון במתכונים/);
+assert.match(englishHome, /What do you feel like cooking\?/);
+assert.match(hebrewHome, /מה בא לך לבשל\?/);
 assert.match(englishHome, /Doughs &amp; Starches/);
 assert.match(hebrewHome, /בצקים ותוספות/);
 assert.match(englishHome, /Vegan/);
 assert.match(hebrewHome, /טבעוני/);
 assert.match(englishHome, /Favorite/);
 assert.match(hebrewHome, /אהוב/);
+
+for (const categoryId of [
+  "doughs_starches",
+  "mains",
+  "salads_pickles",
+  "basics",
+  "sweets",
+  "snacks",
+]) {
+  assert.match(
+    englishHome,
+    new RegExp(`href="#${categoryId}"`),
+    `Expected English category jump link for ${categoryId}`,
+  );
+  assert.match(
+    hebrewHome,
+    new RegExp(`href="#${categoryId}"`),
+    `Expected Hebrew category jump link for ${categoryId}`,
+  );
+}
 
 for (const slug of categorizedSlugs) {
   assert.match(

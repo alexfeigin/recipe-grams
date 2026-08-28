@@ -100,7 +100,17 @@ const navItems = data.categorySections.map((section) => ({
       >
         <div class="section-heading">
           <h2 id="browse-title">{data.labels.sections.title}</h2>
-          <p>{data.labels.sections.description}</p>
+          <nav class="category-links" aria-label={data.labels.nav.categories}>
+            <ul>
+              {
+                data.categorySections.map((section) => (
+                  <li>
+                    <a href={`#${section.id}`}>{section.label}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
         </div>
 
         <div class="category-stack">
@@ -274,13 +284,16 @@ const navItems = data.categorySections.map((section) => ({
     padding-top: 1.2rem;
   }
 
-  .section-heading,
   .category-heading {
     display: flex;
     align-items: end;
     justify-content: space-between;
     gap: 2rem;
     margin-bottom: 1rem;
+  }
+
+  .section-heading {
+    margin-bottom: 1.25rem;
   }
 
   .section-heading h2,
@@ -297,12 +310,48 @@ const navItems = data.categorySections.map((section) => ({
     font-size: clamp(1.35rem, 3vw, 2rem);
   }
 
-  .section-heading p,
   .category-heading p {
     max-width: 42ch;
     margin: 0;
     color: var(--muted);
     line-height: 1.45;
+  }
+
+  .category-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .category-links a {
+    display: block;
+    border: 1px solid rgba(112, 104, 94, 0.28);
+    border-radius: 999px;
+    padding: 0.55rem 0.8rem;
+    background: rgba(255, 253, 248, 0.72);
+    color: #4f463c;
+    font-size: 0.9rem;
+    font-weight: 760;
+    line-height: 1.2;
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .category-links a:hover {
+    border-color: var(--control-accent);
+    background: var(--control-accent);
+    color: var(--control-on-accent);
+  }
+
+  .category-links a:focus-visible {
+    outline: 2px solid var(--control-accent);
+    outline-offset: 3px;
   }
 
   .category-stack {
@@ -433,14 +482,22 @@ const navItems = data.categorySections.map((section) => ({
       max-width: 7ch;
     }
 
-    .section-heading,
     .category-heading {
       display: block;
     }
 
-    .section-heading p,
     .category-heading p {
       margin-top: 0.7rem;
+    }
+
+    .category-links ul {
+      gap: 0.5rem;
+      margin-top: 0.85rem;
+    }
+
+    .category-links a {
+      padding: 0.52rem 0.72rem;
+      font-size: 0.86rem;
     }
 
     .recipe-grid {

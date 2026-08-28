@@ -90,7 +90,6 @@ type LocalizedLabels = {
   };
   sections: {
     title: string;
-    description: string;
   };
   categoryLabels: Record<RecipeCategoryId, string>;
   categoryDescriptions: Record<RecipeCategoryId, string>;
@@ -137,8 +136,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       gramFirst: "Gram-first",
     },
     sections: {
-      title: "Browse Recipes",
-      description: "Choose a category and find something practical to cook.",
+      title: "What do you feel like cooking?",
     },
     categoryLabels: {
       doughs_starches: "Doughs & Starches",
@@ -199,8 +197,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       gramFirst: "מבוסס גרמים",
     },
     sections: {
-      title: "עיון במתכונים",
-      description: "בחרו קטגוריה ומצאו משהו פרקטי לבשל.",
+      title: "מה בא לך לבשל?",
     },
     categoryLabels: {
       doughs_starches: "בצקים ותוספות",
