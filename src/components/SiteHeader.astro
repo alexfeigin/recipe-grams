@@ -170,6 +170,18 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   </div>
 </div>
 
+<button
+  class="back-to-top"
+  type="button"
+  aria-label={labelsByLanguage[language].accessibility.backToTop}
+  data-back-to-top
+  hidden
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="m5 15 7-7 7 7"></path>
+  </svg>
+</button>
+
 <script
   is:inline
   define:vars={{
@@ -184,6 +196,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   const status = document.querySelector("[data-search-status]");
   const results = document.querySelector("[data-search-results]");
   const closeButton = document.querySelector("[data-search-close]");
+  const backToTop = document.querySelector("[data-back-to-top]");
   let pagefindPromise;
   let lastSearchId = 0;
 
@@ -309,6 +322,30 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       closeResultsLayer();
     }
   });
+
+  function updateBackToTopVisibility() {
+    backToTop.hidden = window.scrollY < 480;
+  }
+
+  backToTop.addEventListener("click", () => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+    });
+
+    const brandLink = document.querySelector(".brand");
+    if (brandLink instanceof HTMLElement) {
+      brandLink.focus({ preventScroll: true });
+    }
+  });
+
+  window.addEventListener("scroll", updateBackToTopVisibility, {
+    passive: true,
+  });
+  updateBackToTopVisibility();
 </script>
 
 <style>
@@ -602,6 +639,61 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     color: var(--ink);
   }
 
+  .back-to-top {
+    position: fixed;
+    inset-inline-end: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 20;
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    padding: 0;
+    background: var(--control-accent);
+    color: var(--control-on-accent);
+    box-shadow: 0 10px 24px
+      color-mix(in srgb, var(--control-accent) 30%, transparent);
+    cursor: pointer;
+    transition:
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+
+  :global(html[dir="rtl"]) .back-to-top {
+    inset-inline-end: max(1rem, env(safe-area-inset-left));
+  }
+
+  .back-to-top[hidden] {
+    display: none;
+  }
+
+  .back-to-top svg {
+    width: 25px;
+    height: 25px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.35;
+  }
+
+  .back-to-top:hover {
+    background: var(--control-accent-hover);
+    transform: translateY(-2px);
+  }
+
+  .back-to-top:active {
+    transform: translateY(0);
+  }
+
+  .back-to-top:focus-visible {
+    outline: none;
+    box-shadow: var(--control-accent-shadow), var(--control-accent-focus-ring);
+  }
+
   @media (max-width: 1080px) {
     .site-header {
       gap: 0.65rem;
@@ -790,6 +882,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     .nav-panel {
       right: 0.75rem;
       width: min(15rem, calc(100vw - 1.5rem));
+    }
+  }
+
+  @media print {
+    .back-to-top {
+      display: none;
     }
   }
 </style>

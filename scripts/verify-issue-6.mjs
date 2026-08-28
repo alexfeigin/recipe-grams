@@ -37,6 +37,8 @@ assert.match(englishHome, /href="\/recipe-grams\/he\/"/);
 assert.match(hebrewHome, /href="\/recipe-grams\/"/);
 assert.match(englishHome, /What do you feel like cooking\?/);
 assert.match(hebrewHome, /מה בא לך לבשל\?/);
+assert.match(englishHome, /aria-label="Back to top"[^>]+data-back-to-top/);
+assert.match(hebrewHome, /aria-label="חזרה למעלה"[^>]+data-back-to-top/);
 assert.match(englishHome, /Doughs &amp; Starches/);
 assert.match(hebrewHome, /בצקים ותוספות/);
 assert.match(englishHome, /Vegan/);

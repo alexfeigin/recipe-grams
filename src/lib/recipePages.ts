@@ -61,6 +61,7 @@ type LocalizedLabels = {
   languageSwitch: string;
   markdownSource: string;
   accessibility: {
+    backToTop: string;
     browseSummary: string;
     home: string;
     openRecipe: string;
@@ -107,6 +108,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     languageSwitch: "עברית",
     markdownSource: "Markdown Source",
     accessibility: {
+      backToTop: "Back to top",
       browseSummary: "Browse summary",
       home: "Recipe-Grams home",
       openRecipe: "Open",
@@ -168,6 +170,7 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     languageSwitch: "English",
     markdownSource: "מקור Markdown",
     accessibility: {
+      backToTop: "חזרה למעלה",
       browseSummary: "סיכום עיון",
       home: "עמוד הבית של Recipe-Grams",
       openRecipe: "פתיחת",
