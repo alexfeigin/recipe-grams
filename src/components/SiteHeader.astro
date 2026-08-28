@@ -656,6 +656,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     box-shadow: 0 10px 24px
       color-mix(in srgb, var(--control-accent) 30%, transparent);
     cursor: pointer;
+    animation: back-to-top-enter 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
     transition:
       background-color 160ms ease,
       box-shadow 160ms ease,
@@ -692,6 +693,28 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   .back-to-top:focus-visible {
     outline: none;
     box-shadow: var(--control-accent-shadow), var(--control-accent-focus-ring);
+  }
+
+  @keyframes back-to-top-enter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes back-to-top-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @media (max-width: 1080px) {
@@ -888,6 +911,13 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   @media print {
     .back-to-top {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top {
+      animation-name: back-to-top-fade;
+      animation-duration: 160ms;
     }
   }
 </style>
