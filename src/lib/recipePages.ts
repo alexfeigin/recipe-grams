@@ -431,6 +431,18 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "תערובת תבלינים טבעונית לגריל.",
     ),
   }),
+  ground_beef_on_sweet_potato: defineCatalogEntry("mains", [], 16.5, {
+    en: localizedMetadata(
+      "Ground Beef over Roasted Sweet Potato",
+      "Roasted sweet potato topped with browned beef, caramelized onions, tahini, silan, and toasted nuts.",
+      "ground_beef_on_sweet_potato.jpg",
+    ),
+    he: localizedMetadata(
+      "בשר טחון על מצע בטטה",
+      "בטטה צלויה עם בשר שחום, בצל מקורמל, טחינה, סילאן וצנוברים קלויים.",
+      "ground_beef_on_sweet_potato.jpg",
+    ),
+  }),
   grilled_chicken_thighs: defineCatalogEntry("mains", [], 9, {
     en: localizedMetadata(
       "Grilled Chicken Thighs",
