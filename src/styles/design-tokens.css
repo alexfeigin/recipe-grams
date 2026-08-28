@@ -1,0 +1,19 @@
+:root {
+  /* Shared selected-toggle and primary utility-button palette. */
+  --control-accent: #5a8fa0;
+  --control-on-accent: #ffffff;
+  --control-accent-hover: color-mix(
+    in srgb,
+    var(--control-accent),
+    #000000 16%
+  );
+  --control-accent-shadow: 0 4px 10px
+    color-mix(in srgb, var(--control-accent) 20%, transparent);
+  --control-accent-focus-color: color-mix(
+    in srgb,
+    var(--control-accent) 30%,
+    transparent
+  );
+  --control-accent-focus-ring: 0 0 0 3px
+    color-mix(in srgb, var(--control-accent) 22%, transparent);
+}

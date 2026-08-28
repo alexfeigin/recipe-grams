@@ -12,6 +12,7 @@ The first Astro English home page uses a restrained light palette with warm pape
 - Use real recipe imagery from `images/` whenever a card shows food.
 - Keep cards shallow and scannable; avoid marketing sections.
 - Keep interactive targets stable and readable on small phones.
+- Keep shared selected-toggle and primary utility-button colors in `src/styles/design-tokens.css`; consumers use the semantic `--control-*` tokens instead of hard-coded color copies.
 
 ## Supported Viewports
 
