@@ -198,14 +198,8 @@ const navItems = data.categorySections.map((section) => ({
     categoryScrollFrame = 0;
   }
 
-  function easeOutQuint(progress: number) {
-    return 1 - Math.pow(1 - progress, 5);
-  }
-
-  function easeInOutCubic(progress: number) {
-    return progress < 0.5
-      ? 4 * Math.pow(progress, 3)
-      : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+  function easeOutCubic(progress: number) {
+    return 1 - Math.pow(1 - progress, 3);
   }
 
   function getCategoryScrollTop(target: HTMLElement) {
@@ -236,42 +230,20 @@ const navItems = data.categorySections.map((section) => ({
       return;
     }
 
-    const direction = Math.sign(travelDistance);
-    const approachOffset = Math.min(
-      38,
-      Math.max(24, Math.abs(travelDistance) * 0.035),
+    const scrollDuration = Math.min(
+      680,
+      Math.max(360, Math.abs(travelDistance) * 0.18),
     );
-    const approachScrollTop = finalScrollTop - direction * approachOffset;
-    const approachDuration = Math.min(
-      540,
-      Math.max(360, Math.abs(travelDistance) * 0.24),
-    );
-    const pauseDuration = 55;
-    const settleDuration = 170;
-    const totalDuration = approachDuration + pauseDuration + settleDuration;
     const startTime = performance.now();
 
     function animateScroll(currentTime: number) {
-      const elapsed = currentTime - startTime;
-      let nextScrollTop = finalScrollTop;
-
-      if (elapsed < approachDuration) {
-        const progress = easeOutQuint(elapsed / approachDuration);
-        nextScrollTop =
-          initialScrollTop + (approachScrollTop - initialScrollTop) * progress;
-      } else if (elapsed < approachDuration + pauseDuration) {
-        nextScrollTop = approachScrollTop;
-      } else if (elapsed < totalDuration) {
-        const progress = easeInOutCubic(
-          (elapsed - approachDuration - pauseDuration) / settleDuration,
-        );
-        nextScrollTop =
-          approachScrollTop + (finalScrollTop - approachScrollTop) * progress;
-      }
+      const elapsed = Math.min(currentTime - startTime, scrollDuration);
+      const progress = easeOutCubic(elapsed / scrollDuration);
+      const nextScrollTop = initialScrollTop + travelDistance * progress;
 
       window.scrollTo(0, nextScrollTop);
 
-      if (elapsed < totalDuration) {
+      if (elapsed < scrollDuration) {
         categoryScrollFrame = window.requestAnimationFrame(animateScroll);
         return;
       }
