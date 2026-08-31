@@ -76,6 +76,7 @@ Before finalizing, check the rendered site behavior when the change touches meta
 
 ## Verification
 
+- run `npm run check` to execture Astro check and verify no new errors or warnings.
 - Run Prettier on touched Markdown, Astro, and TypeScript files before staging. Use `npx prettier --check {files}` and, if needed, `npx prettier --write {files}`.
 - Verify Markdown image links point to real files under `images/`.
 - For catalog or Astro changes, run the relevant project checks from `package.json`; at minimum prefer `npm run typecheck` and `npm run build` when site generation could be affected.
