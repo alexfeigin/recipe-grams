@@ -80,7 +80,10 @@ const zeroGrams = `0${text.gramUnit}`;
       navItems={[{ label: text.homeLabel, href: homeHref }]}
     />
 
-    <main class="calculator-shell">
+    <main
+      class="calculator-shell"
+      data-alternate-language-href={alternateLanguageHref}
+    >
       <section class="tool-intro" aria-labelledby="page-title">
         <div>
           <h1 id="page-title">{text.pageTitle}</h1>
@@ -293,7 +296,10 @@ const zeroGrams = `0${text.gramUnit}`;
       </section>
     </main>
 
-    <script define:vars={{ alternateLanguageHref, clientLabels }}>
+    <script is:inline define:vars={{ clientLabels }}>
+      const calculatorShell = document.querySelector(
+        "[data-alternate-language-href]",
+      );
       const form = document.querySelector("[data-calculator-form]");
       const genericControls = document.querySelector("[data-generic-controls]");
       const pizzaControls = document.querySelector("[data-pizza-controls]");
@@ -357,6 +363,16 @@ const zeroGrams = `0${text.gramUnit}`;
       }
 
       function syncAlternateLanguageHref() {
+        if (!(calculatorShell instanceof HTMLElement)) {
+          return;
+        }
+
+        const alternateLanguageHref =
+          calculatorShell.dataset.alternateLanguageHref;
+        if (!alternateLanguageHref) {
+          return;
+        }
+
         const mode = new URLSearchParams(window.location.search).get("mode");
         const alternateUrl = new URL(
           alternateLanguageHref,
