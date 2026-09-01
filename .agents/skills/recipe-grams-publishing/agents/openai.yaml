@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recipe-Grams Publishing"
+  short_description: "Verify, push, and deploy recipe site changes"
+  default_prompt: "Use $recipe-grams-publishing to verify and publish the current Recipe-Grams changes."

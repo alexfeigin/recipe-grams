@@ -43,7 +43,12 @@ application-vault.properties
 server/src/main/resources/static/public/onboarding/
 
 
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+# Track repo-specific Codex skills; keep installed/shared skills local.
+!.agents/skills/recipe-grams-*/
+!.agents/skills/recipe-grams-*/**
 .claude/
 .gemini/
 .opencode/

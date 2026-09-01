@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recipe-Grams Safety"
+  short_description: "Protect and synchronize the shared recipe repo"
+  default_prompt: "Use $recipe-grams-safety to prepare the shared working tree before making changes."

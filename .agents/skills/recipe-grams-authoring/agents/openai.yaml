@@ -1,0 +1,4 @@
+interface:
+  display_name: "Recipe-Grams Authoring"
+  short_description: "Create and maintain bilingual recipe sources"
+  default_prompt: "Use $recipe-grams-authoring to add or update a bilingual recipe and keep every owned source in sync."
