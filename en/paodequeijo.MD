@@ -4,16 +4,16 @@
 
 ## Ingredients
 
-### For the boiled milk mixture
+### For the scalded tapioca mixture
 
 - 100g Milk
 - 30g Lightly flavored olive oil and/or vegetable oil
 - 3g Salt
+- 160g Tapioca flour, plus more as needed to adjust texture
 
-### For the dough
+### To finish the dough
 
 - 1 Large beaten egg
-- 160g Tapioca flour, plus more as needed to adjust texture
 - 40g Freshly grated low moisture mozzarella
 - 30g Finely grated parmesan (or pecorino)
 
