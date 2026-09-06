@@ -18,7 +18,6 @@ test("English search finds a body term and opens the recipe", async ({
   page,
 }) => {
   await page.goto(baseUrl);
-  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("onion");
 
   const result = page.getByRole("link", { name: /Rice Pilaf/ }).first();
@@ -40,7 +39,6 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   page,
 }) => {
   await page.goto(`${baseUrl}he/`);
-  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "חיפוש" }).fill("בצל");
 
   const result = page.getByRole("link", { name: /פילאף אורז/ }).first();
@@ -58,28 +56,36 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   await expect(page.getByRole("heading", { name: "פילאף אורז" })).toBeVisible();
 });
 
-test("Search results dim the page and close from an outside click", async ({
+test("Search results attach to the original field and close outside", async ({
   page,
 }) => {
   await page.goto(baseUrl);
-  await page.locator("[data-search-open]").click();
-  await page.getByRole("searchbox", { name: "Search" }).fill("onion");
+  const input = page.getByRole("searchbox", { name: "Search" });
+  await input.click();
 
   const overlay = page.locator("[data-search-overlay]");
+  await expect(overlay).toBeHidden();
+  await input.fill("o");
+  await expect(overlay).toBeHidden();
+  await input.fill("onion");
   await expect(overlay).toBeVisible();
   await expect(
     page.getByRole("link", { name: /Rice Pilaf/ }).first(),
   ).toBeVisible();
 
   const overlayState = await overlay.evaluate((element) => {
+    const inputBounds = document
+      .querySelector("[data-search-input]")
+      .getBoundingClientRect();
+    const bounds = element.getBoundingClientRect();
     return {
-      modal: element.matches(":modal"),
-      background: getComputedStyle(element, "::backdrop").backgroundColor,
+      aligned: Math.abs(inputBounds.left - bounds.left) < 2,
+      gap: bounds.top - inputBounds.bottom,
     };
   });
 
-  expect(overlayState.modal).toBe(true);
-  expect(overlayState.background).not.toBe("rgba(0, 0, 0, 0)");
+  expect(overlayState.aligned).toBe(true);
+  expect(overlayState.gap).toBeLessThan(8);
 
   await page.mouse.click(24, 220);
   await expect(overlay).toBeHidden();
@@ -88,7 +94,6 @@ test("Search results dim the page and close from an outside click", async ({
 test("Mobile navbar exposes the same search popup", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
-  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("salmon");
 
   const result = page

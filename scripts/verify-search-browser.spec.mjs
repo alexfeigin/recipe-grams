@@ -3,66 +3,95 @@ import { expect, test } from "@playwright/test";
 const baseUrl =
   process.env.SEARCH_BASE_URL ?? "http://127.0.0.1:4324/recipe-grams/";
 
+const copy = {
+  en: {
+    query: "onion",
+    replacement: "salmon",
+    result: "Salmon",
+    loading: "Searching",
+    empty: "No recipes found",
+    error: "Search could not load. Please try again.",
+    found: "Recipes found:",
+  },
+  he: {
+    query: "בצל",
+    replacement: "סלמון",
+    result: "סלמון",
+    loading: "מחפש",
+    empty: "לא נמצאו מתכונים",
+    error: "לא ניתן לטעון את החיפוש. נסו שוב.",
+    found: "מתכונים שנמצאו:",
+  },
+};
+
 for (const language of ["en", "he"]) {
   for (const width of [1280, 390]) {
-    test(`${language} ${width}: editable search and keyboard results`, async ({
+    test(`${language} ${width}: search expands before its anchored results`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}`);
-      const launch = page.locator("[data-search-open]");
-      await launch.click();
-      const input = page.getByRole("dialog").getByRole("searchbox");
-      await expect(input).toBeFocused();
-      const close = page.locator("[data-search-close]");
+
+      const header = page.locator(".site-header");
+      const input = page.getByRole("searchbox");
+      const dropdown = page.locator("[data-search-overlay]");
       const results = page.locator(".search-result");
-      await input.fill(language === "he" ? "בצל" : "onion");
+
+      await expect(dropdown).toBeHidden();
+      await input.click();
+      await expect(header).toHaveClass(/search-active/);
+      await expect(input).toBeFocused();
+      await expect(dropdown).toBeHidden();
+      await expect(page.locator(".brand")).toBeHidden();
+
+      await input.fill(copy[language].query.slice(0, 1));
+      await expect(dropdown).toBeHidden();
+      await input.fill(copy[language].query);
       await expect(results.first()).toBeVisible();
-      await input.click({ timeout: 2000 });
-      await expect(input).toBeFocused();
-      await input.fill(language === "he" ? "סלמון" : "salmon");
-      await expect(results.first()).toContainText(
-        language === "he" ? "סלמון" : "Salmon",
-      );
+      await expect(dropdown).toBeVisible();
+
+      const geometry = await page
+        .locator("[data-search-area]")
+        .evaluate((area) => {
+          const areaBounds = area.getBoundingClientRect();
+          const field = area
+            .querySelector(".search-control")
+            .getBoundingClientRect();
+          const panel = area
+            .querySelector("[data-search-overlay]")
+            .getBoundingClientRect();
+          return {
+            aligned:
+              Math.abs(areaBounds.left - panel.left) < 2 &&
+              Math.abs(areaBounds.right - panel.right) < 2,
+            gap: panel.top - field.bottom,
+          };
+        });
+      expect(geometry.aligned).toBe(true);
+      expect(geometry.gap).toBeLessThan(8);
+
+      await input.fill(copy[language].replacement);
+      await expect(results.first()).toContainText(copy[language].result);
       await page.screenshot({ path: `.astro/search-${language}-${width}.png` });
-      await page.keyboard.press("Shift+Tab");
-      await expect(close).toBeFocused();
-      await page.keyboard.press("Tab");
-      await expect(input).toBeFocused();
-      await page.keyboard.press("Tab");
-      await expect(results.first()).toBeFocused();
+
       for (const href of await results.evaluateAll((links) =>
         links.map((link) => link.href),
       )) {
         expect(new URL(href).pathname).toContain(`/${language}/`);
       }
-      for (let i = 0; i < 8; i++) {
-        await page.keyboard.press("Tab");
-        expect(
-          await page.evaluate(
-            () =>
-              document.activeElement === document.body ||
-              !!document.activeElement.closest("dialog"),
-          ),
-        ).toBe(true);
-      }
-      await input.fill("");
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await expect(input).toBeFocused();
-      await expect(page.getByRole("status")).toHaveText(
-        language === "he"
-          ? "הקלידו לפחות 2 תווים"
-          : "Type at least 2 characters",
-      );
+
+      await input.press("ArrowDown");
+      await expect(results.first()).toBeFocused();
       await page.keyboard.press("Escape");
-      await expect(page.locator("[data-search-overlay]")).toBeHidden();
-      await expect(launch).toBeFocused();
+      await expect(dropdown).toBeHidden();
+      await expect(header).not.toHaveClass(/search-active/);
+      await expect(input).toBeFocused();
     });
   }
 }
 
 for (const language of ["en", "he"]) {
-  test(`${language}: loading, failure, retry, empty, and dismissal`, async ({
+  test(`${language}: loading stays quiet until a result state exists`, async ({
     page,
   }) => {
     let releaseLoad;
@@ -80,39 +109,41 @@ for (const language of ["en", "he"]) {
       }
     });
     await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}`);
-    const launch = page.locator("[data-search-open]");
-    await launch.click();
-    const input = page.getByRole("dialog").getByRole("searchbox");
+
+    const header = page.locator(".site-header");
+    const input = page.getByRole("searchbox");
     const status = page.getByRole("status");
-    const overlay = page.locator("[data-search-overlay]");
-    await input.fill(language === "he" ? "בצל" : "onion");
-    await expect(status).toHaveText(language === "he" ? "מחפש" : "Searching");
+    const dropdown = page.locator("[data-search-overlay]");
+    await input.click();
+    await input.fill(copy[language].query);
+    await expect(status).toHaveText(copy[language].loading);
+    await expect(dropdown).toBeHidden();
+
     releaseLoad();
-    await expect(status).toHaveText(
-      language === "he"
-        ? "לא ניתן לטעון את החיפוש. נסו שוב."
-        : "Search could not load. Please try again.",
-    );
+    await expect(status).toHaveText(copy[language].error);
+    await expect(dropdown).toBeVisible();
     await page.locator("[data-search-retry]").click();
     await expect(page.locator(".search-result").first()).toBeVisible();
-    await expect(status).toContainText(
-      language === "he" ? "מתכונים שנמצאו:" : "Recipes found:",
-    );
-    await input.fill("zzzznomatchingrecipe");
-    await expect(status).toHaveText(
-      language === "he" ? "לא נמצאו מתכונים" : "No recipes found",
-    );
-    await page.locator("[data-search-close]").click();
-    await expect(launch).toBeFocused();
-    await expect(overlay).toBeHidden();
-    await launch.press("Enter");
-    await expect(overlay).toBeVisible();
-    await page.mouse.click(5, 500);
-    await expect(overlay).toBeHidden();
-    await launch.click();
-    await input.fill(language === "he" ? "בצל" : "onion");
-    await expect(page.locator(".search-result").first()).toBeVisible();
+    await expect(status).toContainText(copy[language].found);
 
+    await input.fill("zzzznomatchingrecipe");
+    await expect(status).toHaveText(copy[language].empty);
+    await expect(dropdown).toBeVisible();
+
+    await page.locator("[data-search-close]").click();
+    await expect(dropdown).toBeHidden();
+    await expect(header).not.toHaveClass(/search-active/);
+    await expect(input).toBeFocused();
+
+    await input.click();
+    await expect(header).toHaveClass(/search-active/);
+    await expect(dropdown).toBeHidden();
+    await page.locator("main").click({ position: { x: 10, y: 10 } });
+    await expect(header).not.toHaveClass(/search-active/);
+
+    await input.click();
+    await input.fill(copy[language].query);
+    await expect(page.locator(".search-result").first()).toBeVisible();
     await page.locator(".search-result").first().click();
     await expect(page).toHaveURL(new RegExp(`/${language}/[^/]+/$`));
   });

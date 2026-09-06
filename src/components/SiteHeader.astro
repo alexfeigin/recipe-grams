@@ -63,19 +63,58 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
   </nav>
 
-  <button
-    class="search-control search-launch"
-    type="button"
-    data-search-open
-    aria-haspopup="dialog"
-    aria-controls="search-dialog"
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true"
-      ><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4 4"
-      ></path></svg
+  <div class="search-area" data-search-area dir={searchDirection}>
+    <label class="search-control">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5"></circle>
+        <path d="m16 16 4 4"></path>
+      </svg>
+      <input
+        class="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label={searchLabels.title}
+        aria-controls="search-results-panel"
+        aria-describedby="search-status"
+        aria-expanded="false"
+        placeholder={searchLabels.placeholder}
+        data-search-input
+      />
+    </label>
+    <button class="search-close" type="button" data-search-close>
+      {searchLabels.close}
+    </button>
+
+    <p
+      id="search-status"
+      class="visually-hidden"
+      data-search-status
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
     >
-    {searchLabels.button}
-  </button>
+    </p>
+
+    <section
+      id="search-results-panel"
+      class="search-dropdown"
+      data-search-overlay
+      aria-label={searchLabels.resultsLabel}
+      hidden
+    >
+      <p class="search-summary" data-search-summary></p>
+      <button class="search-retry" type="button" data-search-retry hidden>
+        {searchLabels.retry}
+      </button>
+      <div
+        class="search-results"
+        data-search-results
+        aria-label={searchLabels.resultsLabel}
+      >
+      </div>
+    </section>
+  </div>
 
   <div
     class="language-picker desktop-language-picker"
@@ -145,53 +184,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   </script>
 </header>
 
-<dialog
-  id="search-dialog"
-  class="search-overlay"
-  data-search-overlay
-  aria-labelledby="search-title"
-  dir={searchDirection}
->
-  <div class="search-panel">
-    <div class="search-header">
-      <h2 id="search-title">{searchLabels.resultsLabel}</h2>
-      <button class="search-close" type="button" data-search-close>
-        {searchLabels.close}
-      </button>
-    </div>
-    <label class="search-query">
-      <span>{searchLabels.placeholder}</span>
-      <input
-        class="search-input"
-        type="search"
-        autocomplete="off"
-        spellcheck="false"
-        aria-controls="search-results-panel"
-        data-search-input
-        autofocus
-      />
-    </label>
-    <p
-      class="search-status"
-      data-search-status
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-    </p>
-    <button class="search-close" type="button" data-search-retry hidden
-      >{searchLabels.retry}</button
-    >
-    <div
-      id="search-results-panel"
-      class="search-results"
-      data-search-results
-      aria-label={searchLabels.resultsLabel}
-    >
-    </div>
-  </div>
-</dialog>
-
 <button
   class="back-to-top"
   type="button"
@@ -213,10 +205,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     basePath: import.meta.env.BASE_URL,
   }}
 >
+  const header = document.querySelector(".site-header");
+  const searchArea = document.querySelector("[data-search-area]");
   const overlay = document.querySelector("[data-search-overlay]");
-  const openButton = document.querySelector("[data-search-open]");
   const input = document.querySelector("[data-search-input]");
   const status = document.querySelector("[data-search-status]");
+  const summary = document.querySelector("[data-search-summary]");
   const results = document.querySelector("[data-search-results]");
   const closeButton = document.querySelector("[data-search-close]");
   const backToTop = document.querySelector("[data-back-to-top]");
@@ -251,14 +245,37 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     return pagefindPromise;
   }
 
-  function closeResultsLayer() {
-    ++lastSearchId;
-    overlay.close();
+  function hideResultsLayer() {
+    overlay.hidden = true;
+    input.setAttribute("aria-expanded", "false");
   }
 
-  function clearResults(message) {
-    results.replaceChildren();
+  function showResultsLayer(message) {
+    summary.textContent = message;
     status.textContent = message;
+    overlay.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  }
+
+  function activateSearch() {
+    header.classList.add("search-active");
+    if (navToggle instanceof HTMLInputElement) {
+      navToggle.checked = false;
+    }
+  }
+
+  function closeSearch(restoreFocus = false) {
+    ++lastSearchId;
+    input.removeAttribute("aria-busy");
+    hideResultsLayer();
+    if (restoreFocus) {
+      input.focus();
+    }
+    header.classList.remove("search-active");
+  }
+
+  function clearResults() {
+    results.replaceChildren();
   }
 
   function renderResults(searchResults) {
@@ -293,16 +310,23 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   async function runSearch() {
+    activateSearch();
     const query = input.value.trim();
     const searchId = ++lastSearchId;
 
     retryButton.hidden = true;
     if (query.length < 2) {
-      clearResults(searchLabels.waiting);
+      input.removeAttribute("aria-busy");
+      status.textContent = "";
+      clearResults();
+      hideResultsLayer();
       return;
     }
 
-    clearResults(searchLabels.loading);
+    input.setAttribute("aria-busy", "true");
+    status.textContent = searchLabels.loading;
+    clearResults();
+    hideResultsLayer();
     try {
       const pagefind = await getPagefind();
       const search = await pagefind.search(query, { filters: { language } });
@@ -310,48 +334,65 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
         search.results.slice(0, 8).map((result) => result.data()),
       );
       if (searchId !== lastSearchId) return;
+      input.removeAttribute("aria-busy");
       if (searchResults.length === 0) {
-        clearResults(searchLabels.empty);
+        showResultsLayer(searchLabels.empty);
         return;
       }
-      status.textContent = searchLabels.found.replace(
+      const foundMessage = searchLabels.found.replace(
         "{count}",
         searchResults.length,
       );
       renderResults(searchResults);
+      showResultsLayer(foundMessage);
     } catch {
       if (searchId !== lastSearchId) return;
-      clearResults(searchLabels.error);
+      input.removeAttribute("aria-busy");
+      showResultsLayer(searchLabels.error);
       retryButton.hidden = false;
     }
   }
 
-  closeButton.addEventListener("click", () => closeResultsLayer());
+  closeButton.addEventListener("click", () => closeSearch(true));
   retryButton.addEventListener("click", () => {
     input.focus();
     runSearch();
   });
-  openButton.addEventListener("click", () => {
-    overlay.showModal();
-    input.focus();
+  input.addEventListener("pointerdown", activateSearch);
+  input.addEventListener("focus", activateSearch);
+  input.addEventListener("input", () => {
     runSearch();
   });
-  overlay.addEventListener("close", () => {
-    ++lastSearchId;
-    openButton.focus();
-  });
-  // Only dismiss a gesture that starts and ends on the backdrop.
-  let backdropPointerDown = false;
-  overlay.addEventListener("pointerdown", (event) => {
-    backdropPointerDown = event.target === overlay;
-  });
-  overlay.addEventListener("click", (event) => {
-    if (backdropPointerDown && event.target === overlay) closeResultsLayer();
-    backdropPointerDown = false;
-  });
-  input.addEventListener("input", runSearch);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter") runSearch();
+    if (event.key === "ArrowDown" && !overlay.hidden) {
+      event.preventDefault();
+      results.querySelector("a")?.focus();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (
+      header.classList.contains("search-active") &&
+      event.target instanceof Node &&
+      !searchArea.contains(event.target)
+    ) {
+      closeSearch();
+    }
+  });
+  document.addEventListener("focusin", (event) => {
+    if (
+      header.classList.contains("search-active") &&
+      event.target instanceof Node &&
+      !searchArea.contains(event.target)
+    ) {
+      closeSearch();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && header.classList.contains("search-active")) {
+      event.preventDefault();
+      closeSearch(true);
+    }
   });
 
   const backToTopFadeStart = 140;
@@ -514,16 +555,36 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     outline: none;
   }
 
-  .search-control {
+  .search-area {
+    position: relative;
     display: inline-flex;
     flex: 0 1 clamp(6.75rem, 10vw, 10rem);
     min-width: 6.75rem;
     align-items: center;
+    gap: 0.55rem;
+  }
+
+  .search-control {
+    display: inline-flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
+    gap: 0.45rem;
     min-height: 34px;
     border: 1px solid rgba(112, 104, 94, 0.2);
     border-radius: 8px;
     padding: 0.18rem 0.55rem;
     background: rgba(255, 253, 248, 0.55);
+  }
+
+  .search-control svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 1.8;
   }
 
   .search-input {
@@ -534,7 +595,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     background: transparent;
     color: var(--ink);
     font: inherit;
-    font-size: 0.88rem;
+    font-size: 1rem;
     line-height: 1.2;
   }
 
@@ -545,6 +606,105 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   .search-control:focus-within {
     border-color: rgba(180, 62, 47, 0.52);
     box-shadow: 0 0 0 3px rgba(180, 62, 47, 0.12);
+  }
+
+  .search-close,
+  .search-retry {
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    background: rgba(104, 116, 73, 0.12);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 760;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .search-close {
+    display: none;
+    flex: 0 0 auto;
+  }
+
+  .search-close:focus-visible,
+  .search-retry:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  .site-header.search-active {
+    display: flex;
+    justify-content: center;
+  }
+
+  .site-header.search-active > .brand,
+  .site-header.search-active > .nav-panel,
+  .site-header.search-active > .desktop-language-picker,
+  .site-header.search-active > .mobile-actions {
+    display: none;
+  }
+
+  .site-header.search-active .search-area {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+
+  .site-header.search-active .search-control {
+    min-height: 44px;
+    background: var(--surface);
+  }
+
+  .site-header.search-active .search-close {
+    display: inline-flex;
+  }
+
+  .search-dropdown[hidden] {
+    display: none;
+  }
+
+  .search-dropdown {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(100% + 0.3rem);
+    z-index: 40;
+    box-sizing: border-box;
+    max-height: min(68dvh, 640px);
+    overflow: auto;
+    border: 1px solid rgba(112, 104, 94, 0.22);
+    border-radius: 12px;
+    padding: 0.9rem;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .search-summary {
+    min-height: 1.4rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .search-results {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 
   .language-picker {
@@ -598,109 +758,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   .mobile-actions {
     display: none;
-  }
-
-  .search-launch {
-    gap: 0.45rem;
-    color: var(--ink);
-    font: inherit;
-    cursor: pointer;
-  }
-
-  .search-launch svg {
-    flex: 0 0 auto;
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-  }
-
-  .search-overlay {
-    box-sizing: border-box;
-    width: min(680px, calc(100% - 2rem));
-    max-height: calc(100dvh - min(10vh, 4.5rem) - 1rem);
-    margin: min(10vh, 4.5rem) auto auto;
-    padding: 0;
-    border: 0;
-    border-radius: 12px;
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow);
-  }
-
-  .search-overlay::backdrop {
-    background: rgba(37, 33, 28, 0.34);
-  }
-
-  .search-panel {
-    padding: 1rem;
-  }
-
-  .search-query {
-    display: grid;
-    gap: 0.4rem;
-    margin-bottom: 0.85rem;
-    font-weight: 700;
-  }
-
-  .search-query .search-input {
-    box-sizing: border-box;
-    min-height: 44px;
-    border: 1px solid var(--muted);
-    border-radius: 8px;
-    padding: 0.6rem 0.75rem;
-    background: var(--surface);
-    font-size: 1rem;
-    font-weight: 400;
-  }
-
-  .search-query .search-input:focus-visible,
-  .search-launch:focus-visible,
-  .search-close:focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 3px;
-  }
-
-  .search-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .search-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    letter-spacing: 0;
-  }
-
-  .search-close {
-    min-height: 44px;
-    border: 0;
-    border-radius: 8px;
-    padding: 0.45rem 0.65rem;
-    background: rgba(104, 116, 73, 0.12);
-    color: var(--ink);
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 760;
-    cursor: pointer;
-  }
-
-  .search-status {
-    min-height: 1.4rem;
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.92rem;
-  }
-
-  .search-results {
-    display: grid;
-    gap: 0.55rem;
-    margin-top: 0.75rem;
   }
 
   :global(.search-result) {
@@ -828,15 +885,18 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       font-size: 0.92rem;
     }
 
-    .search-control {
+    .search-area {
       flex-basis: clamp(5.8rem, 9vw, 7.5rem);
       min-width: 5.8rem;
+    }
+
+    .search-control {
       min-height: 32px;
       padding-inline: 0.5rem;
     }
 
     .search-input {
-      font-size: 0.84rem;
+      font-size: 1rem;
     }
 
     .language-picker {
@@ -935,19 +995,22 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       font-size: 0.95rem;
     }
 
-    .search-control {
+    .search-area {
       grid-column: 2;
       grid-row: 1;
       width: 100%;
       min-width: 0;
       max-width: 11rem;
       flex-basis: auto;
+    }
+
+    .search-control {
       min-height: 34px;
       padding: 0.18rem 0.55rem;
     }
 
     .search-input {
-      font-size: 0.88rem;
+      font-size: 1rem;
     }
 
     .desktop-language-picker {
@@ -980,8 +1043,11 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       font-size: 0.82rem;
     }
 
-    .search-control {
+    .search-area {
       max-width: 6.6rem;
+    }
+
+    .search-control {
       padding-inline: 0.45rem;
     }
 
