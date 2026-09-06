@@ -32,13 +32,6 @@ const languageHref =
   language === "he"
     ? sitePath(basePath, "poolish/")
     : sitePath(basePath, "he/poolish/");
-const clientLabels = {
-  copied: text.copied,
-  copyFailed: text.copyFailed,
-  validationMessage: text.validationMessage,
-  gramUnit: text.gramUnit,
-  copyText: text.copyText,
-};
 const alternateLanguageHref = languageHref;
 const zeroGrams = `0${text.gramUnit}`;
 ---
@@ -159,7 +152,7 @@ const zeroGrams = `0${text.gramUnit}`;
                 type="number"
                 min="0"
                 max="1"
-                step="0.01"
+                step="0.001"
                 value="0.667"
                 inputmode="decimal"
                 data-field="poolishShare"
@@ -287,7 +280,7 @@ const zeroGrams = `0${text.gramUnit}`;
             </article>
           </div>
 
-          <button class="copy-button" type="button" data-copy-button>
+          <button class="copy-button" type="button" data-copy-button disabled>
             {text.copyButton}
           </button>
           <p class="copy-status" data-copy-status aria-live="polite"></p>
@@ -296,7 +289,19 @@ const zeroGrams = `0${text.gramUnit}`;
       </section>
     </main>
 
-    <script is:inline define:vars={{ clientLabels }}>
+    <script>
+      import { poolishCalculatorLabels } from "../lib/i18n";
+      import { calculatePoolish } from "../lib/poolishCalculator";
+      import type {
+        CalculatorFields,
+        CalculatorMode,
+        CalculatorResult,
+      } from "../lib/poolishCalculator";
+
+      const clientLabels =
+        poolishCalculatorLabels[
+          document.documentElement.lang === "he" ? "he" : "en"
+        ];
       const calculatorShell = document.querySelector(
         "[data-alternate-language-href]",
       );
@@ -304,42 +309,36 @@ const zeroGrams = `0${text.gramUnit}`;
       const genericControls = document.querySelector("[data-generic-controls]");
       const pizzaControls = document.querySelector("[data-pizza-controls]");
       const presetList = document.querySelector("[data-preset-list]");
-      const validationMessage = document.querySelector(
+      const validationMessage = document.querySelector<HTMLElement>(
         "[data-validation-message]",
-      );
-      const copyButton = document.querySelector("[data-copy-button]");
-      const copyStatus = document.querySelector("[data-copy-status]");
-      const outputs = Object.fromEntries(
-        Array.from(document.querySelectorAll("[data-output]")).map(
-          (element) => [element.dataset.output, element],
+      )!;
+      const copyButton =
+        document.querySelector<HTMLButtonElement>("[data-copy-button]")!;
+      const copyStatus =
+        document.querySelector<HTMLElement>("[data-copy-status]")!;
+      const outputs = Object.fromEntries<HTMLElement>(
+        Array.from(document.querySelectorAll<HTMLElement>("[data-output]")).map(
+          (element) => [element.dataset.output!, element],
         ),
       );
 
-      const pizzaPreset = {
-        hydration: 0.7,
-        poolishShare: 2 / 3,
-        poolishHydration: 1,
-        poolishYeast: 0.013,
-        restYeast: 0,
-        salt: 0.027,
-      };
-
-      function fieldValue(name) {
+      function fieldValue(name: keyof CalculatorFields) {
         const field = form?.querySelector(`[data-field="${name}"]`);
         if (!(field instanceof HTMLInputElement)) {
-          return Number.NaN;
+          return "";
         }
-        return Number(field.value);
+        return field.value;
       }
 
-      function currentMode() {
+      function currentMode(): CalculatorMode {
         const selected = form?.querySelector('input[name="mode"]:checked');
-        return selected instanceof HTMLInputElement
-          ? selected.value
+        return selected instanceof HTMLInputElement &&
+          selected.value === "pizza"
+          ? "pizza"
           : "generic";
       }
 
-      function setMode(mode) {
+      function setMode(mode: CalculatorMode) {
         const modeInput = form?.querySelector(
           `input[name="mode"][value="${mode}"]`,
         );
@@ -393,20 +392,13 @@ const zeroGrams = `0${text.gramUnit}`;
         }
       }
 
-      function grams(value, digits = 0) {
+      function grams(value: number, digits = 0) {
         return `${value.toFixed(digits)}${clientLabels.gramUnit}`;
       }
 
-      function getInputs() {
-        if (currentMode() === "pizza") {
-          const pizzaCount = fieldValue("pizzaCount");
-          return {
-            desiredDough: Math.round((850 / 3) * pizzaCount),
-            ...pizzaPreset,
-          };
-        }
-
+      function getInputs(): CalculatorFields {
         return {
+          pizzaCount: fieldValue("pizzaCount"),
           desiredDough: fieldValue("desiredDough"),
           hydration: fieldValue("hydration"),
           poolishShare: fieldValue("poolishShare"),
@@ -414,36 +406,6 @@ const zeroGrams = `0${text.gramUnit}`;
           poolishYeast: fieldValue("poolishYeast"),
           restYeast: fieldValue("restYeast"),
           salt: fieldValue("salt"),
-        };
-      }
-
-      function calculateRecipe(inputs) {
-        const totalFlour = Math.round(
-          inputs.desiredDough / (1 + inputs.hydration),
-        );
-        const totalWater = Math.round(inputs.desiredDough - totalFlour);
-        const poolishFlour = Math.round(totalFlour * inputs.poolishShare);
-        const poolishWater = Math.round(poolishFlour * inputs.poolishHydration);
-        const poolishYeast = Math.max(
-          Math.round(poolishFlour * inputs.poolishYeast),
-          3,
-        );
-        const restFlour = Math.round(totalFlour - poolishFlour);
-        const restWater = Math.round(totalWater - poolishWater);
-        const restYeast = Math.round(totalFlour * inputs.restYeast);
-        const salt = Number((totalFlour * inputs.salt).toFixed(1));
-
-        return {
-          targetDough: inputs.desiredDough,
-          totalFlour,
-          totalWater,
-          poolishFlour,
-          poolishWater,
-          poolishYeast,
-          restFlour,
-          restWater,
-          restYeast,
-          salt,
         };
       }
 
@@ -460,24 +422,27 @@ const zeroGrams = `0${text.gramUnit}`;
         }
       }
 
-      function render() {
-        updateModeVisibility();
-        const inputs = getInputs();
-        const inputValues = Object.values(inputs);
+      let currentResult: CalculatorResult | null = null;
+      let revision = 0;
 
-        if (
-          inputValues.some((value) => !Number.isFinite(value)) ||
-          inputs.desiredDough <= 0 ||
-          inputs.hydration < 0 ||
-          inputs.poolishShare < 0 ||
-          inputs.poolishShare > 1 ||
-          inputs.poolishHydration < 0
-        ) {
-          validationMessage.textContent = clientLabels.validationMessage;
+      function render() {
+        revision += 1;
+        currentResult = null;
+        copyStatus.textContent = "";
+        copyButton.disabled = true;
+        updateModeVisibility();
+        const calculation = calculatePoolish(currentMode(), getInputs());
+
+        if (!calculation.ok) {
+          for (const output of Object.values(outputs)) output.textContent = "—";
+          validationMessage.textContent =
+            clientLabels.validation[calculation.error];
           return;
         }
 
-        const result = calculateRecipe(inputs);
+        const result = calculation.result;
+        currentResult = result;
+        copyButton.disabled = false;
         outputs.totalFlour.textContent = grams(result.totalFlour);
         outputs.totalWater.textContent = grams(result.totalWater);
         outputs.targetDough.textContent = grams(result.targetDough);
@@ -491,30 +456,34 @@ const zeroGrams = `0${text.gramUnit}`;
         validationMessage.textContent = "";
       }
 
-      function copyWeights() {
+      async function copyWeights() {
+        if (!currentResult || copyButton.disabled) return;
+        const result = currentResult;
+        const copyRevision = revision;
         const text = [
           clientLabels.copyText.poolish,
-          `${clientLabels.copyText.flour}: ${outputs.poolishFlour.textContent}`,
-          `${clientLabels.copyText.water}: ${outputs.poolishWater.textContent}`,
-          `${clientLabels.copyText.yeast}: ${outputs.poolishYeast.textContent}`,
+          `${clientLabels.copyText.flour}: ${grams(result.poolishFlour)}`,
+          `${clientLabels.copyText.water}: ${grams(result.poolishWater)}`,
+          `${clientLabels.copyText.yeast}: ${grams(result.poolishYeast)}`,
           "",
           clientLabels.copyText.finalDough,
-          `${clientLabels.copyText.flour}: ${outputs.restFlour.textContent}`,
-          `${clientLabels.copyText.water}: ${outputs.restWater.textContent}`,
-          `${clientLabels.copyText.yeast}: ${outputs.restYeast.textContent}`,
-          `${clientLabels.copyText.salt}: ${outputs.salt.textContent}`,
+          `${clientLabels.copyText.flour}: ${grams(result.restFlour)}`,
+          `${clientLabels.copyText.water}: ${grams(result.restWater)}`,
+          `${clientLabels.copyText.yeast}: ${grams(result.restYeast)}`,
+          `${clientLabels.copyText.salt}: ${grams(result.salt, 1)}`,
         ].join("\n");
 
-        navigator.clipboard
-          ?.writeText(text)
-          .then(() => {
+        try {
+          await navigator.clipboard.writeText(text);
+          if (revision === copyRevision)
             copyStatus.textContent = clientLabels.copied;
-          })
-          .catch(() => {
+        } catch {
+          if (revision === copyRevision)
             copyStatus.textContent = clientLabels.copyFailed;
-          });
+        }
       }
 
+      form?.addEventListener("submit", (event) => event.preventDefault());
       form?.addEventListener("input", render);
       form?.addEventListener("change", () => {
         syncUrlMode();
@@ -859,10 +828,16 @@ const zeroGrams = `0${text.gramUnit}`;
     cursor: pointer;
   }
 
-  .copy-button:hover,
+  .copy-button:hover:enabled,
   .copy-button:focus-visible {
     background: var(--control-accent-hover);
     outline: none;
+  }
+
+  .copy-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 
   .copy-button:focus-visible {

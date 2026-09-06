@@ -46,7 +46,11 @@ export type PoolishCalculatorLabels = {
   copyButton: string;
   copied: string;
   copyFailed: string;
-  validationMessage: string;
+  validation: {
+    invalidInputs: string;
+    invalidSplit: string;
+    invalidPizzaCount: string;
+  };
   gramUnit: string;
   copyText: {
     poolish: string;
@@ -110,8 +114,13 @@ export const poolishCalculatorLabels: Record<
     copyButton: "Copy weights",
     copied: "Copied",
     copyFailed: "Copy failed",
-    validationMessage:
-      "Use positive numbers. Poolish share must stay between 0 and 1.",
+    validation: {
+      invalidInputs:
+        "Fill every field with a finite number. Use at least 1g of dough, nonnegative ratios, and a poolish share between 0 and 1.",
+      invalidSplit:
+        "Poolish water exceeds the batch water. Reduce the poolish share or poolish hydration, or increase dough hydration.",
+      invalidPizzaCount: "Enter a whole number of pizzas, at least 1.",
+    },
     gramUnit: "g",
     copyText: {
       poolish: "Poolish:",
@@ -170,8 +179,13 @@ export const poolishCalculatorLabels: Record<
     copyButton: "העתקת כמויות",
     copied: "הועתק",
     copyFailed: "ההעתקה נכשלה",
-    validationMessage:
-      "השתמשו במספרים חיוביים. חלק הפוליש חייב להיות בין 0 ל-1.",
+    validation: {
+      invalidInputs:
+        "מלאו כל שדה במספר סופי. כמות הבצק חייבת להיות לפחות גרם אחד, היחסים אינם יכולים להיות שליליים וחלק הפוליש חייב להיות בין 0 ל-1.",
+      invalidSplit:
+        "כמות המים בפוליש גדולה מכמות המים בבצק. הקטינו את חלק הפוליש או את הידרציית הפוליש, או הגדילו את הידרציית הבצק.",
+      invalidPizzaCount: "הזינו מספר שלם של פיצות, לפחות 1.",
+    },
     gramUnit: " גרם",
     copyText: {
       poolish: "פוליש:",
