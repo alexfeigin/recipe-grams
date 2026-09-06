@@ -18,6 +18,7 @@ test("English search finds a body term and opens the recipe", async ({
   page,
 }) => {
   await page.goto(baseUrl);
+  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("onion");
 
   const result = page.getByRole("link", { name: /Rice Pilaf/ }).first();
@@ -39,6 +40,7 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   page,
 }) => {
   await page.goto(`${baseUrl}he/`);
+  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "חיפוש" }).fill("בצל");
 
   const result = page.getByRole("link", { name: /פילאף אורז/ }).first();
@@ -60,6 +62,7 @@ test("Search results dim the page and close from an outside click", async ({
   page,
 }) => {
   await page.goto(baseUrl);
+  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("onion");
 
   const overlay = page.locator("[data-search-overlay]");
@@ -69,16 +72,13 @@ test("Search results dim the page and close from an outside click", async ({
   ).toBeVisible();
 
   const overlayState = await overlay.evaluate((element) => {
-    const bounds = element.getBoundingClientRect();
     return {
-      width: bounds.width,
-      height: bounds.height,
-      background: getComputedStyle(element).backgroundColor,
+      modal: element.matches(":modal"),
+      background: getComputedStyle(element, "::backdrop").backgroundColor,
     };
   });
 
-  expect(overlayState.width).toBeGreaterThanOrEqual(1000);
-  expect(overlayState.height).toBeGreaterThanOrEqual(700);
+  expect(overlayState.modal).toBe(true);
   expect(overlayState.background).not.toBe("rgba(0, 0, 0, 0)");
 
   await page.mouse.click(24, 220);
@@ -88,6 +88,7 @@ test("Search results dim the page and close from an outside click", async ({
 test("Mobile navbar exposes the same search popup", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
+  await page.locator("[data-search-open]").click();
   await page.getByRole("searchbox", { name: "Search" }).fill("salmon");
 
   const result = page

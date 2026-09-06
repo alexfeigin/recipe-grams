@@ -63,18 +63,19 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
   </nav>
 
-  <label class="search-control">
-    <input
-      class="search-input"
-      type="search"
-      autocomplete="off"
-      spellcheck="false"
-      aria-label={searchLabels.placeholder}
-      aria-controls="search-results-panel"
-      placeholder={searchLabels.placeholder}
-      data-search-input
-    />
-  </label>
+  <button
+    class="search-control search-launch"
+    type="button"
+    data-search-open
+    aria-haspopup="dialog"
+    aria-controls="search-dialog"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true"
+      ><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 4 4"
+      ></path></svg
+    >
+    {searchLabels.button}
+  </button>
 
   <div
     class="language-picker desktop-language-picker"
@@ -144,21 +145,32 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   </script>
 </header>
 
-<div
+<dialog
+  id="search-dialog"
   class="search-overlay"
   data-search-overlay
-  hidden
-  role="region"
   aria-labelledby="search-title"
   dir={searchDirection}
 >
-  <div class="search-panel" id="search-results-panel">
+  <div class="search-panel">
     <div class="search-header">
       <h2 id="search-title">{searchLabels.resultsLabel}</h2>
       <button class="search-close" type="button" data-search-close>
         {searchLabels.close}
       </button>
     </div>
+    <label class="search-query">
+      <span>{searchLabels.placeholder}</span>
+      <input
+        class="search-input"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        aria-controls="search-results-panel"
+        data-search-input
+        autofocus
+      />
+    </label>
     <p
       class="search-status"
       data-search-status
@@ -171,13 +183,14 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       >{searchLabels.retry}</button
     >
     <div
+      id="search-results-panel"
       class="search-results"
       data-search-results
       aria-label={searchLabels.resultsLabel}
     >
     </div>
   </div>
-</div>
+</dialog>
 
 <button
   class="back-to-top"
@@ -201,6 +214,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }}
 >
   const overlay = document.querySelector("[data-search-overlay]");
+  const openButton = document.querySelector("[data-search-open]");
   const input = document.querySelector("[data-search-input]");
   const status = document.querySelector("[data-search-status]");
   const results = document.querySelector("[data-search-results]");
@@ -237,16 +251,9 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     return pagefindPromise;
   }
 
-  function showResultsLayer() {
-    overlay.hidden = false;
-  }
-
-  function closeResultsLayer(restoreFocus = true) {
+  function closeResultsLayer() {
     ++lastSearchId;
-    overlay.hidden = true;
-    if (restoreFocus) {
-      input.focus();
-    }
+    overlay.close();
   }
 
   function clearResults(message) {
@@ -289,14 +296,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     const query = input.value.trim();
     const searchId = ++lastSearchId;
 
+    retryButton.hidden = true;
     if (query.length < 2) {
-      overlay.hidden = true;
       clearResults(searchLabels.waiting);
       return;
     }
 
-    showResultsLayer();
-    retryButton.hidden = true;
     clearResults(searchLabels.loading);
     try {
       const pagefind = await getPagefind();
@@ -326,42 +331,27 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     input.focus();
     runSearch();
   });
-  document.addEventListener("click", (event) => {
-    if (
-      !overlay.hidden &&
-      !overlay.contains(event.target) &&
-      !event.target.closest(".search-control")
-    ) {
-      closeResultsLayer(false);
-    }
+  openButton.addEventListener("click", () => {
+    overlay.showModal();
+    input.focus();
+    runSearch();
   });
-  document.addEventListener("focusin", (event) => {
-    if (
-      !overlay.hidden &&
-      event.target !== input &&
-      !overlay.contains(event.target)
-    ) {
-      closeResultsLayer(false);
-    }
+  overlay.addEventListener("close", () => {
+    ++lastSearchId;
+    openButton.focus();
+  });
+  // Only dismiss a gesture that starts and ends on the backdrop.
+  let backdropPointerDown = false;
+  overlay.addEventListener("pointerdown", (event) => {
+    backdropPointerDown = event.target === overlay;
+  });
+  overlay.addEventListener("click", (event) => {
+    if (backdropPointerDown && event.target === overlay) closeResultsLayer();
+    backdropPointerDown = false;
   });
   input.addEventListener("input", runSearch);
   input.addEventListener("keydown", (event) => {
-    if (!overlay.hidden && event.key === "Tab" && !event.shiftKey) {
-      event.preventDefault();
-      closeButton.focus();
-    }
-    if (overlay.hidden && event.key === "Enter") runSearch();
-  });
-  closeButton.addEventListener("keydown", (event) => {
-    if (event.key === "Tab" && event.shiftKey) {
-      event.preventDefault();
-      input.focus();
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !overlay.hidden) {
-      closeResultsLayer();
-    }
+    if (event.key === "Enter") runSearch();
   });
 
   const backToTopFadeStart = 140;
@@ -610,32 +600,67 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     display: none;
   }
 
-  .search-overlay[hidden] {
-    display: none;
+  .search-launch {
+    gap: 0.45rem;
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .search-launch svg {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
   }
 
   .search-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    display: grid;
-    place-items: start center;
-    padding: clamp(4.5rem, 10vh, 7rem) 1rem 1rem;
+    box-sizing: border-box;
+    width: min(680px, calc(100% - 2rem));
+    max-height: calc(100dvh - min(10vh, 4.5rem) - 1rem);
+    margin: min(10vh, 4.5rem) auto auto;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow);
+  }
+
+  .search-overlay::backdrop {
     background: rgba(37, 33, 28, 0.34);
-    pointer-events: none;
   }
 
   .search-panel {
-    pointer-events: auto;
-    box-sizing: border-box;
-    width: min(680px, 100%);
-    max-height: min(760px, calc(100vh - 5.5rem));
-    overflow: auto;
-    border: 1px solid rgba(112, 104, 94, 0.22);
-    border-radius: 8px;
     padding: 1rem;
+  }
+
+  .search-query {
+    display: grid;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+    font-weight: 700;
+  }
+
+  .search-query .search-input {
+    box-sizing: border-box;
+    min-height: 44px;
+    border: 1px solid var(--muted);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
     background: var(--surface);
-    box-shadow: var(--shadow);
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .search-query .search-input:focus-visible,
+  .search-launch:focus-visible,
+  .search-close:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
   }
 
   .search-header {
@@ -653,6 +678,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   .search-close {
+    min-height: 44px;
     border: 0;
     border-radius: 8px;
     padding: 0.45rem 0.65rem;
@@ -691,6 +717,11 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   :global(.search-result:focus-visible) {
     border-color: rgba(180, 62, 47, 0.42);
     outline: none;
+  }
+
+  :global(.search-result:focus-visible) {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
   }
 
   :global(.search-result strong) {

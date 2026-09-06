@@ -10,7 +10,10 @@ for (const language of ["en", "he"]) {
     }) => {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}`);
-      const input = page.getByRole("searchbox");
+      const launch = page.locator("[data-search-open]");
+      await launch.click();
+      const input = page.getByRole("dialog").getByRole("searchbox");
+      await expect(input).toBeFocused();
       const close = page.locator("[data-search-close]");
       const results = page.locator(".search-result");
       await input.fill(language === "he" ? "בצל" : "onion");
@@ -22,8 +25,10 @@ for (const language of ["en", "he"]) {
         language === "he" ? "סלמון" : "Salmon",
       );
       await page.screenshot({ path: `.astro/search-${language}-${width}.png` });
-      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
       await expect(close).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(input).toBeFocused();
       await page.keyboard.press("Tab");
       await expect(results.first()).toBeFocused();
       for (const href of await results.evaluateAll((links) =>
@@ -31,9 +36,27 @@ for (const language of ["en", "he"]) {
       )) {
         expect(new URL(href).pathname).toContain(`/${language}/`);
       }
+      for (let i = 0; i < 8; i++) {
+        await page.keyboard.press("Tab");
+        expect(
+          await page.evaluate(
+            () =>
+              document.activeElement === document.body ||
+              !!document.activeElement.closest("dialog"),
+          ),
+        ).toBe(true);
+      }
+      await input.fill("");
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(input).toBeFocused();
+      await expect(page.getByRole("status")).toHaveText(
+        language === "he"
+          ? "הקלידו לפחות 2 תווים"
+          : "Type at least 2 characters",
+      );
       await page.keyboard.press("Escape");
       await expect(page.locator("[data-search-overlay]")).toBeHidden();
-      await expect(input).toBeFocused();
+      await expect(launch).toBeFocused();
     });
   }
 }
@@ -57,7 +80,9 @@ for (const language of ["en", "he"]) {
       }
     });
     await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}`);
-    const input = page.getByRole("searchbox");
+    const launch = page.locator("[data-search-open]");
+    await launch.click();
+    const input = page.getByRole("dialog").getByRole("searchbox");
     const status = page.getByRole("status");
     const overlay = page.locator("[data-search-overlay]");
     await input.fill(language === "he" ? "בצל" : "onion");
@@ -78,18 +103,16 @@ for (const language of ["en", "he"]) {
       language === "he" ? "לא נמצאו מתכונים" : "No recipes found",
     );
     await page.locator("[data-search-close]").click();
-    await expect(input).toBeFocused();
+    await expect(launch).toBeFocused();
     await expect(overlay).toBeHidden();
-    await input.press("Enter");
+    await launch.press("Enter");
     await expect(overlay).toBeVisible();
     await page.mouse.click(5, 500);
     await expect(overlay).toBeHidden();
+    await launch.click();
     await input.fill(language === "he" ? "בצל" : "onion");
     await expect(page.locator(".search-result").first()).toBeVisible();
-    await input.press("Shift+Tab");
-    await expect(overlay).toBeHidden();
-    await input.fill(language === "he" ? "בצל" : "onion");
-    await expect(page.locator(".search-result").first()).toBeVisible();
+
     await page.locator(".search-result").first().click();
     await expect(page).toHaveURL(new RegExp(`/${language}/[^/]+/$`));
   });
