@@ -26,7 +26,7 @@ const copy = {
 
 for (const language of ["en", "he"]) {
   for (const width of [1280, 390]) {
-    test(`${language} ${width}: search expands before its anchored results`, async ({
+    test(`${language} ${width}: search expands between the brand and language toggle`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 844 });
@@ -36,13 +36,39 @@ for (const language of ["en", "he"]) {
       const input = page.getByRole("searchbox");
       const dropdown = page.locator("[data-search-overlay]");
       const results = page.locator(".search-result");
+      const brand = page.locator(".brand");
+      const languagePicker = page.locator(".language-picker:visible");
+      const searchControl = page.locator(".search-control");
+      const initialSearchWidth = await searchControl.evaluate(
+        (element) => element.getBoundingClientRect().width,
+      );
 
       await expect(dropdown).toBeHidden();
       await input.click();
+      const openingSearchWidth = await searchControl.evaluate(
+        (element) => element.getBoundingClientRect().width,
+      );
       await expect(header).toHaveClass(/search-active/);
       await expect(input).toBeFocused();
       await expect(dropdown).toBeHidden();
-      await expect(page.locator(".brand")).toBeHidden();
+      await expect(brand).toBeVisible();
+      await expect(languagePicker).toBeVisible();
+      await expect
+        .poll(() =>
+          searchControl.evaluate(
+            (element) => element.getBoundingClientRect().width,
+          ),
+        )
+        .toBeGreaterThan(initialSearchWidth + 20);
+      const expandedSearchWidth = await searchControl.evaluate(
+        (element) => element.getBoundingClientRect().width,
+      );
+      expect(openingSearchWidth).toBeLessThan(expandedSearchWidth - 5);
+      if (width > 880) {
+        await expect(page.locator(".nav-panel")).toBeHidden();
+      } else {
+        await expect(page.locator(".menu-button")).toBeHidden();
+      }
 
       await input.fill(copy[language].query.slice(0, 1));
       await expect(dropdown).toBeHidden();
@@ -83,9 +109,27 @@ for (const language of ["en", "he"]) {
       await input.press("ArrowDown");
       await expect(results.first()).toBeFocused();
       await page.keyboard.press("Escape");
+      const closingSearchWidth = await searchControl.evaluate(
+        (element) => element.getBoundingClientRect().width,
+      );
       await expect(dropdown).toBeHidden();
       await expect(header).not.toHaveClass(/search-active/);
       await expect(input).toBeFocused();
+      await expect
+        .poll(() =>
+          searchControl.evaluate(
+            (element) => element.getBoundingClientRect().width,
+          ),
+        )
+        .toBeLessThan(initialSearchWidth + 2);
+      expect(closingSearchWidth).toBeGreaterThan(initialSearchWidth + 5);
+      await expect(brand).toBeVisible();
+      await expect(languagePicker).toBeVisible();
+      if (width > 880) {
+        await expect(page.locator(".nav-panel")).toBeVisible();
+      } else {
+        await expect(page.locator(".menu-button")).toBeVisible();
+      }
     });
   }
 }

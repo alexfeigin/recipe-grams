@@ -82,8 +82,15 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
         data-search-input
       />
     </label>
-    <button class="search-close" type="button" data-search-close>
-      {searchLabels.close}
+    <button
+      class="search-close"
+      type="button"
+      aria-label={searchLabels.close}
+      data-search-close
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18"></path>
+      </svg>
     </button>
 
     <p
@@ -458,8 +465,11 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     top: 0;
     z-index: 10;
     box-sizing: border-box;
-    display: flex;
+    display: grid;
     direction: ltr;
+    grid-template-columns:
+      auto minmax(0, 1fr) minmax(6.75rem, 10rem)
+      auto;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
@@ -470,10 +480,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     background: rgba(248, 244, 236, 0.92);
     border-bottom: 1px solid rgba(112, 104, 94, 0.22);
     backdrop-filter: blur(16px);
+    transition: grid-template-columns 240ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .brand {
     display: inline-flex;
+    grid-column: 1;
     flex: 0 1 auto;
     min-width: 0;
     align-items: center;
@@ -522,12 +534,21 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   .nav-panel {
     display: flex;
+    grid-column: 2;
     flex: 1 1 auto;
     min-width: 0;
     align-items: center;
     justify-content: flex-end;
     gap: 0.35rem;
     margin-left: auto;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+    clip-path: inset(0);
+    transition:
+      opacity 120ms ease,
+      visibility 0s linear,
+      clip-path 180ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .nav-panel a,
@@ -558,6 +579,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   .search-area {
     position: relative;
     display: inline-flex;
+    grid-column: 3;
     flex: 0 1 clamp(6.75rem, 10vw, 10rem);
     min-width: 6.75rem;
     align-items: center;
@@ -575,6 +597,10 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     border-radius: 8px;
     padding: 0.18rem 0.55rem;
     background: rgba(255, 253, 248, 0.55);
+    transition:
+      min-height 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      padding-inline-end 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 180ms ease;
   }
 
   .search-control svg {
@@ -603,6 +629,11 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     outline: none;
   }
 
+  .search-input::-webkit-search-cancel-button {
+    display: none;
+    appearance: none;
+  }
+
   .search-control:focus-within {
     border-color: rgba(180, 62, 47, 0.52);
     box-shadow: 0 0 0 3px rgba(180, 62, 47, 0.12);
@@ -626,8 +657,32 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   .search-close {
-    display: none;
+    position: absolute;
+    inset-inline-end: 2px;
+    top: 50%;
+    z-index: 1;
+    display: inline-flex;
+    width: 42px;
+    max-width: 42px;
+    overflow: hidden;
+    padding-inline: 0;
+    opacity: 0;
+    transform: translateY(-50%) scale(0.84);
+    visibility: hidden;
+    transition:
+      opacity 100ms ease,
+      transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear 180ms;
+  }
+
+  .search-close svg {
     flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
   }
 
   .search-close:focus-visible,
@@ -637,31 +692,38 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   .site-header.search-active {
-    display: flex;
-    justify-content: center;
+    grid-template-columns: auto minmax(0, 0fr) minmax(0, 1fr) auto;
   }
 
-  .site-header.search-active > .brand,
-  .site-header.search-active > .nav-panel,
-  .site-header.search-active > .desktop-language-picker,
-  .site-header.search-active > .mobile-actions {
-    display: none;
+  .site-header.search-active > .nav-panel {
+    opacity: 0;
+    visibility: hidden;
+    clip-path: inset(0 0 0 100%);
+    transition:
+      opacity 100ms ease,
+      visibility 0s linear 180ms,
+      clip-path 180ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .site-header.search-active .search-area {
-    flex: 1 1 100%;
     width: 100%;
-    max-width: 760px;
-    margin-inline: auto;
+    max-width: none;
   }
 
   .site-header.search-active .search-control {
     min-height: 44px;
+    padding-inline-end: 3rem;
     background: var(--surface);
   }
 
   .site-header.search-active .search-close {
-    display: inline-flex;
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+    visibility: visible;
+    transition:
+      opacity 120ms ease 60ms,
+      transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear;
   }
 
   .search-dropdown[hidden] {
@@ -725,6 +787,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   .desktop-language-picker {
+    grid-column: 4;
     margin-left: -0.2rem;
   }
 
@@ -758,6 +821,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   .mobile-actions {
     display: none;
+    transition: gap 220ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   :global(.search-result) {
@@ -864,6 +928,9 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   @media (max-width: 1080px) {
     .site-header {
+      grid-template-columns:
+        auto minmax(0, 1fr) minmax(5.8rem, 7.5rem)
+        auto;
       gap: 0.65rem;
     }
 
@@ -958,6 +1025,13 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       background: var(--surface);
       box-shadow: 0 8px 24px rgba(61, 43, 28, 0.12);
       cursor: pointer;
+      overflow: hidden;
+      opacity: 1;
+      visibility: visible;
+      transition:
+        width 180ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 100ms ease,
+        visibility 0s linear;
     }
 
     .menu-button span {
@@ -1021,6 +1095,25 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       display: grid;
       gap: 0.2rem;
     }
+
+    .site-header.search-active {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .site-header.search-active .mobile-actions {
+      gap: 0;
+    }
+
+    .site-header.search-active .menu-button {
+      width: 0;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        width 180ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 80ms ease,
+        visibility 0s linear 180ms;
+    }
   }
 
   @media (max-width: 380px) {
@@ -1065,6 +1158,18 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   @media print {
     .back-to-top {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .nav-panel,
+    .search-close,
+    .search-control,
+    .mobile-actions,
+    .menu-button {
+      transition-duration: 0.01ms;
+      transition-delay: 0s;
     }
   }
 </style>
