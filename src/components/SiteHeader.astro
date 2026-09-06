@@ -148,8 +148,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   class="search-overlay"
   data-search-overlay
   hidden
-  role="dialog"
-  aria-modal="true"
+  role="region"
   aria-labelledby="search-title"
   dir={searchDirection}
 >
@@ -160,7 +159,17 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
         {searchLabels.close}
       </button>
     </div>
-    <p class="search-status" data-search-status></p>
+    <p
+      class="search-status"
+      data-search-status
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+    </p>
+    <button class="search-close" type="button" data-search-retry hidden
+      >{searchLabels.retry}</button
+    >
     <div
       class="search-results"
       data-search-results
@@ -197,7 +206,9 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   const results = document.querySelector("[data-search-results]");
   const closeButton = document.querySelector("[data-search-close]");
   const backToTop = document.querySelector("[data-back-to-top]");
+  const retryButton = document.querySelector("[data-search-retry]");
   let pagefindPromise;
+  let loadAttempt = 0;
   let lastSearchId = 0;
 
   function normalizeResultUrl(url) {
@@ -209,10 +220,20 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   async function getPagefind() {
-    pagefindPromise ??= import(pagefindBundle).then((pagefind) => {
-      pagefind.init?.();
-      return pagefind;
-    });
+    // Browsers can cache failed module imports, so retries need a fresh URL.
+    const bundleUrl = loadAttempt
+      ? `${pagefindBundle}?retry=${loadAttempt}`
+      : pagefindBundle;
+    pagefindPromise ??= import(bundleUrl)
+      .then(async (pagefind) => {
+        await pagefind.init?.();
+        return pagefind;
+      })
+      .catch((error) => {
+        pagefindPromise = undefined;
+        ++loadAttempt;
+        throw error;
+      });
     return pagefindPromise;
   }
 
@@ -221,6 +242,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   }
 
   function closeResultsLayer(restoreFocus = true) {
+    ++lastSearchId;
     overlay.hidden = true;
     if (restoreFocus) {
       input.focus();
@@ -274,48 +296,67 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     }
 
     showResultsLayer();
-    status.textContent = searchLabels.loading;
-    const pagefind = await getPagefind();
-    const search = await pagefind.search(query, {
-      filters: { language },
-    });
-    const searchResults = await Promise.all(
-      search.results.slice(0, 8).map((result) => result.data()),
-    );
-
-    if (searchId !== lastSearchId) {
-      return;
+    retryButton.hidden = true;
+    clearResults(searchLabels.loading);
+    try {
+      const pagefind = await getPagefind();
+      const search = await pagefind.search(query, { filters: { language } });
+      const searchResults = await Promise.all(
+        search.results.slice(0, 8).map((result) => result.data()),
+      );
+      if (searchId !== lastSearchId) return;
+      if (searchResults.length === 0) {
+        clearResults(searchLabels.empty);
+        return;
+      }
+      status.textContent = searchLabels.found.replace(
+        "{count}",
+        searchResults.length,
+      );
+      renderResults(searchResults);
+    } catch {
+      if (searchId !== lastSearchId) return;
+      clearResults(searchLabels.error);
+      retryButton.hidden = false;
     }
-
-    if (searchResults.length === 0) {
-      clearResults(searchLabels.empty);
-      return;
-    }
-
-    status.textContent = "";
-    renderResults(searchResults);
   }
 
-  input.addEventListener("focus", () => {
-    getPagefind().catch(() => {
-      status.textContent = searchLabels.empty;
-    });
+  closeButton.addEventListener("click", () => closeResultsLayer());
+  retryButton.addEventListener("click", () => {
+    input.focus();
+    runSearch();
   });
-  closeButton.addEventListener("click", () => {
-    closeResultsLayer();
-  });
-  overlay.addEventListener("click", (event) => {
+  document.addEventListener("click", (event) => {
     if (
-      event.target instanceof Element &&
-      !event.target.closest(".search-panel")
+      !overlay.hidden &&
+      !overlay.contains(event.target) &&
+      !event.target.closest(".search-control")
     ) {
       closeResultsLayer(false);
     }
   });
-  input.addEventListener("input", () => {
-    runSearch().catch(() => {
-      clearResults(searchLabels.empty);
-    });
+  document.addEventListener("focusin", (event) => {
+    if (
+      !overlay.hidden &&
+      event.target !== input &&
+      !overlay.contains(event.target)
+    ) {
+      closeResultsLayer(false);
+    }
+  });
+  input.addEventListener("input", runSearch);
+  input.addEventListener("keydown", (event) => {
+    if (!overlay.hidden && event.key === "Tab" && !event.shiftKey) {
+      event.preventDefault();
+      closeButton.focus();
+    }
+    if (overlay.hidden && event.key === "Enter") runSearch();
+  });
+  closeButton.addEventListener("keydown", (event) => {
+    if (event.key === "Tab" && event.shiftKey) {
+      event.preventDefault();
+      input.focus();
+    }
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !overlay.hidden) {
@@ -581,9 +622,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     place-items: start center;
     padding: clamp(4.5rem, 10vh, 7rem) 1rem 1rem;
     background: rgba(37, 33, 28, 0.34);
+    pointer-events: none;
   }
 
   .search-panel {
+    pointer-events: auto;
+    box-sizing: border-box;
     width: min(680px, 100%);
     max-height: min(760px, calc(100vh - 5.5rem));
     overflow: auto;

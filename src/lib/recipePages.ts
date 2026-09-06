@@ -76,6 +76,9 @@ type LocalizedLabels = {
     button: string;
     close: string;
     empty: string;
+    error: string;
+    retry: string;
+    found: string;
     loading: string;
     placeholder: string;
     resultsLabel: string;
@@ -123,6 +126,9 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       button: "Search",
       close: "Close search",
       empty: "No recipes found",
+      error: "Search could not load. Please try again.",
+      retry: "Try again",
+      found: "Recipes found: {count}",
       loading: "Searching",
       placeholder: "Search",
       resultsLabel: "Search results",
@@ -185,6 +191,9 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       button: "חיפוש",
       close: "סגירת חיפוש",
       empty: "לא נמצאו מתכונים",
+      error: "לא ניתן לטעון את החיפוש. נסו שוב.",
+      retry: "נסו שוב",
+      found: "מתכונים שנמצאו: {count}",
       loading: "מחפש",
       placeholder: "חיפוש",
       resultsLabel: "תוצאות חיפוש",
