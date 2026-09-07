@@ -2,11 +2,16 @@
 // source tree, assembling landing page data from the catalog, and rendering a
 // recipe's Markdown body into site HTML. Everything here runs at build time and
 // touches the filesystem; shared labels and URLs live in ./site, published link
-// destinations in ./recipeLinks, and recipe metadata in ./recipeCatalog.
+// destinations in ./recipeLinks, and recipe metadata in ./recipeCatalog, which
+// this module hands the discovered recipes so the two can be checked against
+// each other.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
-import { getCatalogEntry, getRecipeMetadata } from "./recipeCatalog";
+import {
+  collectCatalogDiagnostics,
+  selectFeaturedRecipes,
+} from "./recipeCatalog";
 import { createSiteDestinationPlugin } from "./recipeLinks";
 import {
   isRecipeLanguage,
@@ -43,6 +48,10 @@ export type CategorySection = {
 
 const repoRoot = process.cwd();
 
+// The recipe set the catalog was last checked against, so a build that renders
+// hundreds of pages reports each disagreement once.
+let lastCheckedRecipes = "";
+
 // One renderer per language and base path: the destination plugin is fixed at
 // creation, and building a renderer loads a syntax highlighter.
 const markdownRenderers = new Map<
@@ -51,7 +60,7 @@ const markdownRenderers = new Map<
 >();
 
 export function listLocalizedRecipes(): LocalizedRecipe[] {
-  return languages.flatMap((language) => {
+  const recipes = languages.flatMap((language) => {
     const directory = path.join(repoRoot, language);
 
     return readdirSync(directory)
@@ -63,6 +72,47 @@ export function listLocalizedRecipes(): LocalizedRecipe[] {
         sourcePath: path.join(directory, file),
       }));
   });
+
+  reportCatalogDiagnostics(recipes);
+
+  return recipes;
+}
+
+// Discovery is where the catalog meets the recipe source tree, so it is where
+// the two are checked against each other: once per set of discovered recipes,
+// rather than once per generated page. Warnings are printed and the build goes
+// on; errors stop it, because they describe a page the site should not publish.
+function reportCatalogDiagnostics(recipes: LocalizedRecipe[]): void {
+  const checked = recipes
+    .map((recipe) => `${recipe.language}/${recipe.slug}`)
+    .join("\n");
+
+  if (checked === lastCheckedRecipes) {
+    return;
+  }
+
+  const diagnostics = collectCatalogDiagnostics(recipes);
+
+  for (const diagnostic of diagnostics) {
+    if (diagnostic.severity === "warning") {
+      console.warn(`[recipe catalog] ${diagnostic.message}`);
+    }
+  }
+
+  const errors = diagnostics.filter(
+    (diagnostic) => diagnostic.severity === "error",
+  );
+
+  if (errors.length > 0) {
+    throw new Error(
+      [
+        "Incomplete recipe catalog metadata:",
+        ...errors.map((error) => `  - ${error.message}`),
+      ].join("\n"),
+    );
+  }
+
+  lastCheckedRecipes = checked;
 }
 
 export function listRecipePairs(): string[] {
@@ -101,31 +151,19 @@ export function findLocalizedRecipe(
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   const labels = labelsByLanguage[language];
   const pairedSlugs = new Set(listRecipePairs());
-  const cards: RecipeCard[] = listLocalizedRecipes()
-    .filter((recipe) => recipe.language === language)
-    .filter((recipe) => pairedSlugs.has(recipe.slug))
-    .flatMap((recipe) => {
-      const entry = getCatalogEntry(recipe.slug);
-      const metadata = getRecipeMetadata(recipe);
-
-      if (!entry?.categoryId || entry.featuredOrder === undefined) {
-        return [];
-      }
-
-      return [
-        {
-          slug: recipe.slug,
-          title: metadata.title,
-          description: metadata.description,
-          href: sitePath(basePath, `${language}/${recipe.slug}/`),
-          categoryId: entry.categoryId,
-          markerIds: entry.markerIds,
-          image: metadata.image,
-          featuredOrder: entry.featuredOrder,
-        },
-      ];
-    })
-    .sort((a, b) => a.featuredOrder - b.featuredOrder);
+  const cards: RecipeCard[] = selectFeaturedRecipes(
+    language,
+    listLocalizedRecipes(),
+  ).map((recipe) => ({
+    slug: recipe.slug,
+    title: recipe.metadata.title,
+    description: recipe.metadata.description,
+    href: sitePath(basePath, `${language}/${recipe.slug}/`),
+    categoryId: recipe.categoryId,
+    markerIds: recipe.markerIds,
+    image: recipe.metadata.image,
+    featuredOrder: recipe.featuredOrder,
+  }));
 
   const categorySections: CategorySection[] = (
     Object.keys(labels.categoryLabels) as RecipeCategoryId[]

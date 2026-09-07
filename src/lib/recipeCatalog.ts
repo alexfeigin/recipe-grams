@@ -1,14 +1,17 @@
 // Recipe catalog: the metadata that does not belong in the readable Markdown
-// recipe body — category, markers, featured order, and localized titles,
-// descriptions, and images. Adding or editing a recipe's site metadata happens
-// here and nowhere else. This module reads no files and renders nothing.
+// recipe body — browsing intent, markers, and localized titles, descriptions,
+// and images. Adding or editing a recipe's site metadata happens here and
+// nowhere else. This module reads no files and renders nothing: the functions
+// that check the catalog against the recipe source tree are given the
+// discovered recipes by ./recipePages.
 import {
   labelsByLanguage,
+  languages,
   type RecipeCategoryId,
   type RecipeIdentity,
   type RecipeLanguage,
   type RecipeMarkerId,
-} from "./site";
+} from "./site.ts";
 
 export type LocalizedRecipeMetadata = {
   title: string;
@@ -17,15 +20,55 @@ export type LocalizedRecipeMetadata = {
   socialImage?: string;
 };
 
+// Where a published recipe belongs in generated browsing. A featured recipe
+// carries the category and order its card needs; an unlisted one records why it
+// is deliberately absent. There is no third state, so a forgotten category can
+// never read as a decision to leave a recipe off the landing page.
+export type FeaturedListing = {
+  intent: "featured";
+  categoryId: RecipeCategoryId;
+  featuredOrder: number;
+};
+
+export type UnlistedListing = {
+  intent: "unlisted";
+  reason: string;
+};
+
+export type RecipeListing = FeaturedListing | UnlistedListing;
+
 export type RecipeCatalogEntry = {
-  categoryId?: RecipeCategoryId;
+  listing: RecipeListing;
   markerIds: RecipeMarkerId[];
-  featuredOrder?: number;
   localizations: Partial<Record<RecipeLanguage, LocalizedRecipeMetadata>>;
 };
 
-const recipeCatalog: Record<string, RecipeCatalogEntry> = {
-  banana_bread: defineCatalogEntry("sweets", ["favorite"], 28, {
+export type RecipeCatalog = Record<string, RecipeCatalogEntry>;
+
+// A featured recipe of one language, ready for a landing page card.
+export type FeaturedRecipe = {
+  slug: string;
+  language: RecipeLanguage;
+  categoryId: RecipeCategoryId;
+  featuredOrder: number;
+  markerIds: RecipeMarkerId[];
+  metadata: LocalizedRecipeMetadata;
+};
+
+// What a catalog check found. An error means the site would publish something
+// wrong — a featured recipe whose card has no title or description — and fails
+// the build. A warning means the site is correct but a maintainer probably
+// wants to know: an uncataloged recipe, an orphan entry, a localization the
+// source tree does not have, or two cards competing for one position.
+export type CatalogDiagnostic = {
+  severity: "error" | "warning";
+  slug: string;
+  language?: RecipeLanguage;
+  message: string;
+};
+
+export const recipeCatalog: RecipeCatalog = {
+  banana_bread: featuredRecipe("sweets", ["favorite"], 28, {
     en: localizedMetadata(
       "Banana Bread",
       "A soft banana cake for using ripe bananas.",
@@ -37,7 +80,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "bananaBread1.jpg",
     ),
   }),
-  borscht: defineCatalogEntry("mains", [], 15, {
+  borscht: featuredRecipe("mains", [], 15, {
     en: localizedMetadata(
       "Borscht",
       "A comforting beet soup with a deep red broth.",
@@ -49,24 +92,19 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "borscht.jpg",
     ),
   }),
-  carrot_salad: defineCatalogEntry(
-    "salads_pickles",
-    ["favorite", "vegan"],
-    17,
-    {
-      en: localizedMetadata(
-        "Sweet and Sour Carrot Salad",
-        "Dina's bright carrot salad with a sweet-sour dressing.",
-        "carrot_salad.jpg",
-      ),
-      he: localizedMetadata(
-        "סלט גזר חמוץ מתוק",
-        "סלט הגזר של דינה עם רוטב חמוץ-מתוק.",
-        "carrot_salad.jpg",
-      ),
-    },
-  ),
-  chicken_meatballs: defineCatalogEntry("mains", ["favorite"], 12, {
+  carrot_salad: featuredRecipe("salads_pickles", ["favorite", "vegan"], 17, {
+    en: localizedMetadata(
+      "Sweet and Sour Carrot Salad",
+      "Dina's bright carrot salad with a sweet-sour dressing.",
+      "carrot_salad.jpg",
+    ),
+    he: localizedMetadata(
+      "סלט גזר חמוץ מתוק",
+      "סלט הגזר של דינה עם רוטב חמוץ-מתוק.",
+      "carrot_salad.jpg",
+    ),
+  }),
+  chicken_meatballs: featuredRecipe("mains", ["favorite"], 12, {
     en: localizedMetadata(
       "Quick Chicken Meatballs",
       "Sash's quick chicken meatballs for a simple family dinner.",
@@ -78,7 +116,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "meatballsc.jpeg",
     ),
   }),
-  chicken_soup: defineCatalogEntry("mains", ["favorite"], 14, {
+  chicken_soup: featuredRecipe("mains", ["favorite"], 14, {
     en: localizedMetadata(
       "Chicken and Vegetable Soup",
       "A homestyle chicken soup with vegetables.",
@@ -90,7 +128,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "chicken_soup.jpg",
     ),
   }),
-  choclatechip_vegan: defineCatalogEntry("sweets", ["vegan"], 22, {
+  choclatechip_vegan: featuredRecipe("sweets", ["vegan"], 22, {
     en: localizedMetadata(
       "Vegan Chocolate Chip Cookies",
       "Plant-based cookies with crisp edges and soft centers.",
@@ -102,7 +140,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "Veganchoc.jpeg",
     ),
   }),
-  chocolate_cake: defineCatalogEntry("sweets", [], 27, {
+  chocolate_cake: featuredRecipe("sweets", [], 27, {
     en: localizedMetadata(
       "Chocolate Cake",
       "A straightforward chocolate cake for celebrations.",
@@ -114,7 +152,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "chocake.jpg",
     ),
   }),
-  chocolatechip_cookies: defineCatalogEntry("sweets", ["favorite"], 20, {
+  chocolatechip_cookies: featuredRecipe("sweets", ["favorite"], 20, {
     en: localizedMetadata(
       "Chocolate Chip Cookies",
       "Classic chocolate chip cookies measured by weight.",
@@ -126,7 +164,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "chocookies.jpeg",
     ),
   }),
-  chouquettes: defineCatalogEntry("sweets", ["favorite"], 24, {
+  chouquettes: featuredRecipe("sweets", ["favorite"], 24, {
     en: localizedMetadata(
       "Chouquettes",
       "Light choux pastry puffs finished with pearl sugar.",
@@ -138,7 +176,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "chouquettes.jpeg",
     ),
   }),
-  coconut_almond_choclate_cookies: defineCatalogEntry("sweets", ["vegan"], 21, {
+  coconut_almond_choclate_cookies: featuredRecipe("sweets", ["vegan"], 21, {
     en: localizedMetadata(
       "Coconut Almond Chocolate Cookies",
       "Coconut and almond cookies with chocolate in a vegan dough.",
@@ -150,7 +188,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "almondcoconut.jpeg",
     ),
   }),
-  colslaw_vinaigrette: defineCatalogEntry("salads_pickles", ["vegan"], 19, {
+  colslaw_vinaigrette: featuredRecipe("salads_pickles", ["vegan"], 19, {
     en: localizedMetadata(
       "Coleslaw with Simple Vinaigrette",
       "Crisp coleslaw dressed with a simple vinaigrette.",
@@ -162,7 +200,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "coleslaw.jpg",
     ),
   }),
-  cookie_cutter_cookies: defineCatalogEntry("sweets", [], 23, {
+  cookie_cutter_cookies: featuredRecipe("sweets", [], 23, {
     en: localizedMetadata(
       "Cookie Cutter Butter Cookies",
       "Butter cookies built to hold clean cutter shapes.",
@@ -174,7 +212,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "cookiecutter.jpeg",
     ),
   }),
-  crackers: defineCatalogEntry("snacks", ["favorite", "vegan"], 32, {
+  crackers: featuredRecipe("snacks", ["favorite", "vegan"], 32, {
     en: localizedMetadata(
       "Seed and Nut Crackers",
       "Crunchy seed and nut crackers for snacking.",
@@ -186,7 +224,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "crackers.jpeg",
     ),
   }),
-  crepe: defineCatalogEntry("sweets", [], 31, {
+  crepe: featuredRecipe("sweets", [], 31, {
     en: localizedMetadata(
       "Crepe",
       "Thin crepes for sweet or savory fillings.",
@@ -198,7 +236,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "crepe.jpg",
     ),
   }),
-  frozen_banana: defineCatalogEntry("sweets", ["favorite", "vegan"], 29, {
+  frozen_banana: featuredRecipe("sweets", ["favorite", "vegan"], 29, {
     en: localizedMetadata(
       "Banana Chocolate Popsicles",
       "Frozen banana and chocolate treats on a stick.",
@@ -210,7 +248,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "frozen_banana.jpeg",
     ),
   }),
-  gluten_free_chocolate_banana_brownies: defineCatalogEntry("sweets", [], 30, {
+  gluten_free_chocolate_banana_brownies: featuredRecipe("sweets", [], 30, {
     en: localizedMetadata(
       "Gluten-Free Chocolate Banana Brownies",
       "Chocolate banana brownies without gluten.",
@@ -220,7 +258,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "בראוניז בננה ושוקולד ללא גלוטן.",
     ),
   }),
-  grill_rub: defineCatalogEntry("basics", ["favorite", "vegan"], 1, {
+  grill_rub: featuredRecipe("basics", ["favorite", "vegan"], 1, {
     en: localizedMetadata(
       "Grill Rub",
       "A vegan spice blend for seasoning grilled food.",
@@ -230,7 +268,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "תערובת תבלינים טבעונית לגריל.",
     ),
   }),
-  ground_beef_on_sweet_potato: defineCatalogEntry("mains", [], 16.5, {
+  ground_beef_on_sweet_potato: featuredRecipe("mains", [], 16.5, {
     en: localizedMetadata(
       "Ground Beef over Roasted Sweet Potato",
       "Roasted sweet potato topped with browned beef, caramelized onions, tahini, silan, and toasted nuts.",
@@ -242,7 +280,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "ground_beef_on_sweet_potato.jpg",
     ),
   }),
-  grilled_chicken_thighs: defineCatalogEntry("mains", [], 9, {
+  grilled_chicken_thighs: featuredRecipe("mains", [], 9, {
     en: localizedMetadata(
       "Grilled Chicken Thighs",
       "High-heat chicken thighs with repeatable seasoning and juicy results.",
@@ -254,7 +292,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "grilledchicken.jpeg",
     ),
   }),
-  honey_sugar_cookies: defineCatalogEntry("sweets", [], 28.5, {
+  honey_sugar_cookies: featuredRecipe("sweets", [], 28.5, {
     en: localizedMetadata(
       "Honey Sugar Cookies",
       "Tender sugar cookies sweetened with honey.",
@@ -266,7 +304,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "honeycookies.jpeg",
     ),
   }),
-  leopard_cookies: defineCatalogEntry("sweets", [], 23.5, {
+  leopard_cookies: featuredRecipe("sweets", [], 23.5, {
     en: localizedMetadata(
       "Leopard Print Cookies",
       "Patterned cookies with a playful leopard look.",
@@ -278,7 +316,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "leopardcookie.jpeg",
     ),
   }),
-  pankcakebatter: defineCatalogEntry("sweets", [], 26, {
+  pankcakebatter: featuredRecipe("sweets", [], 26, {
     en: localizedMetadata(
       "Pancake Batter",
       "A reliable gram-based pancake batter.",
@@ -290,7 +328,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "pancake1.jpeg",
     ),
   }),
-  paodequeijo: defineCatalogEntry("doughs_starches", [], 3, {
+  paodequeijo: featuredRecipe("doughs_starches", [], 3, {
     en: localizedMetadata(
       "Pao de Queijo",
       "Brazilian cheese bread with a chewy center.",
@@ -302,31 +340,30 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "paude.jpeg",
     ),
   }),
-  paprikesh_pasta: defineCatalogEntry(
-    "doughs_starches",
-    ["favorite", "vegan"],
-    7,
+  paprikesh_pasta: featuredRecipe("doughs_starches", ["favorite", "vegan"], 7, {
+    en: localizedMetadata(
+      "Pasta Paprikash",
+      "A vegan paprika pasta for a quick savory meal.",
+      "paprikesh.jpeg",
+    ),
+    he: localizedMetadata(
+      "פסטה פפריקש",
+      "פסטה פפריקה טבעונית לארוחה מהירה.",
+      "paprikesh.jpeg",
+    ),
+  }),
+  pastry_cream: unlistedRecipe(
+    "Component recipe that filled pastries build on, not a dish to browse to.",
+    [],
     {
       en: localizedMetadata(
-        "Pasta Paprikash",
-        "A vegan paprika pasta for a quick savory meal.",
-        "paprikesh.jpeg",
+        "Pastry Cream",
+        "A smooth pastry cream helper recipe.",
       ),
-      he: localizedMetadata(
-        "פסטה פפריקש",
-        "פסטה פפריקה טבעונית לארוחה מהירה.",
-        "paprikesh.jpeg",
-      ),
+      he: localizedMetadata("קרם פטיסייר", "מתכון עזר לקרם פטיסייר חלק."),
     },
   ),
-  pastry_cream: defineCatalogEntry(undefined, [], undefined, {
-    en: localizedMetadata(
-      "Pastry Cream",
-      "A smooth pastry cream helper recipe.",
-    ),
-    he: localizedMetadata("קרם פטיסייר", "מתכון עזר לקרם פטיסייר חלק."),
-  }),
-  pateachoux: defineCatalogEntry("sweets", [], 25, {
+  pateachoux: featuredRecipe("sweets", [], 25, {
     en: localizedMetadata(
       "Pate a Choux",
       "Classic choux pastry dough for puffs and related pastries.",
@@ -338,7 +375,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "peta.jpeg",
     ),
   }),
-  pilmeni_dough: defineCatalogEntry("doughs_starches", [], 8, {
+  pilmeni_dough: featuredRecipe("doughs_starches", [], 8, {
     en: localizedMetadata(
       "Pelmeni Dough",
       "A sturdy dough for rolling and filling pelmeni.",
@@ -350,7 +387,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "pilmeni1.jpg",
     ),
   }),
-  pizza_dough: defineCatalogEntry("doughs_starches", [], 4, {
+  pizza_dough: featuredRecipe("doughs_starches", [], 4, {
     en: localizedMetadata(
       "Pizza Dough Recipe",
       "A gram-based overnight poolish dough for two pizzas.",
@@ -362,7 +399,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "pizza.jpg",
     ),
   }),
-  purple_cabbage_salad: defineCatalogEntry("salads_pickles", ["vegan"], 16, {
+  purple_cabbage_salad: featuredRecipe("salads_pickles", ["vegan"], 16, {
     en: localizedMetadata(
       "Purple Cabbage Salad",
       "A crunchy purple cabbage salad with soy dressing.",
@@ -374,7 +411,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "purple_cabbage_salad.jpg",
     ),
   }),
-  quick_pickle_carrot: defineCatalogEntry("salads_pickles", ["vegan"], 18, {
+  quick_pickle_carrot: featuredRecipe("salads_pickles", ["vegan"], 18, {
     en: localizedMetadata(
       "Quick Vinegar-Pickled Carrots",
       "Fast vinegar-pickled carrots for a bright side.",
@@ -384,7 +421,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "גזר כבוש מהיר בחומץ כתוספת מרעננת.",
     ),
   }),
-  quinoa: defineCatalogEntry("doughs_starches", ["vegan"], 1, {
+  quinoa: featuredRecipe("doughs_starches", ["vegan"], 1, {
     en: localizedMetadata(
       "Delicious Quinoa with Sweet Potato",
       "A simple quinoa and sweet potato base measured in grams.",
@@ -396,7 +433,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "quinoa.jpg",
     ),
   }),
-  rice_pilaf: defineCatalogEntry("doughs_starches", [], 2, {
+  rice_pilaf: featuredRecipe("doughs_starches", [], 2, {
     en: localizedMetadata(
       "Rice Pilaf",
       "A reliable rice pilaf side with clear weights.",
@@ -406,11 +443,11 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "תוספת אורז פילאף אמינה עם כמויות ברורות.",
     ),
   }),
-  salt: defineCatalogEntry(undefined, [], undefined, {
+  salt: unlistedRecipe("Seasoning reference note rather than a recipe.", [], {
     en: localizedMetadata("Salt", "A small helper note for salt measurements."),
     he: localizedMetadata("מלח", "הערת עזר קצרה למדידות מלח."),
   }),
-  shnitzel: defineCatalogEntry("mains", [], 13, {
+  shnitzel: featuredRecipe("mains", [], 13, {
     en: localizedMetadata(
       "Simple Oven-Baked Schnitzel",
       "Oven-baked schnitzel using the slurry method.",
@@ -422,14 +459,18 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "shnitzel.jpg",
     ),
   }),
-  simple_vinaigrette: defineCatalogEntry(undefined, ["vegan"], undefined, {
-    en: localizedMetadata(
-      "Simple Vinaigrette",
-      "A basic vinaigrette helper recipe.",
-    ),
-    he: localizedMetadata("ויניגרט פשוט", "מתכון עזר לויניגרט בסיסי."),
-  }),
-  sweet_potato_bake: defineCatalogEntry("mains", [], 16, {
+  simple_vinaigrette: unlistedRecipe(
+    "Dressing helper the salads that use it link to.",
+    ["vegan"],
+    {
+      en: localizedMetadata(
+        "Simple Vinaigrette",
+        "A basic vinaigrette helper recipe.",
+      ),
+      he: localizedMetadata("ויניגרט פשוט", "מתכון עזר לויניגרט בסיסי."),
+    },
+  ),
+  sweet_potato_bake: featuredRecipe("mains", [], 16, {
     en: localizedMetadata(
       "Sweet Potato Bake",
       "A savory sweet potato and onion bake with eggs and warm spices.",
@@ -441,7 +482,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "sweet_potato_bake.jpg",
     ),
   }),
-  super_easy_banana_cake: defineCatalogEntry("sweets", [], 28.25, {
+  super_easy_banana_cake: featuredRecipe("sweets", [], 28.25, {
     en: localizedMetadata(
       "Super-Easy Banana Cake",
       "A quick, tender blender banana cake with dark chocolate.",
@@ -451,7 +492,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "עוגת בננה מהירה ורכה שמכינים בבלנדר עם שוקולד מריר.",
     ),
   }),
-  teriyaki_salmon_air_fryer: defineCatalogEntry("mains", [], 10, {
+  teriyaki_salmon_air_fryer: featuredRecipe("mains", [], 10, {
     en: localizedMetadata(
       "Air Fryer Teriyaki Salmon",
       "Teriyaki salmon cooked quickly in the air fryer.",
@@ -463,7 +504,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "teriyaki_salmon_air_fryer.jpg",
     ),
   }),
-  tortillas: defineCatalogEntry("doughs_starches", ["vegan"], 6, {
+  tortillas: featuredRecipe("doughs_starches", ["vegan"], 6, {
     en: localizedMetadata(
       "Tortillas",
       "Flexible tortillas measured by weight.",
@@ -475,7 +516,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "tortila.jpeg",
     ),
   }),
-  vanila_cupcakes: defineCatalogEntry("sweets", ["favorite"], 24.5, {
+  vanila_cupcakes: featuredRecipe("sweets", ["favorite"], 24.5, {
     en: localizedMetadata(
       "Vanilla Cupcakes",
       "A white-cake style vanilla cupcake recipe.",
@@ -487,7 +528,7 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
       "cupcake.jpg",
     ),
   }),
-  yozhiki: defineCatalogEntry("mains", [], 11, {
+  yozhiki: featuredRecipe("mains", [], 11, {
     en: localizedMetadata(
       "Yozhiki",
       "Rice-studded meatballs in a simple sauce.",
@@ -496,19 +537,18 @@ const recipeCatalog: Record<string, RecipeCatalogEntry> = {
   }),
 };
 
-const warnedMissingMetadata = new Set<string>();
-
-export function getCatalogEntry(slug: string): RecipeCatalogEntry | undefined {
-  return recipeCatalog[slug];
+export function getCatalogEntry(
+  slug: string,
+  catalog: RecipeCatalog = recipeCatalog,
+): RecipeCatalogEntry | undefined {
+  return catalog[slug];
 }
 
 export function getRecipeMetadata(
   recipe: RecipeIdentity,
+  catalog: RecipeCatalog = recipeCatalog,
 ): LocalizedRecipeMetadata {
-  const metadata = recipeCatalog[recipe.slug]?.localizations[recipe.language];
-  const entry = recipeCatalog[recipe.slug];
-
-  warnForIncompleteMetadata(recipe, entry, metadata);
+  const metadata = catalog[recipe.slug]?.localizations[recipe.language];
 
   if (metadata) {
     return metadata;
@@ -521,28 +561,233 @@ export function getRecipeMetadata(
   };
 }
 
-export function getRecipeSearchMetadata(recipe: RecipeIdentity) {
+export function getRecipeSearchMetadata(
+  recipe: RecipeIdentity,
+  catalog: RecipeCatalog = recipeCatalog,
+) {
   const labels = labelsByLanguage[recipe.language];
-  const entry = recipeCatalog[recipe.slug];
+  const entry = catalog[recipe.slug];
+  const listing = entry?.listing;
 
   return {
-    category: entry?.categoryId ? labels.categoryLabels[entry.categoryId] : "",
+    category:
+      listing?.intent === "featured"
+        ? labels.categoryLabels[listing.categoryId]
+        : "",
     markers: entry?.markerIds
       .map((markerId) => labels.markerLabels[markerId])
       .join(", "),
   };
 }
 
-function defineCatalogEntry(
-  categoryId: RecipeCategoryId | undefined,
+// The cards one localized landing page shows, in featured order. A recipe earns
+// a card when the catalog features it, the recipe exists in every published
+// language, and this language has the title and description a card needs.
+export function selectFeaturedRecipes(
+  language: RecipeLanguage,
+  recipes: readonly RecipeIdentity[],
+  catalog: RecipeCatalog = recipeCatalog,
+): FeaturedRecipe[] {
+  const sourceLanguages = groupSourceLanguages(recipes);
+
+  return Array.from(sourceLanguages)
+    .filter(([, availableLanguages]) =>
+      languages.every((candidate) => availableLanguages.has(candidate)),
+    )
+    .flatMap(([slug]) => {
+      const entry = catalog[slug];
+      const metadata = entry?.localizations[language];
+
+      if (
+        entry?.listing.intent !== "featured" ||
+        !metadata?.title ||
+        !metadata.description
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          slug,
+          language,
+          categoryId: entry.listing.categoryId,
+          featuredOrder: entry.listing.featuredOrder,
+          markerIds: entry.markerIds,
+          metadata,
+        },
+      ];
+    })
+    .sort((first, second) => first.featuredOrder - second.featuredOrder);
+}
+
+// Everything the catalog and the recipe source tree can disagree about, checked
+// in one pass over the discovered recipes.
+export function collectCatalogDiagnostics(
+  recipes: readonly RecipeIdentity[],
+  catalog: RecipeCatalog = recipeCatalog,
+): CatalogDiagnostic[] {
+  const sourceLanguages = groupSourceLanguages(recipes);
+  const diagnostics: CatalogDiagnostic[] = [];
+
+  for (const [slug, availableLanguages] of sourceLanguages) {
+    const entry = catalog[slug];
+
+    if (!entry) {
+      diagnostics.push({
+        severity: "warning",
+        slug,
+        message: `${slug} has no catalog entry: its pages publish and stay searchable, but it cannot appear in browsing. Add a featuredRecipe or unlistedRecipe entry.`,
+      });
+      continue;
+    }
+
+    for (const language of languages) {
+      if (!availableLanguages.has(language)) {
+        continue;
+      }
+
+      const missing = missingMetadataFields(entry.localizations[language]);
+      if (missing.length === 0) {
+        continue;
+      }
+
+      diagnostics.push({
+        severity: entry.listing.intent === "featured" ? "error" : "warning",
+        slug,
+        language,
+        message:
+          entry.listing.intent === "featured"
+            ? `${language}/${slug}.MD is featured but its catalog entry has no ${missing.join(" or ")}, so the landing page would drop its card.`
+            : `${language}/${slug}.MD is unlisted and its catalog entry has no ${missing.join(" or ")}, so its page falls back to the generic title and description.`,
+      });
+    }
+
+    for (const language of languages) {
+      if (availableLanguages.has(language) || !entry.localizations[language]) {
+        continue;
+      }
+
+      diagnostics.push({
+        severity: "warning",
+        slug,
+        language,
+        message: `${slug} has ${language} catalog metadata, but ${language}/${slug}.MD does not exist.`,
+      });
+    }
+
+    if (
+      entry.listing.intent === "featured" &&
+      !languages.every((language) => availableLanguages.has(language))
+    ) {
+      diagnostics.push({
+        severity: "warning",
+        slug,
+        message: `${slug} is featured but is not a complete Recipe Pair, and landing pages list only recipes available in every language.`,
+      });
+    }
+  }
+
+  for (const slug of Object.keys(catalog)) {
+    if (sourceLanguages.has(slug)) {
+      continue;
+    }
+
+    diagnostics.push({
+      severity: "warning",
+      slug,
+      message: `${slug} is an orphan catalog entry: no localized Markdown recipe has that slug.`,
+    });
+  }
+
+  return [...diagnostics, ...duplicateFeaturedOrders(catalog)];
+}
+
+function groupSourceLanguages(
+  recipes: readonly RecipeIdentity[],
+): Map<string, Set<RecipeLanguage>> {
+  const sourceLanguages = new Map<string, Set<RecipeLanguage>>();
+
+  for (const recipe of [...recipes].sort((first, second) =>
+    first.slug.localeCompare(second.slug),
+  )) {
+    const availableLanguages =
+      sourceLanguages.get(recipe.slug) ?? new Set<RecipeLanguage>();
+    availableLanguages.add(recipe.language);
+    sourceLanguages.set(recipe.slug, availableLanguages);
+  }
+
+  return sourceLanguages;
+}
+
+function missingMetadataFields(
+  metadata: LocalizedRecipeMetadata | undefined,
+): string[] {
+  const missing: string[] = [];
+
+  if (!metadata?.title) {
+    missing.push("title");
+  }
+
+  if (!metadata?.description) {
+    missing.push("description");
+  }
+
+  return missing;
+}
+
+// Two cards with the same order inside one category leave their sequence to
+// chance, which is worth reporting. The same order in different categories is
+// fine: each category sorts on its own.
+function duplicateFeaturedOrders(catalog: RecipeCatalog): CatalogDiagnostic[] {
+  const slugsByPosition = new Map<string, string[]>();
+
+  for (const [slug, entry] of Object.entries(catalog)) {
+    if (entry.listing.intent !== "featured") {
+      continue;
+    }
+
+    const position = `${entry.listing.categoryId}\n${entry.listing.featuredOrder}`;
+    slugsByPosition.set(position, [
+      ...(slugsByPosition.get(position) ?? []),
+      slug,
+    ]);
+  }
+
+  return Array.from(slugsByPosition)
+    .filter(([, slugs]) => slugs.length > 1)
+    .map(([position, slugs]) => {
+      const [categoryId, featuredOrder] = position.split("\n");
+      return {
+        severity: "warning" as const,
+        slug: slugs[0]!,
+        message: `${slugs.join(", ")} share featured order ${featuredOrder} in ${categoryId}, so their card sequence is undefined.`,
+      };
+    });
+}
+
+function featuredRecipe(
+  categoryId: RecipeCategoryId,
   markerIds: RecipeMarkerId[],
-  featuredOrder: number | undefined,
+  featuredOrder: number,
   localizations: Partial<Record<RecipeLanguage, LocalizedRecipeMetadata>>,
 ): RecipeCatalogEntry {
   return {
-    categoryId,
+    listing: { intent: "featured", categoryId, featuredOrder },
     markerIds,
-    featuredOrder,
+    localizations,
+  };
+}
+
+// A published recipe kept off the landing page on purpose. The reason is for
+// the next maintainer: it says the omission was a decision.
+function unlistedRecipe(
+  reason: string,
+  markerIds: RecipeMarkerId[],
+  localizations: Partial<Record<RecipeLanguage, LocalizedRecipeMetadata>>,
+): RecipeCatalogEntry {
+  return {
+    listing: { intent: "unlisted", reason },
+    markerIds,
     localizations,
   };
 }
@@ -558,46 +803,4 @@ function localizedMetadata(
     image,
     socialImage: image,
   };
-}
-
-function warnForIncompleteMetadata(
-  recipe: RecipeIdentity,
-  entry: RecipeCatalogEntry | undefined,
-  metadata: LocalizedRecipeMetadata | undefined,
-) {
-  const missing: string[] = [];
-
-  if (!entry) {
-    missing.push("catalog entry");
-  }
-
-  if (!entry?.categoryId) {
-    missing.push("category");
-  }
-
-  if (entry?.categoryId && entry.featuredOrder === undefined) {
-    missing.push("featured order");
-  }
-
-  if (!metadata?.title) {
-    missing.push("localized title");
-  }
-
-  if (!metadata?.description) {
-    missing.push("localized description");
-  }
-
-  if (missing.length === 0) {
-    return;
-  }
-
-  const warningKey = `${recipe.language}/${recipe.slug}`;
-  if (warnedMissingMetadata.has(warningKey)) {
-    return;
-  }
-
-  warnedMissingMetadata.add(warningKey);
-  console.warn(
-    `[recipe metadata] Missing ${missing.join(", ")} for ${warningKey}.MD`,
-  );
 }

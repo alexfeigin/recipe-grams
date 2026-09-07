@@ -10,9 +10,10 @@ Work in the user's language and ask a follow-up only when a missing detail block
 ## Source Model
 
 - `en/*.MD` and `he/*.MD` own ingredients, method, notes, and body images. Paired localizations share a snake-style basename and `.MD` extension.
-- `src/lib/recipeCatalog.ts` owns localized titles and descriptions, category placement, featured order, favorite and vegan markers, card images, social images, and search metadata. Shared interface labels live in `src/lib/site.ts`, and `src/lib/recipePages.ts` only discovers and renders recipes at build time.
+- `src/lib/recipeCatalog.ts` owns browsing intent, localized titles and descriptions, favorite and vegan markers, card images, social images, and search metadata. Every entry is either `featuredRecipe(category, markers, order, localizations)` or `unlistedRecipe(reason, markers, localizations)`; there is no way to leave the choice open. Shared interface labels live in `src/lib/site.ts`, and `src/lib/recipePages.ts` only discovers and renders recipes at build time.
 - `index.MD` owns the legacy GitHub-readable index. The generated landing page reads the catalog, not this file.
 - Every localized Markdown file generates a site page and can appear in search even when it is not featured.
+- A recipe without a catalog entry publishes and stays searchable, and the build warns that it cannot appear in browsing. A featured entry missing a localized title or description fails the build, because a card would go missing.
 
 Keep site metadata in the catalog; recipe Markdown has no frontmatter.
 
@@ -25,7 +26,7 @@ Keep site metadata in the catalog; recipe Markdown has no frontmatter.
 5. Put every new site-ready image in `images/` with a clear filename. Make a web-ready copy large enough for recipe pages, cards, and social previews while resizing or compressing oversized originals. Every file in `images/` is published, so keep an existing image that nothing references rather than pruning it; removal needs evidence, not an empty search.
 6. Link useful body images from both localizations as `../images/file-name.ext`, at the bottom after the recipe text unless the surrounding recipe establishes a more specific layout. Confirm every link resolves to a real file.
 7. Promote a card or social image explicitly by passing only its filename as the third argument to each localized `localizedMetadata(...)` call. A Markdown body image does not promote itself.
-8. For a new published recipe, add a complete `recipeCatalog` entry and a row in the most suitable `index.MD` category with both language links. For edits, update every owner affected by the changed title, description, category, featured order, marker, image, or localization. When adding one localization to an existing slug, ensure its paired language and catalog localization exist so the generated language switch has a target.
+8. For a new published recipe, add a complete `recipeCatalog` entry and a row in the most suitable `index.MD` category with both language links. Use `featuredRecipe` with a category and an order unless the recipe is a helper the user does not want on the landing page; then use `unlistedRecipe` and write the reason for the next maintainer. Give featured recipes an order no other recipe in that category uses. For edits, update every owner affected by the changed title, description, category, featured order, marker, image, or localization. When adding one localization to an existing slug, ensure its paired language and catalog localization exist so the generated language switch has a target.
 9. Apply `vegan` / `🅥` only when the recipe is vegan. Apply `favorite` / `★` only when the user calls it a favorite.
 
 Unless the user explicitly excludes publication, finish a new recipe through `$recipe-grams-publishing`. Completion requires usable paired localizations, synchronized owned metadata and index entries, valid image paths, and consistent markers.

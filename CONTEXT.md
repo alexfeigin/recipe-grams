@@ -24,6 +24,10 @@ _Avoid_: Blog post, article
 A published recipe that appears in primary navigation, category browsing, or curated index surfaces.
 _Avoid_: Published recipe, indexed recipe
 
+**Unlisted Recipe**:
+A published recipe the catalog deliberately keeps out of landing page browsing, recorded with the reason for the decision.
+_Avoid_: Uncategorized recipe, hidden recipe, missing metadata
+
 **Recipe Index**:
 The navigable collection view that helps readers browse published recipes by language, category, and markers.
 _Avoid_: Menu, table of contents
@@ -69,7 +73,7 @@ The first Astro site version that publishes static localized recipe pages, local
 _Avoid_: Final site, full SEO implementation
 
 **Metadata Warning**:
-A build-time warning that a published recipe page exists without complete catalog metadata.
+A build-time warning that the catalog and the recipe source tree disagree in a way the reader never sees, such as a recipe with no catalog entry or a catalog entry with no recipe. The build continues. A featured recipe missing a localized title or description is an error instead, and stops the build.
 _Avoid_: Build failure, inferred metadata
 
 **Social Image**:

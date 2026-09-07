@@ -73,6 +73,13 @@ Screenshots, failure traces and test output live under the ignored
 [`docs/verification/`](docs/verification/README.md) is preserved and never
 overwritten by a run. Verification does not format or edit tracked files.
 
+`npm run test:catalog-intent` is the focused check for which recipes earn a
+landing page card and what the build reports when the catalog and the recipe
+files disagree. It runs small fixture catalogs through the real rules and needs
+no build. Run it while editing `src/lib/recipeCatalog.ts`, and see
+[ADR 0030](docs/adr/0030-model-featured-and-unlisted-recipes-explicitly.md) for
+the featured-versus-unlisted choice and the warning-versus-error policy.
+
 `npm run test:recipe-links` is the focused regression for the links and images
 in generated recipe pages. It renders Markdown fixtures through the real
 transformation and needs no build, preview server, browser, or `SITE_BASE_URL`,
