@@ -1,4 +1,8 @@
 ---
+// Landing page for one language: a browse header over the catalog's category
+// sections. Every card, label, and section here comes from getLandingPageData,
+// so the catalog in src/lib/recipePages.ts is the only place to change what
+// this page lists or how the sections are ordered.
 import FaviconLinks from "./FaviconLinks.astro";
 import SiteHeader from "./SiteHeader.astro";
 import SocialMeta from "./SocialMeta.astro";
@@ -48,14 +52,6 @@ const navItems = data.categorySections.map((section) => ({
     <title>{data.labels.pageTitle}</title>
   </head>
   <body>
-    <!--
-      THESIS: Recipe-Grams opens as a real recipe index, refusing a blog hero or marketing pitch.
-      OWN-WORLD: warm kitchen paper, tomato and olive accents, steel rules, compact photo-led recipe cards.
-      STORY: readers can browse localized categories, recognize recipes, switch language, and open generated pages.
-      FIRST VIEWPORT: shared navbar and language switch sit above a dense browse header and the first real category section.
-      FORM: issue #6 localized catalog browse surface; seed key: ticket-6-real-catalog.
-      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
-    -->
     <SiteHeader
       language={data.language}
       brandLine={data.labels.brandLine}

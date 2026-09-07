@@ -47,7 +47,6 @@ const locale = recipe.language === "he" ? "he_IL" : "en_US";
 const alternateLanguage = recipe.language === "he" ? "en" : "he";
 const alternateRecipe = findLocalizedRecipe(alternateLanguage, recipe.slug);
 const labels = labelsByLanguage[recipe.language];
-const homeLabel = recipe.language === "he" ? "עמוד הבית" : "Home";
 const homeHref =
   recipe.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
 const languageHref = alternateRecipe
@@ -55,7 +54,7 @@ const languageHref = alternateRecipe
   : alternateLanguage === "he"
     ? sitePath(basePath, "he/")
     : sitePath(basePath, "");
-const navItems = [{ label: homeLabel, href: homeHref }];
+const navItems = [{ label: labels.home, href: homeHref }];
 ---
 
 <html lang={recipe.language} dir={direction}>
@@ -151,10 +150,6 @@ const navItems = [{ label: homeLabel, href: homeHref }];
       #efe7d9 100%
     );
     color: var(--ink);
-  }
-
-  a {
-    color: var(--tomato);
   }
 
   main {

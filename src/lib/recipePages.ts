@@ -58,8 +58,6 @@ type LocalizedLabels = {
   pageTitle: string;
   pageDescription: string;
   home: string;
-  languageSwitch: string;
-  markdownSource: string;
   accessibility: {
     backToTop: string;
     browseSummary: string;
@@ -70,10 +68,8 @@ type LocalizedLabels = {
   };
   nav: {
     categories: string;
-    sourceIndex: string;
   };
   search: {
-    button: string;
     close: string;
     empty: string;
     error: string;
@@ -83,7 +79,6 @@ type LocalizedLabels = {
     placeholder: string;
     resultsLabel: string;
     title: string;
-    waiting: string;
   };
   hero: {
     title: string;
@@ -108,8 +103,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     pageTitle: "Recipe-Grams",
     pageDescription: "Recipe-Grams is a gram-based family recipe collection.",
     home: "Home",
-    languageSwitch: "עברית",
-    markdownSource: "Markdown Source",
     accessibility: {
       backToTop: "Back to top",
       browseSummary: "Browse summary",
@@ -120,10 +113,8 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     },
     nav: {
       categories: "Categories",
-      sourceIndex: "Legacy Index",
     },
     search: {
-      button: "Search",
       close: "Close search",
       empty: "No recipes found",
       error: "Search could not load. Please try again.",
@@ -133,7 +124,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       placeholder: "Search",
       resultsLabel: "Search results",
       title: "Search recipes",
-      waiting: "Type at least 2 characters",
     },
     hero: {
       title: "Recipe-Grams",
@@ -173,8 +163,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     pageTitle: "Recipe-Grams",
     pageDescription: "Recipe-Grams הוא אוסף מתכונים משפחתיים המבוסס על גרמים.",
     home: "עמוד הבית",
-    languageSwitch: "English",
-    markdownSource: "מקור Markdown",
     accessibility: {
       backToTop: "חזרה למעלה",
       browseSummary: "סיכום עיון",
@@ -185,10 +173,8 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
     },
     nav: {
       categories: "קטגוריות",
-      sourceIndex: "אינדקס ישן",
     },
     search: {
-      button: "חיפוש",
       close: "סגירת חיפוש",
       empty: "לא נמצאו מתכונים",
       error: "לא ניתן לטעון את החיפוש. נסו שוב.",
@@ -198,7 +184,6 @@ export const labelsByLanguage: Record<RecipeLanguage, LocalizedLabels> = {
       placeholder: "חיפוש",
       resultsLabel: "תוצאות חיפוש",
       title: "חיפוש מתכונים",
-      waiting: "הקלידו לפחות 2 תווים",
     },
     hero: {
       title: "Recipe-Grams",
@@ -792,7 +777,7 @@ export function getRecipeSearchMetadata(recipe: LocalizedRecipe) {
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   const labels = labelsByLanguage[language];
   const pairedSlugs = new Set(listRecipePairs());
-  const cards = listLocalizedRecipes()
+  const cards: RecipeCard[] = listLocalizedRecipes()
     .filter((recipe) => recipe.language === language)
     .filter((recipe) => pairedSlugs.has(recipe.slug))
     .flatMap((recipe) => {
@@ -818,7 +803,7 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     })
     .sort((a, b) => a.featuredOrder - b.featuredOrder);
 
-  const categorySections = (
+  const categorySections: CategorySection[] = (
     Object.keys(labels.categoryLabels) as RecipeCategoryId[]
   )
     .map((categoryId) => ({
@@ -833,11 +818,8 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     labels,
     direction: language === "he" ? "rtl" : "ltr",
     language,
-    alternateLanguage: language === "he" ? "en" : "he",
     alternateHref:
       language === "he" ? sitePath(basePath, "") : sitePath(basePath, "he/"),
-    sourceIndexHref:
-      "https://github.com/alexfeigin/recipe-grams/blob/astro-recipe-blog/index.MD",
     recipePairCount: pairedSlugs.size,
     categoryCount: categorySections.length,
     categorySections,

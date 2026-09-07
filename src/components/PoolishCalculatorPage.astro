@@ -1,4 +1,9 @@
 ---
+// Poolish calculator page for one language: a form whose weights are computed
+// in the browser by calculatePoolish in src/lib/poolishCalculator.ts, the
+// TypeScript port of poolish_calc.sh. The page is noindex and unlinked from
+// navigation, and all of its copy lives in poolishCalculatorLabels so the two
+// languages stay in step.
 import FaviconLinks from "./FaviconLinks.astro";
 import SiteHeader from "./SiteHeader.astro";
 import SocialMeta from "./SocialMeta.astro";
@@ -55,14 +60,6 @@ const zeroGrams = `0${text.gramUnit}`;
     <title>{text.pageTitle} | Recipe-Grams</title>
   </head>
   <body>
-    <!--
-      THESIS: Poolish opens as a working kitchen calculator, refusing a generic recipe article or promotional tool page.
-      OWN-WORLD: warm kitchen paper, tomato action states, olive mode controls, steel table rules, compact measurement panels.
-      STORY: cooks switch between the generic dough formula and the house pizza preset, adjust grams, and copy phase weights.
-      FIRST VIEWPORT: Recipe-Grams header sits above a focused calculator with controls on the left and live poolish/final dough results on the right.
-      FORM: hidden operate surface for the repo poolish shell logic; seed key: poolish-calc-existing-world.
-      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
-    -->
     <SiteHeader
       language={language}
       brandLine={text.brandLine}
@@ -535,10 +532,6 @@ const zeroGrams = `0${text.gramUnit}`;
     color: var(--ink);
   }
 
-  a {
-    color: var(--tomato);
-  }
-
   button,
   input {
     font: inherit;
@@ -859,7 +852,6 @@ const zeroGrams = `0${text.gramUnit}`;
     }
 
     .tool-intro {
-      gap: 1rem;
       padding-top: 1rem;
     }
   }
