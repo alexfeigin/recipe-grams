@@ -32,9 +32,11 @@ Linux machines may also need `npx playwright install-deps chromium`.
 
 Where things live: recipe text in `en/` and `he/`, images in `images/`, site
 metadata in `src/lib/recipeCatalog.ts`, shared interface labels in
-`src/lib/site.ts`, and the shared theme in `src/styles/design-tokens.css`. All
-of `images/` is published, including files the site itself does not link, so
-keep an unreferenced image unless there is evidence it can go — see
+`src/lib/site.ts`, the published destinations for recipe Markdown links and
+images in `src/lib/recipeLinks.ts`, and the shared theme in
+`src/styles/design-tokens.css`. All of `images/` is published, including files
+the site itself does not link, so keep an unreferenced image unless there is
+evidence it can go — see
 [ADR 0028](docs/adr/0028-retain-published-images-unless-evidence-supports-removal.md).
 [PRODUCT.md](PRODUCT.md) describes what the site does today,
 [DESIGN.md](DESIGN.md) the visual rules and breakpoints, [CONTEXT.md](CONTEXT.md)
@@ -69,6 +71,11 @@ Screenshots, failure traces and test output live under the ignored
 `.astro/verification/browser/` directory. Historical evidence under
 [`docs/verification/`](docs/verification/README.md) is preserved and never
 overwritten by a run. Verification does not format or edit tracked files.
+
+`npm run test:recipe-links` is the focused regression for the links and images
+in generated recipe pages. It renders Markdown fixtures through the real
+transformation and needs no build, preview server, browser, or `SITE_BASE_URL`,
+so run it while editing `src/lib/recipeLinks.ts`.
 
 For focused checks after a build, use `npm run verify:recipes`,
 `npm run verify:catalog`, or `npm run verify:navigation` (which also checks

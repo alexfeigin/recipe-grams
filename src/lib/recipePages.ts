@@ -1,12 +1,13 @@
 // Build-time recipe pages: discovering the localized recipes in the recipe
 // source tree, assembling landing page data from the catalog, and rendering a
 // recipe's Markdown body into site HTML. Everything here runs at build time and
-// touches the filesystem; shared labels and URLs live in ./site and recipe
-// metadata lives in ./recipeCatalog.
+// touches the filesystem; shared labels and URLs live in ./site, published link
+// destinations in ./recipeLinks, and recipe metadata in ./recipeCatalog.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
 import { getCatalogEntry, getRecipeMetadata } from "./recipeCatalog";
+import { createSiteDestinationPlugin } from "./recipeLinks";
 import {
   isRecipeLanguage,
   labelsByLanguage,
@@ -42,8 +43,12 @@ export type CategorySection = {
 
 const repoRoot = process.cwd();
 
-let markdownRenderer:
-  Awaited<ReturnType<typeof createSatteriMarkdownProcessor>> | undefined;
+// One renderer per language and base path: the destination plugin is fixed at
+// creation, and building a renderer loads a syntax highlighter.
+const markdownRenderers = new Map<
+  string,
+  ReturnType<typeof createSatteriMarkdownProcessor>
+>();
 
 export function listLocalizedRecipes(): LocalizedRecipe[] {
   return languages.flatMap((language) => {
@@ -149,13 +154,9 @@ export async function renderRecipeBody(
   recipe: LocalizedRecipe,
   basePath: string,
 ): Promise<string> {
-  markdownRenderer ??= await createSatteriMarkdownProcessor();
-
-  const rawMarkdown = stripLegacyBackLink(
-    readFileSync(recipe.sourcePath, "utf8"),
-  );
-  const siteMarkdown = rewriteMarkdownLinks(rawMarkdown, recipe, basePath);
-  const rendered = await markdownRenderer.render(siteMarkdown, {
+  const renderer = await getMarkdownRenderer(recipe.language, basePath);
+  const markdown = stripLegacyBackLink(readFileSync(recipe.sourcePath, "utf8"));
+  const rendered = await renderer.render(markdown, {
     fileURL: new URL(`file://${recipe.sourcePath}`),
     frontmatter: {},
   });
@@ -163,72 +164,18 @@ export async function renderRecipeBody(
   return rendered.code;
 }
 
-function rewriteMarkdownLinks(
-  markdown: string,
-  recipe: LocalizedRecipe,
-  basePath: string,
-): string {
-  return rewriteMarkdownRecipeLinks(
-    rewriteMarkdownImageLinks(markdown, basePath),
-    recipe,
-    basePath,
-  );
-}
+function getMarkdownRenderer(language: RecipeLanguage, basePath: string) {
+  const key = `${language}\n${basePath}`;
+  let renderer = markdownRenderers.get(key);
 
-function rewriteMarkdownImageLinks(markdown: string, basePath: string): string {
-  return markdown.replace(
-    /(!\[[^\]]*\]\()\.\.\/images\/([^)]+)(\))/g,
-    (_match, prefix: string, imagePath: string, suffix: string) =>
-      `${prefix}${sitePath(basePath, imagePath)}${suffix}`,
-  );
-}
-
-function rewriteMarkdownRecipeLinks(
-  markdown: string,
-  recipe: LocalizedRecipe,
-  basePath: string,
-): string {
-  return markdown.replace(
-    /(?<!!)(\[[^\]]+\]\()([^)\s]+\.MD)(#[^)]+)?(\))/g,
-    (
-      match,
-      prefix: string,
-      recipePath: string,
-      hash: string | undefined,
-      suffix: string,
-    ) => {
-      const target = parseRecipeLinkTarget(recipePath, recipe.language);
-
-      if (!target) {
-        return match;
-      }
-
-      return `${prefix}${sitePath(
-        basePath,
-        `${target.language}/${target.slug}/${hash ?? ""}`,
-      )}${suffix}`;
-    },
-  );
-}
-
-function parseRecipeLinkTarget(
-  recipePath: string,
-  fallbackLanguage: RecipeLanguage,
-): { language: RecipeLanguage; slug: string } | undefined {
-  const parsed = path.posix.parse(recipePath);
-
-  if (parsed.ext !== ".MD" || parsed.name === "index") {
-    return undefined;
+  if (!renderer) {
+    renderer = createSatteriMarkdownProcessor({
+      mdastPlugins: [createSiteDestinationPlugin(language, basePath)],
+    });
+    markdownRenderers.set(key, renderer);
   }
 
-  const pathLanguage = recipePath
-    .split("/")
-    .find((segment): segment is RecipeLanguage => isRecipeLanguage(segment));
-
-  return {
-    language: pathLanguage ?? fallbackLanguage,
-    slug: parsed.name,
-  };
+  return renderer;
 }
 
 function stripLegacyBackLink(markdown: string): string {
