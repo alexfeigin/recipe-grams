@@ -1,4 +1,23 @@
 :root {
+  /* Base theme shared by the landing, recipe, and calculator pages, and by the
+     header they embed. Pages declare only what they vary, such as their own
+     --shadow depth or page-only accent shades. */
+  color-scheme: light;
+  --paper: #f8f4ec;
+  --surface: #fffdf8;
+  --ink: #25211c;
+  --muted: #70685e;
+  --tomato: #b43e2f;
+  --olive: #687449;
+  --steel: #d8d0c3;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
   /* Shared controls: white labels have 4.86:1 contrast (hover is darker). */
   --control-accent: #487889;
   --control-on-accent: #ffffff;
