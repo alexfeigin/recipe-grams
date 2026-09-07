@@ -1,6 +1,6 @@
 :root {
-  /* Shared selected-toggle and primary utility-button palette. */
-  --control-accent: #5a8fa0;
+  /* Shared controls: white labels have 4.86:1 contrast (hover is darker). */
+  --control-accent: #487889;
   --control-on-accent: #ffffff;
   --control-accent-hover: color-mix(
     in srgb,
