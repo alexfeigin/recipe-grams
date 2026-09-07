@@ -11,3 +11,7 @@ Load every skill whose branch applies before acting:
 - For recipe or site verification, release commits, pushes, and GitHub Pages deployment, use `$recipe-grams-publishing`.
 
 Name future repo-specific skill folders `recipe-grams-*` so Git tracks them while locally installed skills remain private.
+
+## Guidance
+
+Read [PRODUCT.md](PRODUCT.md) for what the site does today, [DESIGN.md](DESIGN.md) for the visual rules and supported viewports, [CONTEXT.md](CONTEXT.md) for the vocabulary, and [docs/adr/](docs/adr/README.md) for the decisions behind the architecture. [README.md](README.md) has the local development and `npm run verify` commands. Accepted UI behavior is the authority whenever older written guidance disagrees; correct the guidance rather than the accepted behavior.
