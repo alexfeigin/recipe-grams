@@ -3,477 +3,449 @@
 // in the browser by calculatePoolish in src/lib/poolishCalculator.ts, the
 // TypeScript port of poolish_calc.sh. The page is noindex and unlinked from
 // navigation, and all of its copy lives in poolishCalculatorLabels so the two
-// languages stay in step.
-import FaviconLinks from "./FaviconLinks.astro";
-import SiteHeader from "./SiteHeader.astro";
-import SocialMeta from "./SocialMeta.astro";
-import "../styles/design-tokens.css";
+// languages stay in step. The document shell, header, and language-derived
+// setup belong to SitePage.
+import SitePage from "../layouts/SitePage.astro";
 import { poolishCalculatorLabels } from "../lib/i18n";
-import { labelsByLanguage, sitePath } from "../lib/site";
+import { getPageContext } from "../lib/pageContext";
+import { sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
 
 type Props = {
   language: RecipeLanguage;
 };
 
-const basePath = import.meta.env.BASE_URL;
-const language = Astro.props.language;
+const page = getPageContext(Astro.props.language, import.meta.env.BASE_URL);
+const language = page.language;
 const text = poolishCalculatorLabels[language];
-const homeHref =
-  language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
-const pagePath = sitePath(
-  basePath,
+const calculatorHref = sitePath(
+  page.basePath,
   language === "he" ? "he/poolish/" : "poolish/",
 );
-const pageUrl = new URL(pagePath, Astro.site ?? Astro.url).href;
-const socialImage = new URL(
-  sitePath(basePath, "pizza.jpg"),
-  Astro.site ?? Astro.url,
-).href;
-const recipeLabels = labelsByLanguage[language];
-const direction = language === "he" ? "rtl" : "ltr";
-const locale = language === "he" ? "he_IL" : "en_US";
-const languageHref =
-  language === "he"
-    ? sitePath(basePath, "poolish/")
-    : sitePath(basePath, "he/poolish/");
+// The language switch stays on the calculator; the reader's mode is added to
+// the link in the browser, where the query string is known.
+const languageHref = sitePath(
+  page.basePath,
+  page.alternateLanguage === "he" ? "he/poolish/" : "poolish/",
+);
 const zeroGrams = `0${text.gramUnit}`;
 ---
 
-<html lang={language} dir={direction}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={text.pageDescription} />
-    <SocialMeta
-      title={`${text.pageTitle} | Recipe-Grams`}
-      description={text.pageDescription}
-      url={pageUrl}
-      image={socialImage}
-      imageAlt={text.imageAlt}
-      locale={locale}
-    />
-    <link rel="canonical" href={pageUrl} />
-    <meta name="robots" content="noindex" />
-    <FaviconLinks />
-    <title>{text.pageTitle} | Recipe-Grams</title>
-  </head>
-  <body>
-    <SiteHeader
-      language={language}
-      brandLine={text.brandLine}
-      homeHref={homeHref}
-      languageHref={languageHref}
-      homeLabel={recipeLabels.accessibility.home}
-      toggleNavigationLabel={recipeLabels.accessibility.toggleNavigation}
-      navItems={[{ label: text.homeLabel, href: homeHref }]}
-    />
+<SitePage
+  language={language}
+  title={`${text.pageTitle} | Recipe-Grams`}
+  description={text.pageDescription}
+  pageHref={calculatorHref}
+  canonical={true}
+  noindex={true}
+  socialImage={{ source: "pizza.jpg", alt: text.imageAlt }}
+  brandLine={text.brandLine}
+  languageHref={languageHref}
+  navItems={[{ label: text.homeLabel, href: page.homeHref }]}
+>
+  <main class="calculator-shell">
+    <section class="tool-intro" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">{text.pageTitle}</h1>
+        <p>{text.intro}</p>
+      </div>
+    </section>
 
-    <main class="calculator-shell">
-      <section class="tool-intro" aria-labelledby="page-title">
-        <div>
-          <h1 id="page-title">{text.pageTitle}</h1>
-          <p>{text.intro}</p>
+    <section class="calculator-grid" aria-label={text.calculatorLabel}>
+      <form class="input-panel" data-calculator-form>
+        <fieldset class="mode-switch">
+          <legend>{text.modeLegend}</legend>
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="generic"
+              checked
+              data-mode-input
+            />
+            <span>{text.genericMode}</span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="pizza" data-mode-input />
+            <span>{text.pizzaMode}</span>
+          </label>
+        </fieldset>
+
+        <div class="pizza-controls" data-pizza-controls hidden>
+          <label>
+            <span>{text.pizzaCount}</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value="3"
+              inputmode="numeric"
+              data-field="pizzaCount"
+            />
+          </label>
+          <p>
+            {text.pizzaHelperPrefix}{" "}
+            <strong>{text.pizzaHelperStrong}</strong>.{" "}
+            {text.pizzaHelperSuffix}
+          </p>
         </div>
+
+        <div class="field-grid" data-generic-controls>
+          <label>
+            <span>{text.fields.desiredDough}</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value="1700"
+              inputmode="decimal"
+              data-field="desiredDough"
+            />
+          </label>
+          <label>
+            <span>{text.fields.hydration}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value="0.70"
+              inputmode="decimal"
+              data-field="hydration"
+            />
+          </label>
+          <label>
+            <span>{text.fields.poolishShare}</span>
+            <input
+              type="number"
+              min="0"
+              max="1"
+              step="0.001"
+              value="0.667"
+              inputmode="decimal"
+              data-field="poolishShare"
+            />
+          </label>
+          <label>
+            <span>{text.fields.poolishHydration}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value="1.00"
+              inputmode="decimal"
+              data-field="poolishHydration"
+            />
+          </label>
+          <label>
+            <span>{text.fields.poolishYeast}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.001"
+              value="0.013"
+              inputmode="decimal"
+              data-field="poolishYeast"
+            />
+          </label>
+          <label>
+            <span>{text.fields.restYeast}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.001"
+              value="0"
+              inputmode="decimal"
+              data-field="restYeast"
+            />
+          </label>
+          <label>
+            <span>{text.fields.salt}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.001"
+              value="0.027"
+              inputmode="decimal"
+              data-field="salt"
+            />
+          </label>
+        </div>
+
+        <dl class="preset-list" data-preset-list hidden>
+          <div>
+            <dt>{text.fields.hydration}</dt>
+            <dd>{text.preset.hydration}</dd>
+          </div>
+          <div>
+            <dt>{text.fields.poolishShare}</dt>
+            <dd>{text.preset.poolishShare}</dd>
+          </div>
+          <div>
+            <dt>{text.fields.poolishYeast}</dt>
+            <dd>{text.preset.poolishYeast}</dd>
+          </div>
+          <div>
+            <dt>{text.fields.salt}</dt>
+            <dd>{text.preset.salt}</dd>
+          </div>
+        </dl>
+      </form>
+
+      <section class="results-panel" aria-live="polite">
+        <div class="result-summary">
+          <span>{text.summaries.totalFlour}</span>
+          <strong data-output="totalFlour">{zeroGrams}</strong>
+        </div>
+        <div class="result-summary">
+          <span>{text.summaries.totalWater}</span>
+          <strong data-output="totalWater">{zeroGrams}</strong>
+        </div>
+        <div class="result-summary">
+          <span>{text.summaries.targetDough}</span>
+          <strong data-output="targetDough">{zeroGrams}</strong>
+        </div>
+
+        <div class="phase-grid">
+          <article>
+            <h2>{text.phases.poolish}</h2>
+            <dl>
+              <div>
+                <dt>{text.phases.flour}</dt>
+                <dd data-output="poolishFlour">{zeroGrams}</dd>
+              </div>
+              <div>
+                <dt>{text.phases.water}</dt>
+                <dd data-output="poolishWater">{zeroGrams}</dd>
+              </div>
+              <div>
+                <dt>{text.phases.yeast}</dt>
+                <dd data-output="poolishYeast">{zeroGrams}</dd>
+              </div>
+            </dl>
+          </article>
+
+          <article>
+            <h2>{text.phases.finalDough}</h2>
+            <dl>
+              <div>
+                <dt>{text.phases.flour}</dt>
+                <dd data-output="restFlour">{zeroGrams}</dd>
+              </div>
+              <div>
+                <dt>{text.phases.water}</dt>
+                <dd data-output="restWater">{zeroGrams}</dd>
+              </div>
+              <div>
+                <dt>{text.phases.yeast}</dt>
+                <dd data-output="restYeast">{zeroGrams}</dd>
+              </div>
+              <div>
+                <dt>{text.phases.salt}</dt>
+                <dd data-output="salt">{zeroGrams}</dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+
+        <button class="copy-button" type="button" data-copy-button disabled>
+          {text.copyButton}
+        </button>
+        <p class="copy-status" data-copy-status aria-live="polite"></p>
+        <p class="validation-message" data-validation-message></p>
       </section>
+    </section>
+  </main>
 
-      <section class="calculator-grid" aria-label={text.calculatorLabel}>
-        <form class="input-panel" data-calculator-form>
-          <fieldset class="mode-switch">
-            <legend>{text.modeLegend}</legend>
-            <label>
-              <input
-                type="radio"
-                name="mode"
-                value="generic"
-                checked
-                data-mode-input
-              />
-              <span>{text.genericMode}</span>
-            </label>
-            <label>
-              <input type="radio" name="mode" value="pizza" data-mode-input />
-              <span>{text.pizzaMode}</span>
-            </label>
-          </fieldset>
+  <script>
+    import { poolishCalculatorLabels } from "../lib/i18n";
+    import { calculatePoolish } from "../lib/poolishCalculator";
+    import type {
+      CalculatorFields,
+      CalculatorMode,
+      CalculatorResult,
+    } from "../lib/poolishCalculator";
+    import { setLanguageSwitchQuery } from "../scripts/languageSwitch";
 
-          <div class="pizza-controls" data-pizza-controls hidden>
-            <label>
-              <span>{text.pizzaCount}</span>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value="3"
-                inputmode="numeric"
-                data-field="pizzaCount"
-              />
-            </label>
-            <p>
-              {text.pizzaHelperPrefix}{" "}
-              <strong>{text.pizzaHelperStrong}</strong>.{" "}
-              {text.pizzaHelperSuffix}
-            </p>
-          </div>
+    const clientLabels =
+      poolishCalculatorLabels[
+        document.documentElement.lang === "he" ? "he" : "en"
+      ];
+    const form = document.querySelector("[data-calculator-form]");
+    const genericControls = document.querySelector("[data-generic-controls]");
+    const pizzaControls = document.querySelector("[data-pizza-controls]");
+    const presetList = document.querySelector("[data-preset-list]");
+    const validationMessage = document.querySelector<HTMLElement>(
+      "[data-validation-message]",
+    )!;
+    const copyButton =
+      document.querySelector<HTMLButtonElement>("[data-copy-button]")!;
+    const copyStatus =
+      document.querySelector<HTMLElement>("[data-copy-status]")!;
+    const outputs = Object.fromEntries<HTMLElement>(
+      Array.from(document.querySelectorAll<HTMLElement>("[data-output]")).map(
+        (element) => [element.dataset.output!, element],
+      ),
+    );
 
-          <div class="field-grid" data-generic-controls>
-            <label>
-              <span>{text.fields.desiredDough}</span>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value="1700"
-                inputmode="decimal"
-                data-field="desiredDough"
-              />
-            </label>
-            <label>
-              <span>{text.fields.hydration}</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value="0.70"
-                inputmode="decimal"
-                data-field="hydration"
-              />
-            </label>
-            <label>
-              <span>{text.fields.poolishShare}</span>
-              <input
-                type="number"
-                min="0"
-                max="1"
-                step="0.001"
-                value="0.667"
-                inputmode="decimal"
-                data-field="poolishShare"
-              />
-            </label>
-            <label>
-              <span>{text.fields.poolishHydration}</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value="1.00"
-                inputmode="decimal"
-                data-field="poolishHydration"
-              />
-            </label>
-            <label>
-              <span>{text.fields.poolishYeast}</span>
-              <input
-                type="number"
-                min="0"
-                step="0.001"
-                value="0.013"
-                inputmode="decimal"
-                data-field="poolishYeast"
-              />
-            </label>
-            <label>
-              <span>{text.fields.restYeast}</span>
-              <input
-                type="number"
-                min="0"
-                step="0.001"
-                value="0"
-                inputmode="decimal"
-                data-field="restYeast"
-              />
-            </label>
-            <label>
-              <span>{text.fields.salt}</span>
-              <input
-                type="number"
-                min="0"
-                step="0.001"
-                value="0.027"
-                inputmode="decimal"
-                data-field="salt"
-              />
-            </label>
-          </div>
+    function fieldValue(name: keyof CalculatorFields) {
+      const field = form?.querySelector(`[data-field="${name}"]`);
+      if (!(field instanceof HTMLInputElement)) {
+        return "";
+      }
+      return field.value;
+    }
 
-          <dl class="preset-list" data-preset-list hidden>
-            <div>
-              <dt>{text.fields.hydration}</dt>
-              <dd>{text.preset.hydration}</dd>
-            </div>
-            <div>
-              <dt>{text.fields.poolishShare}</dt>
-              <dd>{text.preset.poolishShare}</dd>
-            </div>
-            <div>
-              <dt>{text.fields.poolishYeast}</dt>
-              <dd>{text.preset.poolishYeast}</dd>
-            </div>
-            <div>
-              <dt>{text.fields.salt}</dt>
-              <dd>{text.preset.salt}</dd>
-            </div>
-          </dl>
-        </form>
+    function currentMode(): CalculatorMode {
+      const selected = form?.querySelector('input[name="mode"]:checked');
+      return selected instanceof HTMLInputElement && selected.value === "pizza"
+        ? "pizza"
+        : "generic";
+    }
 
-        <section class="results-panel" aria-live="polite">
-          <div class="result-summary">
-            <span>{text.summaries.totalFlour}</span>
-            <strong data-output="totalFlour">{zeroGrams}</strong>
-          </div>
-          <div class="result-summary">
-            <span>{text.summaries.totalWater}</span>
-            <strong data-output="totalWater">{zeroGrams}</strong>
-          </div>
-          <div class="result-summary">
-            <span>{text.summaries.targetDough}</span>
-            <strong data-output="targetDough">{zeroGrams}</strong>
-          </div>
-
-          <div class="phase-grid">
-            <article>
-              <h2>{text.phases.poolish}</h2>
-              <dl>
-                <div>
-                  <dt>{text.phases.flour}</dt>
-                  <dd data-output="poolishFlour">{zeroGrams}</dd>
-                </div>
-                <div>
-                  <dt>{text.phases.water}</dt>
-                  <dd data-output="poolishWater">{zeroGrams}</dd>
-                </div>
-                <div>
-                  <dt>{text.phases.yeast}</dt>
-                  <dd data-output="poolishYeast">{zeroGrams}</dd>
-                </div>
-              </dl>
-            </article>
-
-            <article>
-              <h2>{text.phases.finalDough}</h2>
-              <dl>
-                <div>
-                  <dt>{text.phases.flour}</dt>
-                  <dd data-output="restFlour">{zeroGrams}</dd>
-                </div>
-                <div>
-                  <dt>{text.phases.water}</dt>
-                  <dd data-output="restWater">{zeroGrams}</dd>
-                </div>
-                <div>
-                  <dt>{text.phases.yeast}</dt>
-                  <dd data-output="restYeast">{zeroGrams}</dd>
-                </div>
-                <div>
-                  <dt>{text.phases.salt}</dt>
-                  <dd data-output="salt">{zeroGrams}</dd>
-                </div>
-              </dl>
-            </article>
-          </div>
-
-          <button class="copy-button" type="button" data-copy-button disabled>
-            {text.copyButton}
-          </button>
-          <p class="copy-status" data-copy-status aria-live="polite"></p>
-          <p class="validation-message" data-validation-message></p>
-        </section>
-      </section>
-    </main>
-
-    <script>
-      import { poolishCalculatorLabels } from "../lib/i18n";
-      import { calculatePoolish } from "../lib/poolishCalculator";
-      import type {
-        CalculatorFields,
-        CalculatorMode,
-        CalculatorResult,
-      } from "../lib/poolishCalculator";
-      import { setLanguageSwitchQuery } from "../scripts/languageSwitch";
-
-      const clientLabels =
-        poolishCalculatorLabels[
-          document.documentElement.lang === "he" ? "he" : "en"
-        ];
-      const form = document.querySelector("[data-calculator-form]");
-      const genericControls = document.querySelector("[data-generic-controls]");
-      const pizzaControls = document.querySelector("[data-pizza-controls]");
-      const presetList = document.querySelector("[data-preset-list]");
-      const validationMessage = document.querySelector<HTMLElement>(
-        "[data-validation-message]",
-      )!;
-      const copyButton =
-        document.querySelector<HTMLButtonElement>("[data-copy-button]")!;
-      const copyStatus =
-        document.querySelector<HTMLElement>("[data-copy-status]")!;
-      const outputs = Object.fromEntries<HTMLElement>(
-        Array.from(document.querySelectorAll<HTMLElement>("[data-output]")).map(
-          (element) => [element.dataset.output!, element],
-        ),
+    function setMode(mode: CalculatorMode) {
+      const modeInput = form?.querySelector(
+        `input[name="mode"][value="${mode}"]`,
       );
+      if (modeInput instanceof HTMLInputElement) {
+        modeInput.checked = true;
+      }
+    }
 
-      function fieldValue(name: keyof CalculatorFields) {
-        const field = form?.querySelector(`[data-field="${name}"]`);
-        if (!(field instanceof HTMLInputElement)) {
-          return "";
-        }
-        return field.value;
+    function urlMode(): CalculatorMode | null {
+      const mode = new URLSearchParams(window.location.search).get("mode");
+      return mode === "pizza" || mode === "generic" ? mode : null;
+    }
+
+    function applyUrlMode() {
+      const mode = urlMode();
+      if (mode) {
+        setMode(mode);
+      }
+    }
+
+    function syncUrlMode() {
+      const mode = currentMode();
+      const url = new URL(window.location.href);
+      url.searchParams.set("mode", mode);
+      window.history.replaceState({}, "", url);
+    }
+
+    // The header renders a language-switch link in both its desktop and its
+    // mobile layout. Both carry the selected mode so the reader lands on the
+    // same calculator in the other language.
+    function syncLanguageSwitch() {
+      const mode = urlMode();
+      const query = new URLSearchParams();
+      if (mode) {
+        query.set("mode", mode);
+      }
+      setLanguageSwitchQuery(query);
+    }
+
+    function grams(value: number, digits = 0) {
+      return `${value.toFixed(digits)}${clientLabels.gramUnit}`;
+    }
+
+    function getInputs(): CalculatorFields {
+      return {
+        pizzaCount: fieldValue("pizzaCount"),
+        desiredDough: fieldValue("desiredDough"),
+        hydration: fieldValue("hydration"),
+        poolishShare: fieldValue("poolishShare"),
+        poolishHydration: fieldValue("poolishHydration"),
+        poolishYeast: fieldValue("poolishYeast"),
+        restYeast: fieldValue("restYeast"),
+        salt: fieldValue("salt"),
+      };
+    }
+
+    function updateModeVisibility() {
+      const isPizza = currentMode() === "pizza";
+      if (genericControls instanceof HTMLElement) {
+        genericControls.hidden = isPizza;
+      }
+      if (pizzaControls instanceof HTMLElement) {
+        pizzaControls.hidden = !isPizza;
+      }
+      if (presetList instanceof HTMLElement) {
+        presetList.hidden = !isPizza;
+      }
+    }
+
+    let currentResult: CalculatorResult | null = null;
+    let revision = 0;
+
+    function render() {
+      revision += 1;
+      currentResult = null;
+      copyStatus.textContent = "";
+      copyButton.disabled = true;
+      updateModeVisibility();
+      const calculation = calculatePoolish(currentMode(), getInputs());
+
+      if (!calculation.ok) {
+        for (const output of Object.values(outputs)) output.textContent = "—";
+        validationMessage.textContent =
+          clientLabels.validation[calculation.error];
+        return;
       }
 
-      function currentMode(): CalculatorMode {
-        const selected = form?.querySelector('input[name="mode"]:checked');
-        return selected instanceof HTMLInputElement &&
-          selected.value === "pizza"
-          ? "pizza"
-          : "generic";
+      const result = calculation.result;
+      currentResult = result;
+      copyButton.disabled = false;
+      outputs.totalFlour.textContent = grams(result.totalFlour);
+      outputs.totalWater.textContent = grams(result.totalWater);
+      outputs.targetDough.textContent = grams(result.targetDough);
+      outputs.poolishFlour.textContent = grams(result.poolishFlour);
+      outputs.poolishWater.textContent = grams(result.poolishWater);
+      outputs.poolishYeast.textContent = grams(result.poolishYeast);
+      outputs.restFlour.textContent = grams(result.restFlour);
+      outputs.restWater.textContent = grams(result.restWater);
+      outputs.restYeast.textContent = grams(result.restYeast);
+      outputs.salt.textContent = grams(result.salt, 1);
+      validationMessage.textContent = "";
+    }
+
+    async function copyWeights() {
+      if (!currentResult || copyButton.disabled) return;
+      const result = currentResult;
+      const copyRevision = revision;
+      const text = [
+        clientLabels.copyText.poolish,
+        `${clientLabels.copyText.flour}: ${grams(result.poolishFlour)}`,
+        `${clientLabels.copyText.water}: ${grams(result.poolishWater)}`,
+        `${clientLabels.copyText.yeast}: ${grams(result.poolishYeast)}`,
+        "",
+        clientLabels.copyText.finalDough,
+        `${clientLabels.copyText.flour}: ${grams(result.restFlour)}`,
+        `${clientLabels.copyText.water}: ${grams(result.restWater)}`,
+        `${clientLabels.copyText.yeast}: ${grams(result.restYeast)}`,
+        `${clientLabels.copyText.salt}: ${grams(result.salt, 1)}`,
+      ].join("\n");
+
+      try {
+        await navigator.clipboard.writeText(text);
+        if (revision === copyRevision)
+          copyStatus.textContent = clientLabels.copied;
+      } catch {
+        if (revision === copyRevision)
+          copyStatus.textContent = clientLabels.copyFailed;
       }
+    }
 
-      function setMode(mode: CalculatorMode) {
-        const modeInput = form?.querySelector(
-          `input[name="mode"][value="${mode}"]`,
-        );
-        if (modeInput instanceof HTMLInputElement) {
-          modeInput.checked = true;
-        }
-      }
-
-      function urlMode(): CalculatorMode | null {
-        const mode = new URLSearchParams(window.location.search).get("mode");
-        return mode === "pizza" || mode === "generic" ? mode : null;
-      }
-
-      function applyUrlMode() {
-        const mode = urlMode();
-        if (mode) {
-          setMode(mode);
-        }
-      }
-
-      function syncUrlMode() {
-        const mode = currentMode();
-        const url = new URL(window.location.href);
-        url.searchParams.set("mode", mode);
-        window.history.replaceState({}, "", url);
-      }
-
-      // The header renders a language-switch link in both its desktop and its
-      // mobile layout. Both carry the selected mode so the reader lands on the
-      // same calculator in the other language.
-      function syncLanguageSwitch() {
-        const mode = urlMode();
-        const query = new URLSearchParams();
-        if (mode) {
-          query.set("mode", mode);
-        }
-        setLanguageSwitchQuery(query);
-      }
-
-      function grams(value: number, digits = 0) {
-        return `${value.toFixed(digits)}${clientLabels.gramUnit}`;
-      }
-
-      function getInputs(): CalculatorFields {
-        return {
-          pizzaCount: fieldValue("pizzaCount"),
-          desiredDough: fieldValue("desiredDough"),
-          hydration: fieldValue("hydration"),
-          poolishShare: fieldValue("poolishShare"),
-          poolishHydration: fieldValue("poolishHydration"),
-          poolishYeast: fieldValue("poolishYeast"),
-          restYeast: fieldValue("restYeast"),
-          salt: fieldValue("salt"),
-        };
-      }
-
-      function updateModeVisibility() {
-        const isPizza = currentMode() === "pizza";
-        if (genericControls instanceof HTMLElement) {
-          genericControls.hidden = isPizza;
-        }
-        if (pizzaControls instanceof HTMLElement) {
-          pizzaControls.hidden = !isPizza;
-        }
-        if (presetList instanceof HTMLElement) {
-          presetList.hidden = !isPizza;
-        }
-      }
-
-      let currentResult: CalculatorResult | null = null;
-      let revision = 0;
-
-      function render() {
-        revision += 1;
-        currentResult = null;
-        copyStatus.textContent = "";
-        copyButton.disabled = true;
-        updateModeVisibility();
-        const calculation = calculatePoolish(currentMode(), getInputs());
-
-        if (!calculation.ok) {
-          for (const output of Object.values(outputs)) output.textContent = "—";
-          validationMessage.textContent =
-            clientLabels.validation[calculation.error];
-          return;
-        }
-
-        const result = calculation.result;
-        currentResult = result;
-        copyButton.disabled = false;
-        outputs.totalFlour.textContent = grams(result.totalFlour);
-        outputs.totalWater.textContent = grams(result.totalWater);
-        outputs.targetDough.textContent = grams(result.targetDough);
-        outputs.poolishFlour.textContent = grams(result.poolishFlour);
-        outputs.poolishWater.textContent = grams(result.poolishWater);
-        outputs.poolishYeast.textContent = grams(result.poolishYeast);
-        outputs.restFlour.textContent = grams(result.restFlour);
-        outputs.restWater.textContent = grams(result.restWater);
-        outputs.restYeast.textContent = grams(result.restYeast);
-        outputs.salt.textContent = grams(result.salt, 1);
-        validationMessage.textContent = "";
-      }
-
-      async function copyWeights() {
-        if (!currentResult || copyButton.disabled) return;
-        const result = currentResult;
-        const copyRevision = revision;
-        const text = [
-          clientLabels.copyText.poolish,
-          `${clientLabels.copyText.flour}: ${grams(result.poolishFlour)}`,
-          `${clientLabels.copyText.water}: ${grams(result.poolishWater)}`,
-          `${clientLabels.copyText.yeast}: ${grams(result.poolishYeast)}`,
-          "",
-          clientLabels.copyText.finalDough,
-          `${clientLabels.copyText.flour}: ${grams(result.restFlour)}`,
-          `${clientLabels.copyText.water}: ${grams(result.restWater)}`,
-          `${clientLabels.copyText.yeast}: ${grams(result.restYeast)}`,
-          `${clientLabels.copyText.salt}: ${grams(result.salt, 1)}`,
-        ].join("\n");
-
-        try {
-          await navigator.clipboard.writeText(text);
-          if (revision === copyRevision)
-            copyStatus.textContent = clientLabels.copied;
-        } catch {
-          if (revision === copyRevision)
-            copyStatus.textContent = clientLabels.copyFailed;
-        }
-      }
-
-      form?.addEventListener("submit", (event) => event.preventDefault());
-      form?.addEventListener("input", render);
-      form?.addEventListener("change", () => {
-        syncUrlMode();
-        syncLanguageSwitch();
-        render();
-      });
-      copyButton?.addEventListener("click", copyWeights);
-      applyUrlMode();
+    form?.addEventListener("submit", (event) => event.preventDefault());
+    form?.addEventListener("input", render);
+    form?.addEventListener("change", () => {
+      syncUrlMode();
       syncLanguageSwitch();
       render();
-    </script>
-  </body>
-</html>
+    });
+    copyButton?.addEventListener("click", copyWeights);
+    applyUrlMode();
+    syncLanguageSwitch();
+    render();
+  </script>
+</SitePage>
 
 <style>
   :root {

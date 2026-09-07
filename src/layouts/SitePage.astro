@@ -1,0 +1,111 @@
+---
+// The shared document behind every localized page: the html/head/body shell,
+// the metadata each surface publishes, and the header above its content. A
+// surface passes only what it alone knows — its title, description, published
+// path, social card, and header links — and keeps everything inside the default
+// slot, including its own <main> and styles. Head elements a single surface
+// needs, such as the recipe pages' search metadata, go in the "head" slot.
+// Language-derived setup comes from getPageContext, so direction, locale,
+// labels, and home URLs are decided in one place.
+import FaviconLinks from "../components/FaviconLinks.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SocialMeta from "../components/SocialMeta.astro";
+import "../styles/design-tokens.css";
+import { getPageContext, type NavItem } from "../lib/pageContext";
+import { sitePath, type RecipeLanguage } from "../lib/site";
+
+// A social card image named by its published file, with the dimensions and type
+// a page can state when it knows them.
+export type SocialImage = {
+  source: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  type?: string;
+};
+
+type Props = {
+  language: RecipeLanguage;
+  // The document title, used verbatim for <title> and the social title.
+  title: string;
+  description: string;
+  // This page's own site-relative href, which becomes its absolute social URL.
+  pageHref: string;
+  // Whether this page publishes a canonical link, and whether it asks search
+  // engines to skip it. Both are per-surface decisions, so both are stated.
+  canonical: boolean;
+  noindex?: boolean;
+  socialImage: SocialImage;
+  socialType?: "website" | "article";
+  // Header content the surface chooses: the line under the brand and where the
+  // language switch and navigation lead.
+  brandLine: string;
+  languageHref: string;
+  navItems: NavItem[];
+};
+
+const {
+  language,
+  title,
+  description,
+  pageHref,
+  canonical,
+  noindex = false,
+  socialImage,
+  socialType = "website",
+  brandLine,
+  languageHref,
+  navItems,
+} = Astro.props;
+
+const page = getPageContext(language, import.meta.env.BASE_URL);
+const siteOrigin = Astro.site ?? Astro.url;
+const pageUrl = new URL(pageHref, siteOrigin).href;
+const socialImageUrl = new URL(
+  sitePath(page.basePath, socialImage.source),
+  siteOrigin,
+).href;
+---
+
+<html lang={page.language} dir={page.direction}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <SocialMeta
+      title={title}
+      description={description}
+      url={pageUrl}
+      image={socialImageUrl}
+      imageAlt={socialImage.alt}
+      locale={page.locale}
+      type={socialType}
+      imageWidth={socialImage.width}
+      imageHeight={socialImage.height}
+      imageType={socialImage.type}
+    />
+    <slot name="head" />
+    {canonical && <link rel="canonical" href={pageUrl} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <FaviconLinks />
+    <title>{title}</title>
+  </head>
+  <body>
+    <SiteHeader
+      language={page.language}
+      brandLine={brandLine}
+      languageHref={languageHref}
+      navItems={navItems}
+    />
+
+    <slot />
+  </body>
+</html>
+
+<style>
+  /* The document elements this layout owns. Each page keeps the box sizing,
+     background, and layout of the content it renders. */
+  * {
+    box-sizing: border-box;
+  }
+</style>

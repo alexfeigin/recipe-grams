@@ -20,7 +20,7 @@ export type RecipeCategoryId =
 
 export type RecipeMarkerId = "favorite" | "vegan";
 
-type LocalizedLabels = {
+export type LocalizedLabels = {
   brandLine: string;
   pageTitle: string;
   pageDescription: string;

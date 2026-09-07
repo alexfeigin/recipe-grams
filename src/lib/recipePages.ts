@@ -176,12 +176,9 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     }))
     .filter((section) => section.recipes.length > 0);
 
+  // What the landing page lists. Direction, locale, labels, and home URLs are
+  // language-derived page setup and belong to ./pageContext, not here.
   return {
-    labels,
-    direction: language === "he" ? "rtl" : "ltr",
-    language,
-    alternateHref:
-      language === "he" ? sitePath(basePath, "") : sitePath(basePath, "he/"),
     recipePairCount: pairedSlugs.size,
     categoryCount: categorySections.length,
     categorySections,

@@ -1,8 +1,11 @@
 ---
-import FaviconLinks from "../../components/FaviconLinks.astro";
-import SiteHeader from "../../components/SiteHeader.astro";
-import SocialMeta from "../../components/SocialMeta.astro";
-import "../../styles/design-tokens.css";
+// One localized recipe page: the recipe's Markdown body rendered into the
+// shared site document. The page decides what only it knows — the recipe's
+// title and description, its social card, its search metadata, and where the
+// language switch leads when the other language has this recipe — and leaves
+// the document shell, header, and language-derived setup to SitePage.
+import SitePage from "../../layouts/SitePage.astro";
+import type { SocialImage } from "../../layouts/SitePage.astro";
 import {
   getRecipeMetadata,
   getRecipeSearchMetadata,
@@ -12,7 +15,8 @@ import {
   listLocalizedRecipes,
   renderRecipeBody,
 } from "../../lib/recipePages";
-import { labelsByLanguage, sitePath } from "../../lib/site";
+import { getPageContext } from "../../lib/pageContext";
+import { sitePath } from "../../lib/site";
 
 export function getStaticPaths() {
   return listLocalizedRecipes().map((recipe) => ({
@@ -29,52 +33,52 @@ if (!recipe) {
   return Astro.redirect("/");
 }
 
-const basePath = import.meta.env.BASE_URL;
+const page = getPageContext(recipe.language, import.meta.env.BASE_URL);
+const basePath = page.basePath;
 const metadata = getRecipeMetadata(recipe);
 const searchMetadata = getRecipeSearchMetadata(recipe);
 const recipeHtml = await renderRecipeBody(recipe, basePath);
-const canonicalPath = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
-const canonicalUrl = new URL(canonicalPath, Astro.site ?? Astro.url).href;
+const recipeHref = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
+const title = `${metadata.title} | Recipe-Grams`;
+
+// Without a recipe photo the shared placeholder card stands in, and only then
+// are its dimensions known well enough to publish.
 const fallbackSocialImageSource = "recipe-grams-card-placeholder.png";
 const socialImageSource =
   metadata.socialImage ?? metadata.image ?? fallbackSocialImageSource;
-const socialImage = new URL(
-  sitePath(basePath, socialImageSource),
-  Astro.site ?? Astro.url,
-).href;
 const usesFallbackSocialImage = socialImageSource === fallbackSocialImageSource;
-const direction = recipe.language === "he" ? "rtl" : "ltr";
-const locale = recipe.language === "he" ? "he_IL" : "en_US";
-const alternateLanguage = recipe.language === "he" ? "en" : "he";
-const alternateRecipe = findLocalizedRecipe(alternateLanguage, recipe.slug);
-const labels = labelsByLanguage[recipe.language];
-const homeHref =
-  recipe.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
+const socialImage: SocialImage = {
+  source: socialImageSource,
+  alt: metadata.title,
+  width: usesFallbackSocialImage ? 562 : undefined,
+  height: usesFallbackSocialImage ? 480 : undefined,
+  type: usesFallbackSocialImage ? "image/png" : undefined,
+};
+
+// The language switch stays on this recipe when the other language has it, and
+// falls back to that language's landing page when it does not.
+const alternateRecipe = findLocalizedRecipe(
+  page.alternateLanguage,
+  recipe.slug,
+);
 const languageHref = alternateRecipe
-  ? sitePath(basePath, `${alternateLanguage}/${recipe.slug}/`)
-  : alternateLanguage === "he"
-    ? sitePath(basePath, "he/")
-    : sitePath(basePath, "");
-const navItems = [{ label: labels.home, href: homeHref }];
+  ? sitePath(basePath, `${page.alternateLanguage}/${recipe.slug}/`)
+  : page.alternateHomeHref;
 ---
 
-<html lang={recipe.language} dir={direction}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={metadata.description} />
-    <SocialMeta
-      title={`${metadata.title} | Recipe-Grams`}
-      description={metadata.description}
-      url={canonicalUrl}
-      image={socialImage}
-      imageAlt={metadata.title}
-      locale={locale}
-      type="article"
-      imageWidth={usesFallbackSocialImage ? 562 : undefined}
-      imageHeight={usesFallbackSocialImage ? 480 : undefined}
-      imageType={usesFallbackSocialImage ? "image/png" : undefined}
-    />
+<SitePage
+  language={recipe.language}
+  title={title}
+  description={metadata.description}
+  pageHref={recipeHref}
+  canonical={true}
+  socialImage={socialImage}
+  socialType="article"
+  brandLine={metadata.title}
+  languageHref={languageHref}
+  navItems={[{ label: page.labels.home, href: page.homeHref }]}
+>
+  <Fragment slot="head">
     <meta data-pagefind-filter={`language:${recipe.language}`} />
     {
       searchMetadata.category && (
@@ -94,28 +98,14 @@ const navItems = [{ label: labels.home, href: homeHref }];
         />
       )
     }
-    <link rel="canonical" href={canonicalUrl} />
-    <FaviconLinks />
-    <title>{metadata.title} | Recipe-Grams</title>
-  </head>
-  <body>
-    <SiteHeader
-      language={recipe.language}
-      brandLine={metadata.title}
-      homeHref={homeHref}
-      languageHref={languageHref}
-      homeLabel={labels.accessibility.home}
-      toggleNavigationLabel={labels.accessibility.toggleNavigation}
-      navItems={navItems}
-    />
+  </Fragment>
 
-    <main>
-      <article class="recipe-shell" data-pagefind-body>
-        <div class="recipe-body" set:html={recipeHtml} />
-      </article>
-    </main>
-  </body>
-</html>
+  <main>
+    <article class="recipe-shell" data-pagefind-body>
+      <div class="recipe-body" set:html={recipeHtml} />
+    </article>
+  </main>
+</SitePage>
 
 <style>
   :root {

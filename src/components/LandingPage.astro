@@ -1,13 +1,12 @@
 ---
 // Landing page for one language: a browse header over the catalog's category
-// sections. Every card, label, and section here comes from getLandingPageData,
-// so the catalog in src/lib/recipeCatalog.ts is the only place to change what
-// this page lists or how the sections are ordered.
-import FaviconLinks from "./FaviconLinks.astro";
-import SiteHeader from "./SiteHeader.astro";
-import SocialMeta from "./SocialMeta.astro";
-import "../styles/design-tokens.css";
+// sections. Every card and section here comes from getLandingPageData, so the
+// catalog in src/lib/recipeCatalog.ts is the only place to change what this
+// page lists or how the sections are ordered. The document shell, header, and
+// language-derived setup belong to SitePage.
+import SitePage from "../layouts/SitePage.astro";
 import { getLandingPageData } from "../lib/recipePages";
+import { getPageContext } from "../lib/pageContext";
 import { sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
 
@@ -15,168 +14,143 @@ type Props = {
   language: RecipeLanguage;
 };
 
-const basePath = import.meta.env.BASE_URL;
-const data = getLandingPageData(Astro.props.language, basePath);
-const homeHref =
-  data.language === "he" ? sitePath(basePath, "he/") : sitePath(basePath, "");
-const placeholderLogoHref = sitePath(
-  basePath,
-  "recipe-grams-card-placeholder.png",
-);
-const socialImageUrl = new URL(placeholderLogoHref, Astro.site ?? Astro.url)
-  .href;
-const pageUrl = new URL(homeHref, Astro.site ?? Astro.url).href;
-const locale = data.language === "he" ? "he_IL" : "en_US";
+const page = getPageContext(Astro.props.language, import.meta.env.BASE_URL);
+const basePath = page.basePath;
+const labels = page.labels;
+const data = getLandingPageData(page.language, basePath);
+const placeholderLogoSource = "recipe-grams-card-placeholder.png";
+const placeholderLogoHref = sitePath(basePath, placeholderLogoSource);
 const navItems = data.categorySections.map((section) => ({
   label: section.label,
   href: `#${section.id}`,
 }));
 ---
 
-<html lang={data.language} dir={data.direction}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={data.labels.pageDescription} />
-    <SocialMeta
-      title={data.labels.pageTitle}
-      description={data.labels.pageDescription}
-      url={pageUrl}
-      image={socialImageUrl}
-      imageAlt="Recipe-Grams"
-      locale={locale}
-      imageWidth={562}
-      imageHeight={480}
-      imageType="image/png"
-    />
-    <FaviconLinks />
-    <title>{data.labels.pageTitle}</title>
-  </head>
-  <body>
-    <SiteHeader
-      language={data.language}
-      brandLine={data.labels.brandLine}
-      homeHref={homeHref}
-      languageHref={data.alternateHref}
-      homeLabel={data.labels.accessibility.home}
-      toggleNavigationLabel={data.labels.accessibility.toggleNavigation}
-      navItems={navItems}
-    />
+<SitePage
+  language={page.language}
+  title={labels.pageTitle}
+  description={labels.pageDescription}
+  pageHref={page.homeHref}
+  canonical={false}
+  socialImage={{
+    source: placeholderLogoSource,
+    alt: "Recipe-Grams",
+    width: 562,
+    height: 480,
+    type: "image/png",
+  }}
+  brandLine={labels.brandLine}
+  languageHref={page.alternateHomeHref}
+  navItems={navItems}
+>
+  <main>
+    <section class="browse-hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <h1 id="page-title">{labels.hero.title}</h1>
+        <p>{labels.hero.description}</p>
+      </div>
 
-    <main>
-      <section class="browse-hero" aria-labelledby="page-title">
-        <div class="hero-copy">
-          <h1 id="page-title">{data.labels.hero.title}</h1>
-          <p>{data.labels.hero.description}</p>
+      <div class="browse-tools" aria-label={labels.accessibility.browseSummary}>
+        <div>
+          <span>{data.recipePairCount}</span>
+          {labels.hero.recipeCount}
         </div>
-
-        <div
-          class="browse-tools"
-          aria-label={data.labels.accessibility.browseSummary}
-        >
-          <div>
-            <span>{data.recipePairCount}</span>
-            {data.labels.hero.recipeCount}
-          </div>
-          <div>
-            <span>{data.categoryCount}</span>
-            {data.labels.hero.categoryCount}
-          </div>
-          <div>
-            <span>100%</span>
-            {data.labels.hero.gramFirst}
-          </div>
+        <div>
+          <span>{data.categoryCount}</span>
+          {labels.hero.categoryCount}
         </div>
-      </section>
-
-      <section
-        class="recipe-board"
-        id="categories"
-        aria-labelledby="browse-title"
-      >
-        <div class="section-heading">
-          <h2 id="browse-title">{data.labels.sections.title}</h2>
-          <nav class="category-links" aria-label={data.labels.nav.categories}>
-            <ul>
-              {
-                data.categorySections.map((section) => (
-                  <li data-category={section.id}>
-                    <a href={`#${section.id}`}>{section.label}</a>
-                  </li>
-                ))
-              }
-            </ul>
-          </nav>
+        <div>
+          <span>100%</span>
+          {labels.hero.gramFirst}
         </div>
+      </div>
+    </section>
 
-        <div class="category-stack">
-          {
-            data.categorySections.map((section) => (
-              <section
-                class="category-section"
-                id={section.id}
-                data-category={section.id}
-                aria-labelledby={`${section.id}-title`}
-              >
-                <div class="category-heading">
-                  <h3 id={`${section.id}-title`} tabindex="-1">
-                    {section.label}
-                  </h3>
-                  <p>{section.description}</p>
-                </div>
+    <section
+      class="recipe-board"
+      id="categories"
+      aria-labelledby="browse-title"
+    >
+      <div class="section-heading">
+        <h2 id="browse-title">{labels.sections.title}</h2>
+        <nav class="category-links" aria-label={labels.nav.categories}>
+          <ul>
+            {
+              data.categorySections.map((section) => (
+                <li data-category={section.id}>
+                  <a href={`#${section.id}`}>{section.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
 
-                <div class="recipe-grid">
-                  {section.recipes.map((recipe) => (
-                    <article class="recipe-card">
-                      <a
-                        href={recipe.href}
-                        aria-label={`${data.labels.accessibility.openRecipe} ${recipe.title}`}
-                      >
-                        {recipe.image && (
+      <div class="category-stack">
+        {
+          data.categorySections.map((section) => (
+            <section
+              class="category-section"
+              id={section.id}
+              data-category={section.id}
+              aria-labelledby={`${section.id}-title`}
+            >
+              <div class="category-heading">
+                <h3 id={`${section.id}-title`} tabindex="-1">
+                  {section.label}
+                </h3>
+                <p>{section.description}</p>
+              </div>
+
+              <div class="recipe-grid">
+                {section.recipes.map((recipe) => (
+                  <article class="recipe-card">
+                    <a
+                      href={recipe.href}
+                      aria-label={`${labels.accessibility.openRecipe} ${recipe.title}`}
+                    >
+                      {recipe.image && (
+                        <img
+                          src={sitePath(basePath, recipe.image)}
+                          alt={`${recipe.title} ${labels.accessibility.recipePhoto}`}
+                          loading="lazy"
+                        />
+                      )}
+                      {!recipe.image && (
+                        <div class="image-placeholder" aria-hidden="true">
                           <img
-                            src={sitePath(basePath, recipe.image)}
-                            alt={`${recipe.title} ${data.labels.accessibility.recipePhoto}`}
+                            src={placeholderLogoHref}
+                            alt=""
                             loading="lazy"
                           />
-                        )}
-                        {!recipe.image && (
-                          <div class="image-placeholder" aria-hidden="true">
-                            <img
-                              src={placeholderLogoHref}
-                              alt=""
-                              loading="lazy"
-                            />
-                          </div>
-                        )}
-                        <div class="card-body">
-                          <div class="card-meta">
-                            <span class="card-category">{section.label}</span>
-                            <span>{recipe.slug.replaceAll("_", " ")}</span>
-                          </div>
-                          <h4>{recipe.title}</h4>
-                          <p>{recipe.description}</p>
-                          {recipe.markerIds.length > 0 && (
-                            <div class="markers">
-                              {recipe.markerIds.map((markerId) => (
-                                <span>
-                                  {data.labels.markerLabels[markerId]}
-                                </span>
-                              ))}
-                            </div>
-                          )}
                         </div>
-                      </a>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ))
-          }
-        </div>
-      </section>
-    </main>
-  </body>
-</html>
+                      )}
+                      <div class="card-body">
+                        <div class="card-meta">
+                          <span class="card-category">{section.label}</span>
+                          <span>{recipe.slug.replaceAll("_", " ")}</span>
+                        </div>
+                        <h4>{recipe.title}</h4>
+                        <p>{recipe.description}</p>
+                        {recipe.markerIds.length > 0 && (
+                          <div class="markers">
+                            {recipe.markerIds.map((markerId) => (
+                              <span>{labels.markerLabels[markerId]}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </a>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</SitePage>
 
 <script>
   const categoryLinks = document.querySelectorAll('a[href^="#"]');

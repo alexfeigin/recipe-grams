@@ -35,7 +35,17 @@ metadata in `src/lib/recipeCatalog.ts`, shared interface labels in
 `src/lib/site.ts`, the published destinations for recipe Markdown links and
 images in `src/lib/recipeLinks.ts`, the browser behavior of the header, the
 back-to-top button and the language-switch links in `src/scripts/`, and the
-shared theme in `src/styles/design-tokens.css`. All of `images/` is published, including files
+shared theme in `src/styles/design-tokens.css`.
+
+The landing, recipe, and calculator pages share one document. The
+`<html>`/`<head>`/`<body>` shell, the metadata every page publishes, and the
+header above the content belong to `src/layouts/SitePage.astro`; what a page
+alone knows — its title, description, published path, social card, and header
+links — stays with that page, along with its `<main>` and its styles. What a
+page derives from its language — direction, social locale, interface labels,
+and the home URL of each language — comes from `src/lib/pageContext.ts`, so add
+a language-wide default there rather than in one surface. See
+[ADR 0032](docs/adr/0032-share-one-document-shell-across-localized-pages.md). All of `images/` is published, including files
 the site itself does not link, so keep an unreferenced image unless there is
 evidence it can go — see
 [ADR 0028](docs/adr/0028-retain-published-images-unless-evidence-supports-removal.md).
