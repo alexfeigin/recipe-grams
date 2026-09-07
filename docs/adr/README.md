@@ -29,3 +29,4 @@ Each record is a short, dated-by-number statement of one decision. Records are n
 | 0023 | [Preserve recipe back links in source and strip them in the site](0023-preserve-recipe-back-links-in-source-and-strip-them-in-the-site.md)                                     | Current, supersedes 0008   |
 | 0024 | [Serve site images directly from the root image directory](0024-serve-site-images-directly-from-the-root-image-directory.md)                                                   | Current, supersedes 0016   |
 | 0025 | [Keep the legacy index for Markdown readers and the catalog for generated browsing](0025-keep-the-legacy-index-for-markdown-readers-and-the-catalog-for-generated-browsing.md) | Current, clarifies 0006    |
+| 0026 | [Separate site vocabulary, recipe catalog, and build-time page modules](0026-separate-site-vocabulary-catalog-and-build-time-modules.md)                                       | Current                    |

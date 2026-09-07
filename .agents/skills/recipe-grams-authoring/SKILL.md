@@ -10,7 +10,7 @@ Work in the user's language and ask a follow-up only when a missing detail block
 ## Source Model
 
 - `en/*.MD` and `he/*.MD` own ingredients, method, notes, and body images. Paired localizations share a snake-style basename and `.MD` extension.
-- `src/lib/recipePages.ts` owns localized titles and descriptions, category placement, featured order, favorite and vegan markers, card images, social images, and search metadata.
+- `src/lib/recipeCatalog.ts` owns localized titles and descriptions, category placement, featured order, favorite and vegan markers, card images, social images, and search metadata. Shared interface labels live in `src/lib/site.ts`, and `src/lib/recipePages.ts` only discovers and renders recipes at build time.
 - `index.MD` owns the legacy GitHub-readable index. The generated landing page reads the catalog, not this file.
 - Every localized Markdown file generates a site page and can appear in search even when it is not featured.
 

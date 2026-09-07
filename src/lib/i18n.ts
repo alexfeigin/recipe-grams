@@ -1,4 +1,4 @@
-import type { RecipeLanguage } from "./recipePages";
+import type { RecipeLanguage } from "./site";
 
 export type PoolishCalculatorLabels = {
   brandLine: string;

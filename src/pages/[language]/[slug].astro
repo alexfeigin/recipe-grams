@@ -4,14 +4,15 @@ import SiteHeader from "../../components/SiteHeader.astro";
 import SocialMeta from "../../components/SocialMeta.astro";
 import "../../styles/design-tokens.css";
 import {
-  findLocalizedRecipe,
   getRecipeMetadata,
   getRecipeSearchMetadata,
-  labelsByLanguage,
+} from "../../lib/recipeCatalog";
+import {
+  findLocalizedRecipe,
   listLocalizedRecipes,
   renderRecipeBody,
-  sitePath,
 } from "../../lib/recipePages";
+import { labelsByLanguage, sitePath } from "../../lib/site";
 
 export function getStaticPaths() {
   return listLocalizedRecipes().map((recipe) => ({
