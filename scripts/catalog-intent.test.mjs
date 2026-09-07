@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   collectCatalogDiagnostics,
+  getRecipeMetadata,
+  listUnlistedRecipes,
   selectFeaturedRecipes,
 } from "../src/lib/recipeCatalog.ts";
 
@@ -39,6 +41,13 @@ function unlisted(reason, title = "Unlisted") {
     localizations: localizations(title, "A deliberately unfeatured recipe."),
   };
 }
+
+// The fallback a page shows when the catalog gives it no usable text.
+const generic = {
+  title: "Recipe-Grams Recipe",
+  description:
+    "A Recipe-Grams page rendered from the localized Markdown recipe source.",
+};
 
 function messagesFor(diagnostics, severity) {
   return diagnostics
@@ -129,6 +138,146 @@ test("an unlisted recipe with missing metadata warns instead of failing", () => 
   assert.deepEqual(messagesFor(diagnostics, "error"), []);
   assert.equal(messagesFor(diagnostics, "warning").length, 1);
   assert.match(diagnostics[0].message, /he\/helper\.MD is unlisted/);
+
+  // The warning says the page falls back to the generic title and description,
+  // so the page it describes has to actually get them.
+  assert.deepEqual(
+    getRecipeMetadata({ language: "he", slug: "helper" }, catalog),
+    {
+      title: generic.title,
+      description: generic.description,
+    },
+  );
+  assert.deepEqual(
+    getRecipeMetadata({ language: "en", slug: "helper" }, catalog),
+    {
+      title: "Helper",
+      description: "A helper.",
+    },
+  );
+});
+
+test("an unlisted recipe with an empty field falls back field by field", () => {
+  const recipes = pair("helper");
+  const catalog = {
+    helper: {
+      listing: { intent: "unlisted", reason: "Helper note." },
+      markerIds: [],
+      localizations: {
+        en: { title: "", description: "A helper.", image: "helper.jpg" },
+        he: { title: "עוזר", description: "", image: "helper.jpg" },
+      },
+    },
+  };
+
+  const diagnostics = collectCatalogDiagnostics(recipes, catalog);
+  assert.deepEqual(messagesFor(diagnostics, "error"), []);
+  assert.equal(messagesFor(diagnostics, "warning").length, 2);
+  assert.match(
+    diagnostics[0].message,
+    /en\/helper\.MD is unlisted.*no title,/s,
+  );
+  assert.match(
+    diagnostics[1].message,
+    /he\/helper\.MD is unlisted.*no description,/s,
+  );
+
+  assert.deepEqual(
+    getRecipeMetadata({ language: "en", slug: "helper" }, catalog),
+    {
+      title: generic.title,
+      description: "A helper.",
+      image: "helper.jpg",
+    },
+  );
+  assert.deepEqual(
+    getRecipeMetadata({ language: "he", slug: "helper" }, catalog),
+    {
+      title: "עוזר",
+      description: generic.description,
+      image: "helper.jpg",
+    },
+  );
+});
+
+test("an empty localization is no better than a missing one", () => {
+  const catalog = {
+    helper: {
+      listing: { intent: "unlisted", reason: "Helper note." },
+      markerIds: [],
+      localizations: { en: { title: "", description: "" } },
+    },
+  };
+
+  assert.deepEqual(
+    getRecipeMetadata({ language: "en", slug: "helper" }, catalog),
+    {
+      title: generic.title,
+      description: generic.description,
+    },
+  );
+  assert.deepEqual(
+    getRecipeMetadata({ language: "en", slug: "uncataloged" }, catalog),
+    getRecipeMetadata({ language: "en", slug: "helper" }, catalog),
+  );
+});
+
+test("complete metadata reaches the page untouched, social override included", () => {
+  const catalog = {
+    dish: {
+      listing: { intent: "featured", categoryId: "mains", featuredOrder: 1 },
+      markerIds: [],
+      localizations: {
+        en: {
+          title: "Dish",
+          description: "A dish.",
+          image: "dish.jpg",
+          socialImage: "dish-card.png",
+        },
+      },
+    },
+  };
+
+  assert.deepEqual(
+    getRecipeMetadata({ language: "en", slug: "dish" }, catalog),
+    {
+      title: "Dish",
+      description: "A dish.",
+      image: "dish.jpg",
+      socialImage: "dish-card.png",
+    },
+  );
+});
+
+test("verification checks the unlisted pages the source tree actually has", () => {
+  const recipes = [
+    ...pair("featured_dish"),
+    { language: "en", slug: "helper" },
+  ];
+  const catalog = {
+    featured_dish: featured("mains", 1),
+    helper: unlisted("Component recipe other recipes link to."),
+    removed: unlisted("Kept for a recipe that no longer exists."),
+  };
+
+  // One localized source means one page to require: the missing Hebrew
+  // counterpart is a warning, not a page verification may demand. An orphan
+  // entry names no page at all.
+  assert.deepEqual(listUnlistedRecipes(recipes, catalog), [
+    { language: "en", slug: "helper" },
+  ]);
+  assert.deepEqual(
+    messagesFor(collectCatalogDiagnostics(recipes, catalog), "error"),
+    [],
+  );
+});
+
+test("a catalog with nothing unlisted asks verification for nothing", () => {
+  const recipes = pair("featured_dish");
+  const catalog = { featured_dish: featured("mains", 1) };
+
+  assert.deepEqual(listUnlistedRecipes(recipes, catalog), []);
+  assert.deepEqual(collectCatalogDiagnostics(recipes, catalog), []);
 });
 
 test("a recipe missing one language keeps its card off every landing page", () => {

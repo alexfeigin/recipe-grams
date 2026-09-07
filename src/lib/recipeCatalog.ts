@@ -537,12 +537,15 @@ export const recipeCatalog: RecipeCatalog = {
   }),
 };
 
-export function getCatalogEntry(
-  slug: string,
-  catalog: RecipeCatalog = recipeCatalog,
-): RecipeCatalogEntry | undefined {
-  return catalog[slug];
-}
+// What a recipe page says about itself when the catalog does not say it. A
+// missing entry and an entry with an empty title read the same to a reader, so
+// they fall back the same way, field by field: whatever the catalog does give —
+// the other text, an image, an explicit social image — is kept.
+const genericMetadata = {
+  title: "Recipe-Grams Recipe",
+  description:
+    "A Recipe-Grams page rendered from the localized Markdown recipe source.",
+} as const;
 
 export function getRecipeMetadata(
   recipe: RecipeIdentity,
@@ -550,14 +553,10 @@ export function getRecipeMetadata(
 ): LocalizedRecipeMetadata {
   const metadata = catalog[recipe.slug]?.localizations[recipe.language];
 
-  if (metadata) {
-    return metadata;
-  }
-
   return {
-    title: "Recipe-Grams Recipe",
-    description:
-      "A Recipe-Grams page rendered from the localized Markdown recipe source.",
+    ...metadata,
+    title: metadata?.title || genericMetadata.title,
+    description: metadata?.description || genericMetadata.description,
   };
 }
 
@@ -618,6 +617,24 @@ export function selectFeaturedRecipes(
       ];
     })
     .sort((first, second) => first.featuredOrder - second.featuredOrder);
+}
+
+// The published recipes the catalog deliberately keeps out of browsing, one
+// entry per localized source that actually exists. Verification uses this to
+// check that an unlisted recipe still publishes and still has no card, without
+// assuming the catalog holds any particular number of unlisted recipes or that
+// every one of them is a complete Recipe Pair.
+export function listUnlistedRecipes(
+  recipes: readonly RecipeIdentity[],
+  catalog: RecipeCatalog = recipeCatalog,
+): RecipeIdentity[] {
+  return Array.from(groupSourceLanguages(recipes))
+    .filter(([slug]) => catalog[slug]?.listing.intent === "unlisted")
+    .flatMap(([slug, availableLanguages]) =>
+      languages
+        .filter((language) => availableLanguages.has(language))
+        .map((language) => ({ language, slug })),
+    );
 }
 
 // Everything the catalog and the recipe source tree can disagree about, checked
@@ -792,6 +809,8 @@ function unlistedRecipe(
   };
 }
 
+// A recipe's social card is its own image unless a localization overrides it,
+// so an entry records the image once and leaves socialImage to the exceptions.
 function localizedMetadata(
   title: string,
   description: string,
@@ -801,6 +820,5 @@ function localizedMetadata(
     title,
     description,
     image,
-    socialImage: image,
   };
 }
