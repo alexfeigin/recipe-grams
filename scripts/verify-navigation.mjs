@@ -119,4 +119,4 @@ assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 builtAssetExists("pizza.jpg");
 builtAssetExists("grilledchicken.jpeg");
 
-console.log("Issue #7 navigation verification passed.");
+console.log("Navigation verification passed.");

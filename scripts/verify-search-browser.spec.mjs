@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const baseUrl =
-  process.env.SEARCH_BASE_URL ?? "http://127.0.0.1:4324/recipe-grams/";
+import { baseUrl } from "./browser-target.mjs";
 
 const copy = {
   en: {
@@ -28,7 +27,7 @@ for (const language of ["en", "he"]) {
   for (const width of [1280, 390]) {
     test(`${language} ${width}: search expands between the brand and language toggle`, async ({
       page,
-    }) => {
+    }, testInfo) => {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}`);
 
@@ -98,7 +97,9 @@ for (const language of ["en", "he"]) {
 
       await input.fill(copy[language].replacement);
       await expect(results.first()).toContainText(copy[language].result);
-      await page.screenshot({ path: `.astro/search-${language}-${width}.png` });
+      await page.screenshot({
+        path: testInfo.outputPath(`search-${language}-${width}.png`),
+      });
 
       for (const href of await results.evaluateAll((links) =>
         links.map((link) => link.href),

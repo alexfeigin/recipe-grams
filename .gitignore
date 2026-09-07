@@ -27,6 +27,8 @@
 .DS_Store
 node_modules/
 .astro/
+/test-results/
+/playwright-report/
 .impeccable/config.local.json
 .impeccable/screenshots/
 

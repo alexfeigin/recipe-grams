@@ -107,4 +107,4 @@ assert.doesNotMatch(
   /github\.com\/alexfeigin\/recipe-grams\/blob\/astro-recipe-blog\/he\/[^"]+\.MD/,
 );
 
-console.log("Issue #6 catalog landing page verification passed.");
+console.log("Catalog landing page verification passed.");

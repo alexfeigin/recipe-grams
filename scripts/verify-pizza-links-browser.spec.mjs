@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const baseUrl =
-  process.env.PIZZA_LINKS_BASE_URL ?? "http://127.0.0.1:4324/recipe-grams/";
+import { baseUrl } from "./browser-target.mjs";
 const productionBase = "https://alexfeigin.github.io/recipe-grams/";
 const shellUrl =
   "https://github.com/alexfeigin/recipe-grams/blob/master/poolish_calc.sh";

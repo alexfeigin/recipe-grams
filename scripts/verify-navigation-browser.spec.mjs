@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const baseUrl =
-  process.env.NAVIGATION_BASE_URL ?? "http://127.0.0.1:4324/recipe-grams/";
+import { baseUrl } from "./browser-target.mjs";
 
 async function tabTo(page, target) {
   for (let index = 0; index < 12; index++) {

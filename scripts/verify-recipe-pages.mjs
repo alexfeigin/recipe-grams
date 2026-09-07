@@ -51,4 +51,4 @@ assert.doesNotMatch(
   /github\.com\/alexfeigin\/recipe-grams\/blob\/astro-recipe-blog\/en\/(?:pizza_dough|grilled_chicken_thighs|choclatechip_vegan|quinoa)\.MD/,
 );
 
-console.log("Issue #5 recipe page verification passed.");
+console.log("Recipe page verification passed.");

@@ -2,8 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
 
-const baseUrl = "http://127.0.0.1:4321/recipe-grams/";
-const screenshotDir = "docs/verification/issue-8-screenshots";
+import { baseUrl } from "./browser-target.mjs";
 
 test("Pagefind indexes the generated static site", async () => {
   expect(
@@ -16,7 +15,7 @@ test("Pagefind indexes the generated static site", async () => {
 
 test("English search finds a body term and opens the recipe", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto(baseUrl);
   await page.getByRole("searchbox", { name: "Search" }).fill("onion");
 
@@ -26,7 +25,7 @@ test("English search finds a body term and opens the recipe", async ({
   await expect(result).toContainText("onion");
 
   await page.screenshot({
-    path: `${screenshotDir}/en-search-results.png`,
+    path: testInfo.outputPath("en-search-results.png"),
     fullPage: true,
   });
 
@@ -37,7 +36,7 @@ test("English search finds a body term and opens the recipe", async ({
 
 test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto(`${baseUrl}he/`);
   await page.getByRole("searchbox", { name: "חיפוש" }).fill("בצל");
 
@@ -47,7 +46,7 @@ test("Hebrew search finds a body term and opens the Hebrew recipe", async ({
   await expect(result).toContainText("בצל");
 
   await page.screenshot({
-    path: `${screenshotDir}/he-search-results.png`,
+    path: testInfo.outputPath("he-search-results.png"),
     fullPage: true,
   });
 
@@ -75,11 +74,13 @@ test("Search results attach to the original field and close outside", async ({
 
   const overlayState = await overlay.evaluate((element) => {
     const inputBounds = document
-      .querySelector("[data-search-input]")
+      .querySelector(".search-control")
       .getBoundingClientRect();
     const bounds = element.getBoundingClientRect();
     return {
-      aligned: Math.abs(inputBounds.left - bounds.left) < 2,
+      aligned:
+        Math.abs(inputBounds.left - bounds.left) < 2 &&
+        Math.abs(inputBounds.right - bounds.right) < 2,
       gap: bounds.top - inputBounds.bottom,
     };
   });
@@ -91,7 +92,9 @@ test("Search results attach to the original field and close outside", async ({
   await expect(overlay).toBeHidden();
 });
 
-test("Mobile navbar exposes the same search popup", async ({ page }) => {
+test("Mobile navbar exposes the same search popup", async ({
+  page,
+}, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(baseUrl);
   await page.getByRole("searchbox", { name: "Search" }).fill("salmon");
@@ -102,7 +105,7 @@ test("Mobile navbar exposes the same search popup", async ({ page }) => {
   await expect(result).toBeVisible();
 
   await page.screenshot({
-    path: `${screenshotDir}/mobile-search-results.png`,
+    path: testInfo.outputPath("mobile-search-results.png"),
     fullPage: true,
   });
 });

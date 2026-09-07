@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { calculatePoolish } from "../src/lib/poolishCalculator.ts";
 
-const baseUrl =
-  process.env.CALCULATOR_BASE_URL ?? "http://127.0.0.1:4323/recipe-grams/";
+import { baseUrl } from "./browser-target.mjs";
 const defaults = {
   desiredDough: "1700",
   hydration: "0.7",
