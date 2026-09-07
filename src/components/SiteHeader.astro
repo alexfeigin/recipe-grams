@@ -57,9 +57,12 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     </span>
   </a>
 
-  <input class="nav-toggle" type="checkbox" id="nav-toggle" />
-
-  <nav class="nav-panel" aria-label={navLabel} dir={searchDirection}>
+  <nav
+    id="main-navigation"
+    class="nav-panel"
+    aria-label={navLabel}
+    dir={searchDirection}
+  >
     {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
   </nav>
 
@@ -161,33 +164,80 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       }
     </div>
 
-    <label
+    <button
       class="menu-button"
-      for="nav-toggle"
+      type="button"
       aria-label={toggleNavigationLabel}
+      aria-expanded="false"
+      aria-controls="main-navigation"
     >
-      <span></span>
-      <span></span>
-      <span></span>
-    </label>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
   </div>
 
   <script is:inline>
-    const navToggle = document.getElementById("nav-toggle");
+    const menuButton = document.querySelector(".menu-button");
+    const navigation = document.getElementById("main-navigation");
+    const mobileNavigation = window.matchMedia("(max-width: 880px)");
+    let lastFocusedElement = document.activeElement;
 
-    if (navToggle instanceof HTMLInputElement) {
-      if (window.location.hash === "#nav-open") {
-        navToggle.checked = true;
-      }
-
-      document
-        .querySelector(".nav-panel")
-        ?.addEventListener("click", (event) => {
-          if (event.target instanceof Element && event.target.closest("a")) {
-            navToggle.checked = false;
-          }
-        });
+    function setNavigationOpen(open, restoreFocus = false) {
+      const expanded = open && mobileNavigation.matches;
+      menuButton.setAttribute("aria-expanded", String(expanded));
+      navigation.classList.toggle("is-open", expanded);
+      if (restoreFocus) menuButton.focus({ preventScroll: true });
     }
+
+    setNavigationOpen(window.location.hash === "#nav-open");
+
+    menuButton.addEventListener("click", (event) => {
+      const open = menuButton.getAttribute("aria-expanded") !== "true";
+      setNavigationOpen(open);
+      // The drawer precedes the trigger in DOM order. Keyboard activation
+      // starts at its first link so subsequent Tab presses follow the links.
+      if (open && event.detail === 0) navigation.querySelector("a")?.focus();
+    });
+
+    navigation.addEventListener("click", (event) => {
+      if (event.target instanceof Element && event.target.closest("a")) {
+        setNavigationOpen(false, mobileNavigation.matches);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        menuButton.getAttribute("aria-expanded") === "true"
+      ) {
+        event.preventDefault();
+        setNavigationOpen(false, true);
+      }
+    });
+
+    document.addEventListener("focusin", (event) => {
+      lastFocusedElement = event.target;
+      if (
+        !navigation.contains(event.target) &&
+        !menuButton.contains(event.target)
+      ) {
+        setNavigationOpen(false);
+      }
+    });
+
+    mobileNavigation.addEventListener("change", () => {
+      // CSS can hide and blur the focused control before the media event fires.
+      const focusedElement =
+        document.activeElement === document.body
+          ? lastFocusedElement
+          : document.activeElement;
+      const focusInNavigation = navigation.contains(focusedElement);
+      const focusOnTrigger = focusedElement === menuButton;
+      setNavigationOpen(false, mobileNavigation.matches && focusInNavigation);
+      if (!mobileNavigation.matches && focusOnTrigger)
+        navigation.querySelector("a")?.focus();
+    });
   </script>
 </header>
 
@@ -266,9 +316,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
 
   function activateSearch() {
     header.classList.add("search-active");
-    if (navToggle instanceof HTMLInputElement) {
-      navToggle.checked = false;
-    }
+    setNavigationOpen(false);
   }
 
   function closeSearch(restoreFocus = false) {
@@ -520,16 +568,15 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
     white-space: nowrap;
   }
 
-  .nav-toggle {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
   .menu-button {
     display: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .menu-button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
   }
 
   .nav-panel {
@@ -1091,7 +1138,7 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       display: none;
     }
 
-    .nav-toggle:checked ~ .nav-panel {
+    .nav-panel.is-open {
       display: grid;
       gap: 0.2rem;
     }
