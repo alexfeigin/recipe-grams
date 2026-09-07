@@ -32,7 +32,10 @@ Linux machines may also need `npx playwright install-deps chromium`.
 
 Where things live: recipe text in `en/` and `he/`, images in `images/`, site
 metadata in `src/lib/recipeCatalog.ts`, shared interface labels in
-`src/lib/site.ts`, and the shared theme in `src/styles/design-tokens.css`.
+`src/lib/site.ts`, and the shared theme in `src/styles/design-tokens.css`. All
+of `images/` is published, including files the site itself does not link, so
+keep an unreferenced image unless there is evidence it can go — see
+[ADR 0028](docs/adr/0028-retain-published-images-unless-evidence-supports-removal.md).
 [PRODUCT.md](PRODUCT.md) describes what the site does today,
 [DESIGN.md](DESIGN.md) the visual rules and breakpoints, [CONTEXT.md](CONTEXT.md)
 the vocabulary, and [docs/adr/](docs/adr/README.md) why the architecture is what

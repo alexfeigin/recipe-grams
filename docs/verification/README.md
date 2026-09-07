@@ -27,7 +27,8 @@ it is.
 | [issue-20](issue-20-shared-theme.md)          | 2026-09-07 | `cd71119`   | Shared theme ownership                                          |
 | [issue-21](issue-21-module-boundaries.md)     | 2026-09-07 | `38233e1`   | Catalog, labels, and rendering separated                        |
 | [issue-17](issue-17-current-guidance.md)      | 2026-09-07 | `e0847f1`   | Product, design, and development guidance                       |
-| [issue-19](issue-19-historical-evidence.md)   | 2026-09-07 | this change | Historical evidence separated from current instruction          |
+| [issue-19](issue-19-historical-evidence.md)   | 2026-09-07 | `134e624`   | Historical evidence separated from current instruction          |
+| [issue-22](issue-22-unreferenced-assets.md)   | 2026-09-07 | this change | Disposition of three unreferenced published images              |
 
 ## Page counts are checkpoint counts
 
