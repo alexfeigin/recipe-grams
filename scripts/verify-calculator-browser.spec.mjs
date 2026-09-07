@@ -160,6 +160,54 @@ for (const language of ["en", "he"]) {
       await expectOutputs({ targetDough: 283, poolishYeast: 3 });
     });
 
+    test("carries the selected mode into every language-switch link", async ({
+      page,
+    }) => {
+      const otherLanguage = language === "en" ? "he" : "en";
+      const otherCalculator = `${baseUrl}${otherLanguage === "he" ? "he/" : ""}poolish/`;
+      // The header renders one language-switch link per layout variant, so both
+      // the desktop picker and the mobile actions have to carry the mode.
+      const switches = page.locator("a[data-language-switch]");
+      await expect(switches).toHaveCount(2);
+      for (const link of await switches.all()) {
+        await expect(link).toHaveAttribute(
+          "href",
+          new URL(otherCalculator).pathname,
+        );
+      }
+
+      await page
+        .locator(".mode-switch label")
+        .filter({ hasText: language === "en" ? "Pizza preset" : "פריסט פיצה" })
+        .click();
+      await expect(page).toHaveURL(/\?mode=pizza$/);
+      for (const link of await switches.all()) {
+        await expect(link).toHaveAttribute(
+          "href",
+          `${new URL(otherCalculator).pathname}?mode=pizza`,
+        );
+      }
+
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.locator(".mobile-actions a[data-language-switch]").click();
+      await expect(page).toHaveURL(`${otherCalculator}?mode=pizza`);
+      await expect(page.locator("html")).toHaveAttribute("lang", otherLanguage);
+      await expect(
+        page.locator('input[name="mode"][value="pizza"]'),
+      ).toBeChecked();
+      await expect(page.locator("[data-pizza-controls]")).toBeVisible();
+      await expect(page.locator('[data-output="targetDough"]')).toContainText(
+        "850",
+      );
+      // The mode survives a second switch, back to where the reader started.
+      for (const link of await switches.all()) {
+        await expect(link).toHaveAttribute(
+          "href",
+          `${new URL(`${baseUrl}${language === "he" ? "he/" : ""}poolish/`).pathname}?mode=pizza`,
+        );
+      }
+    });
+
     test("copies current localized weights and cannot copy invalid results", async ({
       page,
       context,

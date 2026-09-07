@@ -123,6 +123,26 @@ for (const language of ["en", "he"]) {
     await expect(navigation).toBeHidden();
   });
 
+  test(`${language}: back to top returns to the page start and focuses the brand`, async ({
+    page,
+  }) => {
+    // Reduced motion keeps the jump instant, which is also the behavior the
+    // button is expected to honor.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(homeUrl);
+    const backToTop = page.locator("[data-back-to-top]");
+    await expect(backToTop).toBeHidden();
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight),
+    );
+    await expect(backToTop).toBeVisible();
+    await backToTop.click();
+    await expect(page.locator(".brand")).toBeFocused();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(backToTop).toBeHidden();
+  });
+
   for (const width of [881, 1280]) {
     test(`${language} ${width}: desktop Tab order has visible navigation and no mobile trigger`, async ({
       page,

@@ -37,7 +37,6 @@ const languageHref =
   language === "he"
     ? sitePath(basePath, "poolish/")
     : sitePath(basePath, "he/poolish/");
-const alternateLanguageHref = languageHref;
 const zeroGrams = `0${text.gramUnit}`;
 ---
 
@@ -70,10 +69,7 @@ const zeroGrams = `0${text.gramUnit}`;
       navItems={[{ label: text.homeLabel, href: homeHref }]}
     />
 
-    <main
-      class="calculator-shell"
-      data-alternate-language-href={alternateLanguageHref}
-    >
+    <main class="calculator-shell">
       <section class="tool-intro" aria-labelledby="page-title">
         <div>
           <h1 id="page-title">{text.pageTitle}</h1>
@@ -294,14 +290,12 @@ const zeroGrams = `0${text.gramUnit}`;
         CalculatorMode,
         CalculatorResult,
       } from "../lib/poolishCalculator";
+      import { setLanguageSwitchQuery } from "../scripts/languageSwitch";
 
       const clientLabels =
         poolishCalculatorLabels[
           document.documentElement.lang === "he" ? "he" : "en"
         ];
-      const calculatorShell = document.querySelector(
-        "[data-alternate-language-href]",
-      );
       const form = document.querySelector("[data-calculator-form]");
       const genericControls = document.querySelector("[data-generic-controls]");
       const pizzaControls = document.querySelector("[data-pizza-controls]");
@@ -344,9 +338,14 @@ const zeroGrams = `0${text.gramUnit}`;
         }
       }
 
-      function applyUrlMode() {
+      function urlMode(): CalculatorMode | null {
         const mode = new URLSearchParams(window.location.search).get("mode");
-        if (mode === "pizza" || mode === "generic") {
+        return mode === "pizza" || mode === "generic" ? mode : null;
+      }
+
+      function applyUrlMode() {
+        const mode = urlMode();
+        if (mode) {
           setMode(mode);
         }
       }
@@ -358,35 +357,16 @@ const zeroGrams = `0${text.gramUnit}`;
         window.history.replaceState({}, "", url);
       }
 
-      function syncAlternateLanguageHref() {
-        if (!(calculatorShell instanceof HTMLElement)) {
-          return;
+      // The header renders a language-switch link in both its desktop and its
+      // mobile layout. Both carry the selected mode so the reader lands on the
+      // same calculator in the other language.
+      function syncLanguageSwitch() {
+        const mode = urlMode();
+        const query = new URLSearchParams();
+        if (mode) {
+          query.set("mode", mode);
         }
-
-        const alternateLanguageHref =
-          calculatorShell.dataset.alternateLanguageHref;
-        if (!alternateLanguageHref) {
-          return;
-        }
-
-        const mode = new URLSearchParams(window.location.search).get("mode");
-        const alternateUrl = new URL(
-          alternateLanguageHref,
-          window.location.origin,
-        );
-
-        if (mode === "pizza" || mode === "generic") {
-          alternateUrl.searchParams.set("mode", mode);
-        }
-
-        for (const link of document.querySelectorAll("a")) {
-          if (
-            link instanceof HTMLAnchorElement &&
-            new URL(link.href).pathname === alternateUrl.pathname
-          ) {
-            link.href = `${alternateUrl.pathname}${alternateUrl.search}`;
-          }
-        }
+        setLanguageSwitchQuery(query);
       }
 
       function grams(value: number, digits = 0) {
@@ -484,12 +464,12 @@ const zeroGrams = `0${text.gramUnit}`;
       form?.addEventListener("input", render);
       form?.addEventListener("change", () => {
         syncUrlMode();
-        syncAlternateLanguageHref();
+        syncLanguageSwitch();
         render();
       });
       copyButton?.addEventListener("click", copyWeights);
       applyUrlMode();
-      syncAlternateLanguageHref();
+      syncLanguageSwitch();
       render();
     </script>
   </body>

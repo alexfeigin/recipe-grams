@@ -31,16 +31,18 @@ const navLabel = language === "he" ? "ניווט ראשי" : "Main navigation";
 const languagePickerLabel = language === "he" ? "בחירת שפה" : "Language";
 const hebrewLabel = "עב";
 const englishLabel = "EN";
-const logoHref = sitePath(import.meta.env.BASE_URL, "recipe-grams-logo.png");
+const basePath = import.meta.env.BASE_URL;
+const logoHref = sitePath(basePath, "recipe-grams-logo.png");
 const searchLabels = labelsByLanguage[language].search;
-const pagefindBundle = sitePath(
-  import.meta.env.BASE_URL,
-  "pagefind/pagefind.js",
-);
 const searchDirection = language === "he" ? "rtl" : "ltr";
 ---
 
-<header class="site-header">
+<header
+  class="site-header"
+  data-site-header
+  data-language={language}
+  data-base-path={basePath}
+>
   <a class="brand" href={homeHref} aria-label={homeLabel}>
     <img
       class="brand-mark"
@@ -134,14 +136,18 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       language === "he" ? (
         <span aria-current="page">{hebrewLabel}</span>
       ) : (
-        <a href={languageHref}>{hebrewLabel}</a>
+        <a href={languageHref} data-language-switch>
+          {hebrewLabel}
+        </a>
       )
     }
     {
       language === "en" ? (
         <span aria-current="page">{englishLabel}</span>
       ) : (
-        <a href={languageHref}>{englishLabel}</a>
+        <a href={languageHref} data-language-switch>
+          {englishLabel}
+        </a>
       )
     }
   </div>
@@ -152,14 +158,18 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
         language === "he" ? (
           <span aria-current="page">{hebrewLabel}</span>
         ) : (
-          <a href={languageHref}>{hebrewLabel}</a>
+          <a href={languageHref} data-language-switch>
+            {hebrewLabel}
+          </a>
         )
       }
       {
         language === "en" ? (
           <span aria-current="page">{englishLabel}</span>
         ) : (
-          <a href={languageHref}>{englishLabel}</a>
+          <a href={languageHref} data-language-switch>
+            {englishLabel}
+          </a>
         )
       }
     </div>
@@ -176,69 +186,6 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
       <span aria-hidden="true"></span>
     </button>
   </div>
-
-  <script is:inline>
-    const menuButton = document.querySelector(".menu-button");
-    const navigation = document.getElementById("main-navigation");
-    const mobileNavigation = window.matchMedia("(max-width: 880px)");
-    let lastFocusedElement = document.activeElement;
-
-    function setNavigationOpen(open, restoreFocus = false) {
-      const expanded = open && mobileNavigation.matches;
-      menuButton.setAttribute("aria-expanded", String(expanded));
-      navigation.classList.toggle("is-open", expanded);
-      if (restoreFocus) menuButton.focus({ preventScroll: true });
-    }
-
-    setNavigationOpen(window.location.hash === "#nav-open");
-
-    menuButton.addEventListener("click", (event) => {
-      const open = menuButton.getAttribute("aria-expanded") !== "true";
-      setNavigationOpen(open);
-      // The drawer precedes the trigger in DOM order. Keyboard activation
-      // starts at its first link so subsequent Tab presses follow the links.
-      if (open && event.detail === 0) navigation.querySelector("a")?.focus();
-    });
-
-    navigation.addEventListener("click", (event) => {
-      if (event.target instanceof Element && event.target.closest("a")) {
-        setNavigationOpen(false, mobileNavigation.matches);
-      }
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (
-        event.key === "Escape" &&
-        menuButton.getAttribute("aria-expanded") === "true"
-      ) {
-        event.preventDefault();
-        setNavigationOpen(false, true);
-      }
-    });
-
-    document.addEventListener("focusin", (event) => {
-      lastFocusedElement = event.target;
-      if (
-        !navigation.contains(event.target) &&
-        !menuButton.contains(event.target)
-      ) {
-        setNavigationOpen(false);
-      }
-    });
-
-    mobileNavigation.addEventListener("change", () => {
-      // CSS can hide and blur the focused control before the media event fires.
-      const focusedElement =
-        document.activeElement === document.body
-          ? lastFocusedElement
-          : document.activeElement;
-      const focusInNavigation = navigation.contains(focusedElement);
-      const focusOnTrigger = focusedElement === menuButton;
-      setNavigationOpen(false, mobileNavigation.matches && focusInNavigation);
-      if (!mobileNavigation.matches && focusOnTrigger)
-        navigation.querySelector("a")?.focus();
-    });
-  </script>
 </header>
 
 <button
@@ -253,258 +200,17 @@ const searchDirection = language === "he" ? "rtl" : "ltr";
   </svg>
 </button>
 
-<script
-  is:inline
-  define:vars={{
-    language,
-    pagefindBundle,
-    searchLabels,
-    basePath: import.meta.env.BASE_URL,
-  }}
->
-  const header = document.querySelector(".site-header");
-  const searchArea = document.querySelector("[data-search-area]");
-  const overlay = document.querySelector("[data-search-overlay]");
-  const input = document.querySelector("[data-search-input]");
-  const status = document.querySelector("[data-search-status]");
-  const summary = document.querySelector("[data-search-summary]");
-  const results = document.querySelector("[data-search-results]");
-  const closeButton = document.querySelector("[data-search-close]");
-  const backToTop = document.querySelector("[data-back-to-top]");
-  const retryButton = document.querySelector("[data-search-retry]");
-  let pagefindPromise;
-  let loadAttempt = 0;
-  let lastSearchId = 0;
+<script>
+  import { initializeBackToTop } from "../scripts/backToTop";
+  import { initializeSiteHeader } from "../scripts/siteHeader";
 
-  function normalizeResultUrl(url) {
-    const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-    if (url.startsWith(normalizedBase)) {
-      return url;
-    }
-    return `${normalizedBase}${url.replace(/^\/+/, "")}`;
-  }
+  const header = document.querySelector<HTMLElement>("[data-site-header]");
+  const backToTop = document.querySelector<HTMLElement>("[data-back-to-top]");
+  const brand = header?.querySelector<HTMLElement>(".brand");
 
-  async function getPagefind() {
-    // Browsers can cache failed module imports, so retries need a fresh URL.
-    const bundleUrl = loadAttempt
-      ? `${pagefindBundle}?retry=${loadAttempt}`
-      : pagefindBundle;
-    pagefindPromise ??= import(bundleUrl)
-      .then(async (pagefind) => {
-        await pagefind.init?.();
-        return pagefind;
-      })
-      .catch((error) => {
-        pagefindPromise = undefined;
-        ++loadAttempt;
-        throw error;
-      });
-    return pagefindPromise;
-  }
-
-  function hideResultsLayer() {
-    overlay.hidden = true;
-    input.setAttribute("aria-expanded", "false");
-  }
-
-  function showResultsLayer(message) {
-    summary.textContent = message;
-    status.textContent = message;
-    overlay.hidden = false;
-    input.setAttribute("aria-expanded", "true");
-  }
-
-  function activateSearch() {
-    header.classList.add("search-active");
-    setNavigationOpen(false);
-  }
-
-  function closeSearch(restoreFocus = false) {
-    ++lastSearchId;
-    input.removeAttribute("aria-busy");
-    hideResultsLayer();
-    if (restoreFocus) {
-      input.focus();
-    }
-    header.classList.remove("search-active");
-  }
-
-  function clearResults() {
-    results.replaceChildren();
-  }
-
-  function renderResults(searchResults) {
-    results.replaceChildren();
-
-    for (const result of searchResults) {
-      const link = document.createElement("a");
-      link.className = "search-result";
-      link.href = normalizeResultUrl(result.url);
-
-      const title = document.createElement("strong");
-      title.textContent = result.meta.title ?? link.href;
-      link.append(title);
-
-      const details = [result.meta.category, result.meta.markers]
-        .filter(Boolean)
-        .join(" | ");
-      if (details) {
-        const meta = document.createElement("span");
-        meta.className = "search-result-meta";
-        meta.textContent = details;
-        link.append(meta);
-      }
-
-      const excerpt = document.createElement("span");
-      excerpt.className = "search-result-excerpt";
-      excerpt.innerHTML = result.excerpt;
-      link.append(excerpt);
-
-      results.append(link);
-    }
-  }
-
-  async function runSearch() {
-    activateSearch();
-    const query = input.value.trim();
-    const searchId = ++lastSearchId;
-
-    retryButton.hidden = true;
-    if (query.length < 2) {
-      input.removeAttribute("aria-busy");
-      status.textContent = "";
-      clearResults();
-      hideResultsLayer();
-      return;
-    }
-
-    input.setAttribute("aria-busy", "true");
-    status.textContent = searchLabels.loading;
-    clearResults();
-    hideResultsLayer();
-    try {
-      const pagefind = await getPagefind();
-      const search = await pagefind.search(query, { filters: { language } });
-      const searchResults = await Promise.all(
-        search.results.slice(0, 8).map((result) => result.data()),
-      );
-      if (searchId !== lastSearchId) return;
-      input.removeAttribute("aria-busy");
-      if (searchResults.length === 0) {
-        showResultsLayer(searchLabels.empty);
-        return;
-      }
-      const foundMessage = searchLabels.found.replace(
-        "{count}",
-        searchResults.length,
-      );
-      renderResults(searchResults);
-      showResultsLayer(foundMessage);
-    } catch {
-      if (searchId !== lastSearchId) return;
-      input.removeAttribute("aria-busy");
-      showResultsLayer(searchLabels.error);
-      retryButton.hidden = false;
-    }
-  }
-
-  closeButton.addEventListener("click", () => closeSearch(true));
-  retryButton.addEventListener("click", () => {
-    input.focus();
-    runSearch();
-  });
-  input.addEventListener("pointerdown", activateSearch);
-  input.addEventListener("focus", activateSearch);
-  input.addEventListener("input", () => {
-    runSearch();
-  });
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") runSearch();
-    if (event.key === "ArrowDown" && !overlay.hidden) {
-      event.preventDefault();
-      results.querySelector("a")?.focus();
-    }
-  });
-  document.addEventListener("pointerdown", (event) => {
-    if (
-      header.classList.contains("search-active") &&
-      event.target instanceof Node &&
-      !searchArea.contains(event.target)
-    ) {
-      closeSearch();
-    }
-  });
-  document.addEventListener("focusin", (event) => {
-    if (
-      header.classList.contains("search-active") &&
-      event.target instanceof Node &&
-      !searchArea.contains(event.target)
-    ) {
-      closeSearch();
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && header.classList.contains("search-active")) {
-      event.preventDefault();
-      closeSearch(true);
-    }
-  });
-
-  const backToTopFadeStart = 140;
-  const backToTopFadeEnd = 720;
-  const backToTopMinimumOpacity = 0.14;
-  let backToTopFrame = 0;
-
-  function updateBackToTopVisibility() {
-    const scrollPosition = window.scrollY;
-
-    if (scrollPosition <= backToTopFadeStart) {
-      backToTop.hidden = true;
-      return;
-    }
-
-    const scrollProgress = Math.min(
-      1,
-      (scrollPosition - backToTopFadeStart) /
-        (backToTopFadeEnd - backToTopFadeStart),
-    );
-    const opacity =
-      backToTopMinimumOpacity + (1 - backToTopMinimumOpacity) * scrollProgress;
-
-    backToTop.style.setProperty("--back-to-top-opacity", opacity.toFixed(3));
-    backToTop.hidden = false;
-  }
-
-  function scheduleBackToTopUpdate() {
-    if (backToTopFrame) {
-      return;
-    }
-
-    backToTopFrame = window.requestAnimationFrame(() => {
-      backToTopFrame = 0;
-      updateBackToTopVisibility();
-    });
-  }
-
-  backToTop.addEventListener("click", () => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    window.scrollTo({
-      top: 0,
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-    });
-
-    const brandLink = document.querySelector(".brand");
-    if (brandLink instanceof HTMLElement) {
-      brandLink.focus({ preventScroll: true });
-    }
-  });
-
-  window.addEventListener("scroll", scheduleBackToTopUpdate, {
-    passive: true,
-  });
-  updateBackToTopVisibility();
+  if (header) initializeSiteHeader(header);
+  if (backToTop && brand)
+    initializeBackToTop({ button: backToTop, focusTarget: brand });
 </script>
 
 <style>

@@ -32,3 +32,4 @@ Each record is a short, dated-by-number statement of one decision. Records are n
 | 0026 | [Separate site vocabulary, recipe catalog, and build-time page modules](0026-separate-site-vocabulary-catalog-and-build-time-modules.md)                                       | Current                          |
 | 0027 | [Keep search and language switching in the header at every width](0027-keep-search-and-language-switching-in-the-header.md)                                                    | Current, supersedes 0014 in part |
 | 0028 | [Retain published images unless evidence supports removal](0028-retain-published-images-unless-evidence-supports-removal.md)                                                   | Current                          |
+| 0029 | [Own header behavior in typed browser modules](0029-own-header-behavior-in-typed-browser-modules.md)                                                                           | Current                          |
