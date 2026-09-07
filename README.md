@@ -34,11 +34,21 @@ Linux machines may also need `npx playwright install-deps chromium`.
   whenever you need to try search, social previews, or the published URLs.
 
 Where things live: recipe text in `en/` and `he/`, images in `images/`, site
-metadata in `src/lib/recipeCatalog.ts`, shared interface labels in
-`src/lib/site.ts`, the published destinations for recipe Markdown links and
-images in `src/lib/recipeLinks.ts`, the browser behavior of the header, the
-back-to-top button and the language-switch links in `src/scripts/`, and the
-shared theme in `src/styles/design-tokens.css`.
+metadata in `src/lib/recipeCatalog.ts`, interface translations in `src/i18n/`,
+the site vocabulary and URL helper in `src/lib/site.ts`, the published
+destinations for recipe Markdown links and images in `src/lib/recipeLinks.ts`,
+the browser behavior of the header, the back-to-top button and the
+language-switch links in `src/scripts/`, and the shared theme in
+`src/styles/design-tokens.css`.
+
+Every English and Hebrew interface string lives in `src/i18n/`, one module per
+surface: `ui.ts` for the shared chrome, `calculator.ts` for the poolish
+calculator. Each exports `<surface>Labels: Record<RecipeLanguage, ...>`, so a
+new side page adds `src/i18n/<page>.ts` in the same shape and imports it, and
+leaving a Hebrew string out fails `npm run typecheck` rather than rendering
+English inside a right-to-left page. Recipe copy is not interface copy: it
+stays in the Markdown recipes and, for titles and descriptions, in the catalog.
+See [ADR 0034](docs/adr/0034-store-interface-translations-in-src-i18n.md).
 
 The landing, recipe, and calculator pages share one document. The
 `<html>`/`<head>`/`<body>` shell, the metadata every page publishes, and the

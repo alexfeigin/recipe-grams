@@ -5,10 +5,10 @@
 // calculator, and the arithmetic to calculatePoolish in
 // src/lib/poolishCalculator.ts, the TypeScript port of poolish_calc.sh. The
 // page is noindex and unlinked from navigation, and all of its copy lives in
-// poolishCalculatorLabels so the two languages stay in step. The document
-// shell, header, and language-derived setup belong to SitePage.
+// src/i18n/calculator.ts so the two languages stay in step (ADR 0034). The
+// document shell, header, and language-derived setup belong to SitePage.
 import SitePage from "../layouts/SitePage.astro";
-import { poolishCalculatorLabels } from "../lib/poolishCalculatorLabels";
+import { calculatorLabels } from "../i18n/calculator";
 import { getPageContext } from "../lib/pageContext";
 import { sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
@@ -19,7 +19,7 @@ type Props = {
 
 const page = getPageContext(Astro.props.language, import.meta.env.BASE_URL);
 const language = page.language;
-const text = poolishCalculatorLabels[language];
+const text = calculatorLabels[language];
 const calculatorHref = sitePath(
   page.basePath,
   language === "he" ? "he/poolish/" : "poolish/",

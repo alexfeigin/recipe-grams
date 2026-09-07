@@ -12,7 +12,8 @@ import {
   listUnlistedRecipes,
   selectFeaturedRecipes,
 } from "../src/lib/recipeCatalog.ts";
-import { labelsByLanguage, languages } from "../src/lib/site.ts";
+import { uiLabels } from "../src/i18n/ui.ts";
+import { languages } from "../src/lib/site.ts";
 
 const repoRoot = process.cwd();
 
@@ -124,7 +125,7 @@ const homesByLanguage = { en: englishHome, he: hebrewHome };
 
 for (const language of languages) {
   const featured = selectFeaturedRecipes(language, localizedRecipes);
-  const expected = Object.keys(labelsByLanguage[language].categoryLabels)
+  const expected = Object.keys(uiLabels[language].categoryLabels)
     .flatMap((categoryId) =>
       featured.filter((recipe) => recipe.categoryId === categoryId),
     )

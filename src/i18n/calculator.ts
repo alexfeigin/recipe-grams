@@ -1,10 +1,11 @@
-// Every word the poolish calculator shows, in both site languages: the page
-// copy Astro renders and the messages its browser module writes at runtime.
-// Keeping them in one place is how the two languages stay in step; this module
-// holds no calculator arithmetic and reads no files.
-import type { RecipeLanguage } from "./site";
+// Interface translations for the poolish calculator: the page copy Astro
+// renders and the messages its browser module writes at runtime. One module
+// per surface under src/i18n, exporting Record<RecipeLanguage, ...> so both
+// languages are required and a half-translated page cannot build (ADR 0034).
+// This module holds no calculator arithmetic and reads no files.
+import type { RecipeLanguage } from "../lib/site";
 
-export type PoolishCalculatorLabels = {
+export type CalculatorLabels = {
   brandLine: string;
   pageTitle: string;
   pageDescription: string;
@@ -66,10 +67,7 @@ export type PoolishCalculatorLabels = {
   };
 };
 
-export const poolishCalculatorLabels: Record<
-  RecipeLanguage,
-  PoolishCalculatorLabels
-> = {
+export const calculatorLabels: Record<RecipeLanguage, CalculatorLabels> = {
   en: {
     brandLine: "Poolish Calculator",
     pageTitle: "Poolish Calculator",

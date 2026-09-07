@@ -5,7 +5,8 @@
 // shared global, and every element lookup is scoped to the header that was
 // passed in, so a page can change one behavior without touching the other or
 // the rest of its markup.
-import { isRecipeLanguage, labelsByLanguage, sitePath } from "../lib/site";
+import { uiLabels } from "../i18n/ui";
+import { isRecipeLanguage, sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
 
 const mobileNavigationQuery = "(max-width: 880px)";
@@ -119,7 +120,7 @@ function createSearch(
   navigation: NavigationController,
 ) {
   const { language, basePath } = settings;
-  const labels = labelsByLanguage[language].search;
+  const labels = uiLabels[language].search;
   const pagefindBundle = sitePath(basePath, "pagefind/pagefind.js");
   const area = requireElement<HTMLElement>(header, "[data-search-area]");
   const overlay = requireElement<HTMLElement>(header, "[data-search-overlay]");

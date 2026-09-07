@@ -14,9 +14,9 @@ import {
   selectFeaturedRecipes,
 } from "./recipeCatalog";
 import { createSiteDestinationPlugin } from "./recipeLinks";
+import { uiLabels } from "../i18n/ui";
 import {
   isRecipeLanguage,
-  labelsByLanguage,
   languages,
   sitePath,
   type RecipeCategoryId,
@@ -150,7 +150,7 @@ export function findLocalizedRecipe(
 }
 
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
-  const labels = labelsByLanguage[language];
+  const labels = uiLabels[language];
   // One walk of the recipe source tree per call: the pair count and the
   // featured cards are two readings of the same discovered set.
   const localizedRecipes = listLocalizedRecipes();

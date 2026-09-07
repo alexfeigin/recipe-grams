@@ -10,7 +10,7 @@ Work in the user's language and ask a follow-up only when a missing detail block
 ## Source Model
 
 - `en/*.MD` and `he/*.MD` own ingredients, method, notes, and body images. Paired localizations share a snake-style basename and `.MD` extension.
-- `src/lib/recipeCatalog.ts` owns browsing intent, localized titles and descriptions, favorite and vegan markers, card images, social images, and search metadata. Every entry is either `featuredRecipe(category, markers, order, localizations)` or `unlistedRecipe(reason, markers, localizations)`; there is no way to leave the choice open. Shared interface labels live in `src/lib/site.ts`, and `src/lib/recipePages.ts` only discovers and renders recipes at build time.
+- `src/lib/recipeCatalog.ts` owns browsing intent, localized titles and descriptions, favorite and vegan markers, card images, social images, and search metadata. Every entry is either `featuredRecipe(category, markers, order, localizations)` or `unlistedRecipe(reason, markers, localizations)`; there is no way to leave the choice open. Interface translations live in `src/i18n/`, one module per surface, and `src/lib/recipePages.ts` only discovers and renders recipes at build time.
 - `index.MD` owns the legacy GitHub-readable index. The generated landing page reads the catalog, not this file.
 - Every localized Markdown file generates a site page and can appear in search even when it is not featured.
 - A recipe without a catalog entry publishes and stays searchable, and the build warns that it cannot appear in browsing. A featured entry missing a localized title or description fails the build, because a card would go missing.

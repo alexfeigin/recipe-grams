@@ -37,3 +37,4 @@ Each record is a short, dated-by-number statement of one decision. Records are n
 | 0031 | [Check poolish arithmetic without a browser](0031-check-poolish-arithmetic-without-a-browser.md)                                                                               | Current                          |
 | 0032 | [Share one document shell across localized pages](0032-share-one-document-shell-across-localized-pages.md)                                                                     | Current                          |
 | 0033 | [Fail before the build and give each check one owner](0033-fail-before-the-build-and-give-each-check-one-owner.md)                                                             | Current, refines 0031            |
+| 0034 | [Store interface translations in src/i18n](0034-store-interface-translations-in-src-i18n.md)                                                                                   | Current, refines 0026            |

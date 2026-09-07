@@ -4,13 +4,9 @@
 // page asks for its context once and keeps only the decisions that are its own
 // — its title, description, social card, and the links its header points at.
 // This module reads no files and holds no recipe data; the vocabulary it builds
-// on lives in ./site.
-import {
-  labelsByLanguage,
-  sitePath,
-  type LocalizedLabels,
-  type RecipeLanguage,
-} from "./site";
+// on lives in ./site and the copy it hands out in ../i18n/ui (ADR 0034).
+import { uiLabels, type UiLabels } from "../i18n/ui";
+import { sitePath, type RecipeLanguage } from "./site";
 
 export type PageDirection = "ltr" | "rtl";
 
@@ -25,7 +21,7 @@ export type PageContext = {
   direction: PageDirection;
   // The Open Graph locale for this language.
   locale: string;
-  labels: LocalizedLabels;
+  labels: UiLabels;
   basePath: string;
   // Where this language's landing page lives, and where the other language's
   // does, for pages whose language switch has no better destination.
@@ -44,7 +40,7 @@ export function getPageContext(
     language,
     direction: directionFor(language),
     locale: localeFor(language),
-    labels: labelsByLanguage[language],
+    labels: uiLabels[language],
     basePath,
     homeHref: homeHref(basePath, language),
     alternateLanguage: alternate,

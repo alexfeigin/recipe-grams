@@ -4,8 +4,8 @@
 // nowhere else. This module reads no files and renders nothing: the functions
 // that check the catalog against the recipe source tree are given the
 // discovered recipes by ./recipePages.
+import { uiLabels } from "../i18n/ui.ts";
 import {
-  labelsByLanguage,
   languages,
   type RecipeCategoryId,
   type RecipeIdentity,
@@ -564,7 +564,7 @@ export function getRecipeSearchMetadata(
   recipe: RecipeIdentity,
   catalog: RecipeCatalog = recipeCatalog,
 ) {
-  const labels = labelsByLanguage[recipe.language];
+  const labels = uiLabels[recipe.language];
   const entry = catalog[recipe.slug];
   const listing = entry?.listing;
 

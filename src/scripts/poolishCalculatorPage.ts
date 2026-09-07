@@ -4,17 +4,17 @@
 // and everything else is internal: every element the behavior needs is resolved
 // from that root up front and named in a type, so markup the behavior depends
 // on cannot go missing quietly. Arithmetic and rejection rules stay in
-// ../lib/poolishCalculator, and every word stays in
-// ../lib/poolishCalculatorLabels; this module only reads the form, runs the
-// calculation, and writes what it returns.
+// ../lib/poolishCalculator, and every word stays in ../i18n/calculator; this
+// module only reads the form, runs the calculation, and writes what it
+// returns.
 import { calculatePoolish } from "../lib/poolishCalculator";
 import type {
   CalculatorFields,
   CalculatorMode,
   CalculatorResult,
 } from "../lib/poolishCalculator";
-import { poolishCalculatorLabels } from "../lib/poolishCalculatorLabels";
-import type { PoolishCalculatorLabels } from "../lib/poolishCalculatorLabels";
+import { calculatorLabels } from "../i18n/calculator";
+import type { CalculatorLabels } from "../i18n/calculator";
 import { isRecipeLanguage } from "../lib/site";
 import { setLanguageSwitchQuery } from "./languageSwitch";
 
@@ -51,12 +51,12 @@ function requireElement<T extends Element>(
   return element;
 }
 
-function requireLabels(root: HTMLElement): PoolishCalculatorLabels {
+function requireLabels(root: HTMLElement): CalculatorLabels {
   const { language } = root.dataset;
   if (!isRecipeLanguage(language)) {
     throw new Error("The poolish calculator needs a data-language attribute.");
   }
-  return poolishCalculatorLabels[language];
+  return calculatorLabels[language];
 }
 
 function requireInput(root: ParentNode, name: keyof CalculatorFields) {
