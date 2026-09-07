@@ -86,6 +86,17 @@ for comparison, then the changed tree was built the same way.
 ## Reproducing
 
 ```sh
-git stash list   # expect empty; build the previous revision in a worktree
-npm run build    # then diff -r that dist against this one
+npm run build                       # then diff -r this dist against a build
+                                    # of the previous revision in a worktree
+npx astro preview --port 4419       # a port no other local checkout uses
+CALCULATOR_BASE_URL=http://127.0.0.1:4419/recipe-grams/ \
+  npm run verify:calculator:browser # same for SEARCH_, NAVIGATION_,
+                                    # CONTRAST_, and PIZZA_LINKS_BASE_URL
 ```
+
+The browser specs take their base URL from those environment variables, so
+pointing them at a dedicated port keeps the run honest when another checkout
+of this repository is serving a preview on the default ports. `verify-issue-7-`
+and `verify-issue-8-browser` hard-code port 4321 and were run from copies
+pointed at 4419; both also overwrite tracked screenshots under
+`docs/verification/`, which were restored after the run.
