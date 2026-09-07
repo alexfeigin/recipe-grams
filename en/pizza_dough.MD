@@ -93,8 +93,8 @@ Salt: 9g
 
 ## For nerds
 
-1. Unfortunately the original calculator seems to be down [poolish calculator](https://ggalmazor.com/bread_making/poolish_recipe_calculator.html)
-2. Fortunately I copied the logic to a bash script before it went down [poolish bash script](../poolish_calc.sh)
+1. Adjust the dough quantities with the [poolish calculator](https://alexfeigin.github.io/recipe-grams/poolish/).
+2. The calculator logic is also available as a [poolish bash script](https://github.com/alexfeigin/recipe-grams/blob/master/poolish_calc.sh).
 
 Desired dough weight: 566g makes 2 12-inch pizzas of 283g each
 Desired dough hydration: 70%

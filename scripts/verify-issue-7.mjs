@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { verifyGeneratedLinks } from "./generated-links.mjs";
 
 const repoRoot = process.cwd();
 const basePath = "/recipe-grams";
@@ -57,36 +58,6 @@ function pageNameFor(filePath) {
   return path.relative(path.join(repoRoot, "dist"), filePath);
 }
 
-function assertNoBrokenGeneratedLinks(html, pageName) {
-  const hrefs = Array.from(
-    html.matchAll(/<a\b[^>]*href="([^"]+)"/g),
-    ([, href]) => href,
-  );
-  const generatedLinks = hrefs.filter((href) => href.startsWith(basePath));
-
-  assert.ok(
-    generatedLinks.length > 0,
-    `Expected ${pageName} to include generated site links`,
-  );
-
-  for (const href of generatedLinks) {
-    const withoutHash = href.replace(/#.*$/, "");
-    const relativePath = withoutHash.replace(new RegExp(`^${basePath}/?`), "");
-    const targetPath =
-      relativePath === ""
-        ? path.join(repoRoot, "dist", "index.html")
-        : path.join(repoRoot, "dist", relativePath, "index.html");
-
-    assert.ok(
-      existsSync(targetPath),
-      `Expected ${pageName} link ${href} to resolve to ${path.relative(
-        repoRoot,
-        targetPath,
-      )}`,
-    );
-  }
-}
-
 const englishHome = readBuiltPage();
 const hebrewHome = readBuiltPage("he");
 const englishRicePilaf = readBuiltPage("en", "rice_pilaf");
@@ -127,7 +98,6 @@ for (const [pageName, html] of [
     /href="[^"]+\.MD(?:#[^"]*)?"/,
     `Expected no Markdown recipe hrefs in ${pageName}`,
   );
-  assertNoBrokenGeneratedLinks(html, pageName);
   assertNoBrokenGeneratedImages(html, pageName);
 }
 
@@ -140,9 +110,10 @@ for (const pagePath of listBuiltPages()) {
     /href="[^"]+\.MD(?:#[^"]*)?"/,
     `Expected no Markdown recipe hrefs in ${pageName}`,
   );
-  assertNoBrokenGeneratedLinks(html, pageName);
   assertNoBrokenGeneratedImages(html, pageName);
 }
+
+verifyGeneratedLinks(path.join(repoRoot, "dist"));
 
 assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 builtAssetExists("pizza.jpg");
