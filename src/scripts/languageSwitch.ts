@@ -4,7 +4,7 @@
 // that state into the other language. The links are found by their explicit
 // marker attribute, never by guessing which anchors on the page happen to point
 // at a matching URL.
-export const languageSwitchSelector = "a[data-language-switch]";
+const languageSwitchSelector = "a[data-language-switch]";
 
 export function setLanguageSwitchQuery(
   query: URLSearchParams,

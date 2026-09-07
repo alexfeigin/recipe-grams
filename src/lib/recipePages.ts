@@ -7,6 +7,7 @@
 // each other.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
 import {
   collectCatalogDiagnostics,
@@ -36,7 +37,6 @@ export type RecipeCard = {
   categoryId: RecipeCategoryId;
   markerIds: RecipeMarkerId[];
   image?: string;
-  featuredOrder: number;
 };
 
 export type CategorySection = {
@@ -115,8 +115,9 @@ function reportCatalogDiagnostics(recipes: LocalizedRecipe[]): void {
   lastCheckedRecipes = checked;
 }
 
-export function listRecipePairs(): string[] {
-  const localizedRecipes = listLocalizedRecipes();
+// The slugs that exist in both languages, counted from one already discovered
+// recipe list so a caller never walks the recipe source tree twice.
+function listRecipePairs(localizedRecipes: LocalizedRecipe[]): string[] {
   const slugsByLanguage = new Map<RecipeLanguage, Set<string>>();
 
   for (const language of languages) {
@@ -150,10 +151,13 @@ export function findLocalizedRecipe(
 
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   const labels = labelsByLanguage[language];
-  const pairedSlugs = new Set(listRecipePairs());
+  // One walk of the recipe source tree per call: the pair count and the
+  // featured cards are two readings of the same discovered set.
+  const localizedRecipes = listLocalizedRecipes();
+  const pairedSlugs = listRecipePairs(localizedRecipes);
   const cards: RecipeCard[] = selectFeaturedRecipes(
     language,
-    listLocalizedRecipes(),
+    localizedRecipes,
   ).map((recipe) => ({
     slug: recipe.slug,
     title: recipe.metadata.title,
@@ -162,7 +166,6 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     categoryId: recipe.categoryId,
     markerIds: recipe.markerIds,
     image: recipe.metadata.image,
-    featuredOrder: recipe.featuredOrder,
   }));
 
   const categorySections: CategorySection[] = (
@@ -179,7 +182,7 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   // What the landing page lists. Direction, locale, labels, and home URLs are
   // language-derived page setup and belong to ./pageContext, not here.
   return {
-    recipePairCount: pairedSlugs.size,
+    recipePairCount: pairedSlugs.length,
     categoryCount: categorySections.length,
     categorySections,
   };
@@ -192,7 +195,7 @@ export async function renderRecipeBody(
   const renderer = await getMarkdownRenderer(recipe.language, basePath);
   const markdown = stripLegacyBackLink(readFileSync(recipe.sourcePath, "utf8"));
   const rendered = await renderer.render(markdown, {
-    fileURL: new URL(`file://${recipe.sourcePath}`),
+    fileURL: pathToFileURL(recipe.sourcePath),
     frontmatter: {},
   });
 

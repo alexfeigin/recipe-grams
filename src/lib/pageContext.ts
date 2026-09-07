@@ -53,19 +53,19 @@ export function getPageContext(
 }
 
 // Hebrew is written right to left; see ADR 0022 for why the whole page turns.
-export function directionFor(language: RecipeLanguage): PageDirection {
+function directionFor(language: RecipeLanguage): PageDirection {
   return language === "he" ? "rtl" : "ltr";
 }
 
-export function localeFor(language: RecipeLanguage): string {
+function localeFor(language: RecipeLanguage): string {
   return language === "he" ? "he_IL" : "en_US";
 }
 
-export function alternateLanguage(language: RecipeLanguage): RecipeLanguage {
+function alternateLanguage(language: RecipeLanguage): RecipeLanguage {
   return language === "he" ? "en" : "he";
 }
 
 // English is published at the site root and Hebrew under `he/`; see ADR 0009.
-export function homeHref(basePath: string, language: RecipeLanguage): string {
+function homeHref(basePath: string, language: RecipeLanguage): string {
   return sitePath(basePath, language === "he" ? "he/" : "");
 }

@@ -14,24 +14,29 @@ import {
   findLocalizedRecipe,
   listLocalizedRecipes,
   renderRecipeBody,
+  type LocalizedRecipe,
 } from "../../lib/recipePages";
 import { getPageContext } from "../../lib/pageContext";
 import { sitePath } from "../../lib/site";
 
+// Discovery already read the recipe source tree, so each route carries its
+// recipe forward as a prop. The site is static: only the recipes listed here
+// are ever built, and nothing has to look one up again by URL segment.
 export function getStaticPaths() {
   return listLocalizedRecipes().map((recipe) => ({
     params: {
       language: recipe.language,
       slug: recipe.slug,
     },
+    props: { recipe },
   }));
 }
 
-const recipe = findLocalizedRecipe(Astro.params.language, Astro.params.slug);
+type Props = {
+  recipe: LocalizedRecipe;
+};
 
-if (!recipe) {
-  return Astro.redirect("/");
-}
+const { recipe } = Astro.props;
 
 const page = getPageContext(recipe.language, import.meta.env.BASE_URL);
 const basePath = page.basePath;
