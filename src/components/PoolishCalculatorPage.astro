@@ -1,12 +1,14 @@
 ---
-// Poolish calculator page for one language: a form whose weights are computed
-// in the browser by calculatePoolish in src/lib/poolishCalculator.ts, the
-// TypeScript port of poolish_calc.sh. The page is noindex and unlinked from
-// navigation, and all of its copy lives in poolishCalculatorLabels so the two
-// languages stay in step. The document shell, header, and language-derived
-// setup belong to SitePage.
+// Poolish calculator page for one language: the form and the panel its weights
+// are written into. The browser behavior belongs to
+// src/scripts/poolishCalculatorPage.ts, which is handed the rendered
+// calculator, and the arithmetic to calculatePoolish in
+// src/lib/poolishCalculator.ts, the TypeScript port of poolish_calc.sh. The
+// page is noindex and unlinked from navigation, and all of its copy lives in
+// poolishCalculatorLabels so the two languages stay in step. The document
+// shell, header, and language-derived setup belong to SitePage.
 import SitePage from "../layouts/SitePage.astro";
-import { poolishCalculatorLabels } from "../lib/i18n";
+import { poolishCalculatorLabels } from "../lib/poolishCalculatorLabels";
 import { getPageContext } from "../lib/pageContext";
 import { sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
@@ -43,7 +45,11 @@ const zeroGrams = `0${text.gramUnit}`;
   languageHref={languageHref}
   navItems={[{ label: text.homeLabel, href: page.homeHref }]}
 >
-  <main class="calculator-shell">
+  <main
+    class="calculator-shell"
+    data-poolish-calculator
+    data-language={language}
+  >
     <section class="tool-intro" aria-labelledby="page-title">
       <div>
         <h1 id="page-title">{text.pageTitle}</h1>
@@ -257,193 +263,13 @@ const zeroGrams = `0${text.gramUnit}`;
   </main>
 
   <script>
-    import { poolishCalculatorLabels } from "../lib/i18n";
-    import { calculatePoolish } from "../lib/poolishCalculator";
-    import type {
-      CalculatorFields,
-      CalculatorMode,
-      CalculatorResult,
-    } from "../lib/poolishCalculator";
-    import { setLanguageSwitchQuery } from "../scripts/languageSwitch";
+    import { initializePoolishCalculator } from "../scripts/poolishCalculatorPage";
 
-    const clientLabels =
-      poolishCalculatorLabels[
-        document.documentElement.lang === "he" ? "he" : "en"
-      ];
-    const form = document.querySelector("[data-calculator-form]");
-    const genericControls = document.querySelector("[data-generic-controls]");
-    const pizzaControls = document.querySelector("[data-pizza-controls]");
-    const presetList = document.querySelector("[data-preset-list]");
-    const validationMessage = document.querySelector<HTMLElement>(
-      "[data-validation-message]",
-    )!;
-    const copyButton =
-      document.querySelector<HTMLButtonElement>("[data-copy-button]")!;
-    const copyStatus =
-      document.querySelector<HTMLElement>("[data-copy-status]")!;
-    const outputs = Object.fromEntries<HTMLElement>(
-      Array.from(document.querySelectorAll<HTMLElement>("[data-output]")).map(
-        (element) => [element.dataset.output!, element],
-      ),
+    const calculator = document.querySelector<HTMLElement>(
+      "[data-poolish-calculator]",
     );
 
-    function fieldValue(name: keyof CalculatorFields) {
-      const field = form?.querySelector(`[data-field="${name}"]`);
-      if (!(field instanceof HTMLInputElement)) {
-        return "";
-      }
-      return field.value;
-    }
-
-    function currentMode(): CalculatorMode {
-      const selected = form?.querySelector('input[name="mode"]:checked');
-      return selected instanceof HTMLInputElement && selected.value === "pizza"
-        ? "pizza"
-        : "generic";
-    }
-
-    function setMode(mode: CalculatorMode) {
-      const modeInput = form?.querySelector(
-        `input[name="mode"][value="${mode}"]`,
-      );
-      if (modeInput instanceof HTMLInputElement) {
-        modeInput.checked = true;
-      }
-    }
-
-    function urlMode(): CalculatorMode | null {
-      const mode = new URLSearchParams(window.location.search).get("mode");
-      return mode === "pizza" || mode === "generic" ? mode : null;
-    }
-
-    function applyUrlMode() {
-      const mode = urlMode();
-      if (mode) {
-        setMode(mode);
-      }
-    }
-
-    function syncUrlMode() {
-      const mode = currentMode();
-      const url = new URL(window.location.href);
-      url.searchParams.set("mode", mode);
-      window.history.replaceState({}, "", url);
-    }
-
-    // The header renders a language-switch link in both its desktop and its
-    // mobile layout. Both carry the selected mode so the reader lands on the
-    // same calculator in the other language.
-    function syncLanguageSwitch() {
-      const mode = urlMode();
-      const query = new URLSearchParams();
-      if (mode) {
-        query.set("mode", mode);
-      }
-      setLanguageSwitchQuery(query);
-    }
-
-    function grams(value: number, digits = 0) {
-      return `${value.toFixed(digits)}${clientLabels.gramUnit}`;
-    }
-
-    function getInputs(): CalculatorFields {
-      return {
-        pizzaCount: fieldValue("pizzaCount"),
-        desiredDough: fieldValue("desiredDough"),
-        hydration: fieldValue("hydration"),
-        poolishShare: fieldValue("poolishShare"),
-        poolishHydration: fieldValue("poolishHydration"),
-        poolishYeast: fieldValue("poolishYeast"),
-        restYeast: fieldValue("restYeast"),
-        salt: fieldValue("salt"),
-      };
-    }
-
-    function updateModeVisibility() {
-      const isPizza = currentMode() === "pizza";
-      if (genericControls instanceof HTMLElement) {
-        genericControls.hidden = isPizza;
-      }
-      if (pizzaControls instanceof HTMLElement) {
-        pizzaControls.hidden = !isPizza;
-      }
-      if (presetList instanceof HTMLElement) {
-        presetList.hidden = !isPizza;
-      }
-    }
-
-    let currentResult: CalculatorResult | null = null;
-    let revision = 0;
-
-    function render() {
-      revision += 1;
-      currentResult = null;
-      copyStatus.textContent = "";
-      copyButton.disabled = true;
-      updateModeVisibility();
-      const calculation = calculatePoolish(currentMode(), getInputs());
-
-      if (!calculation.ok) {
-        for (const output of Object.values(outputs)) output.textContent = "—";
-        validationMessage.textContent =
-          clientLabels.validation[calculation.error];
-        return;
-      }
-
-      const result = calculation.result;
-      currentResult = result;
-      copyButton.disabled = false;
-      outputs.totalFlour.textContent = grams(result.totalFlour);
-      outputs.totalWater.textContent = grams(result.totalWater);
-      outputs.targetDough.textContent = grams(result.targetDough);
-      outputs.poolishFlour.textContent = grams(result.poolishFlour);
-      outputs.poolishWater.textContent = grams(result.poolishWater);
-      outputs.poolishYeast.textContent = grams(result.poolishYeast);
-      outputs.restFlour.textContent = grams(result.restFlour);
-      outputs.restWater.textContent = grams(result.restWater);
-      outputs.restYeast.textContent = grams(result.restYeast);
-      outputs.salt.textContent = grams(result.salt, 1);
-      validationMessage.textContent = "";
-    }
-
-    async function copyWeights() {
-      if (!currentResult || copyButton.disabled) return;
-      const result = currentResult;
-      const copyRevision = revision;
-      const text = [
-        clientLabels.copyText.poolish,
-        `${clientLabels.copyText.flour}: ${grams(result.poolishFlour)}`,
-        `${clientLabels.copyText.water}: ${grams(result.poolishWater)}`,
-        `${clientLabels.copyText.yeast}: ${grams(result.poolishYeast)}`,
-        "",
-        clientLabels.copyText.finalDough,
-        `${clientLabels.copyText.flour}: ${grams(result.restFlour)}`,
-        `${clientLabels.copyText.water}: ${grams(result.restWater)}`,
-        `${clientLabels.copyText.yeast}: ${grams(result.restYeast)}`,
-        `${clientLabels.copyText.salt}: ${grams(result.salt, 1)}`,
-      ].join("\n");
-
-      try {
-        await navigator.clipboard.writeText(text);
-        if (revision === copyRevision)
-          copyStatus.textContent = clientLabels.copied;
-      } catch {
-        if (revision === copyRevision)
-          copyStatus.textContent = clientLabels.copyFailed;
-      }
-    }
-
-    form?.addEventListener("submit", (event) => event.preventDefault());
-    form?.addEventListener("input", render);
-    form?.addEventListener("change", () => {
-      syncUrlMode();
-      syncLanguageSwitch();
-      render();
-    });
-    copyButton?.addEventListener("click", copyWeights);
-    applyUrlMode();
-    syncLanguageSwitch();
-    render();
+    if (calculator) initializePoolishCalculator(calculator);
   </script>
 </SitePage>
 

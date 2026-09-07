@@ -1,3 +1,7 @@
+// Every word the poolish calculator shows, in both site languages: the page
+// copy Astro renders and the messages its browser module writes at runtime.
+// Keeping them in one place is how the two languages stay in step; this module
+// holds no calculator arithmetic and reads no files.
 import type { RecipeLanguage } from "./site";
 
 export type PoolishCalculatorLabels = {
