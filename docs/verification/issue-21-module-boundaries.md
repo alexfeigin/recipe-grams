@@ -1,5 +1,7 @@
 # Issue 21: catalog, shared labels, and build-time rendering separated
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Verified 2026-09-07 against a local production build at revision cd71119.
 
 ## What changed

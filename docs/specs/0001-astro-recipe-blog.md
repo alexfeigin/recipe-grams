@@ -1,5 +1,15 @@
 # Build Astro Recipe Blog From Legacy Markdown Recipes
 
+> **Historical migration spec.** This records what was planned and agreed for the
+> August 2026 move from a Markdown-only repository to the Astro site, and it is
+> kept as written. It is not a description of the site today and not a
+> contributor instruction. For current behavior read [PRODUCT.md](../../PRODUCT.md)
+> and [DESIGN.md](../../DESIGN.md), for the workflow read
+> [AGENTS.md](../../AGENTS.md) and the skills it names, for commands read
+> [README.md](../../README.md), and for the decisions that superseded parts of
+> this plan read [docs/adr/](../adr/README.md). Where this spec and current
+> behavior disagree, current behavior and the ADRs are right.
+
 ## Problem Statement
 
 Recipe-Grams has grown from a simple Markdown recipe repository into something that needs a modern reading and browsing experience. Friends and family already have direct GitHub Markdown links to localized recipes, so the upgrade must not move or break the existing recipe files. At the same time, the repository should build a fully static Astro site for GitHub Pages with responsive navigation, localized landing pages, and full-recipe search without introducing a backend.

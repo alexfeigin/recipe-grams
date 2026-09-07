@@ -1,5 +1,7 @@
 # Issue 20: shared theme ownership
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Verified 2026-09-07 against a local production build.
 
 ## What changed

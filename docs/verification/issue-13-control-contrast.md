@@ -1,5 +1,7 @@
 # Issue 13: shared control contrast
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Verified 2026-09-07 against the production build using Chromium.
 
 The original shared accent, `#5a8fa0`, gave white labels **3.5767:1**

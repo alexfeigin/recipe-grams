@@ -1,5 +1,7 @@
 # Issue 10: calculator validation
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Scope: English `/poolish/` and Hebrew `/he/poolish/` calculators, under the site's `/recipe-grams/` base path.
 
 The baseline browser regression failed in both languages: negative salt and final yeast produced no validation error, and setting desired dough to zero left copying enabled. Invalid inputs now clear every displayed quantity and disable copying. Restoring valid inputs restores calculation and copying.

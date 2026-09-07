@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Astro at the repository root, delegated by the project spec in `docs/specs/0001-astro-recipe-blog.md`.
+Astro at the repository root. The historical migration spec in `docs/specs/0001-astro-recipe-blog.md` records how it was introduced; this document describes what ships today.
 
 ## Users
 

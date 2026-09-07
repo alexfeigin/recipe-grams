@@ -1,5 +1,7 @@
 # Issue 17: product, design, and development guidance brought up to date
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Verified 2026-09-07 against the production build at revision 0d5ffa9.
 
 Every claim below was read out of current source or the generated build before

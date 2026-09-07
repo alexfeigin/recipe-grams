@@ -1,5 +1,7 @@
 # Issue 4 Verification
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Date: 2026-08-09
 
 Commands run:
@@ -21,3 +23,13 @@ Screenshot review:
 - Fresh desktop/browser screenshot reviewed at `1440x1000`.
 - Fresh modern-phone screenshot reviewed at `430x932`.
 - Separate visual inspection agent result: no visual findings for either supported screenshot.
+
+## Artifact availability (added 2026-09-07)
+
+The reviewed screenshots are not in this repository and cannot be recovered:
+`.impeccable/screenshots/` is ignored by Git and `/private/tmp/` held temporary
+files, so both existed only on the machine that ran the checks. The
+`detect.mjs` tool came from a locally installed skill that this repository does
+not track, and its output was not recorded. The reviews above are reported as
+they were written; no later re-review confirmed them. `npm run format:check`
+and `npm run build` still exist.

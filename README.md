@@ -41,6 +41,13 @@ it is.
 Adding or changing a recipe, and publishing to GitHub Pages, are owned by the
 repository workflows in [AGENTS.md](AGENTS.md) and the skills it names under
 [`.agents/skills/`](.agents/skills/) — follow those rather than a copy here.
+[docs/adding-a-recipe.he.md](docs/adding-a-recipe.he.md) summarizes the same
+workflow in Hebrew.
+
+Historical documents are kept separately and are not instructions: past
+verification evidence in [docs/verification/](docs/verification/README.md), the
+2026 migration spec in [docs/specs/](docs/specs/0001-astro-recipe-blog.md), and
+superseded guides in [docs/history/](docs/history/README.md).
 
 ## Verify the site
 
@@ -57,8 +64,8 @@ verification at a time per checkout because builds share `dist/`.
 
 Screenshots, failure traces and test output live under the ignored
 `.astro/verification/browser/` directory. Historical evidence under
-`docs/verification/` is preserved. Verification does not format or edit tracked
-files.
+[`docs/verification/`](docs/verification/README.md) is preserved and never
+overwritten by a run. Verification does not format or edit tracked files.
 
 For focused checks after a build, use `npm run verify:recipes`,
 `npm run verify:catalog`, or `npm run verify:navigation` (which also checks

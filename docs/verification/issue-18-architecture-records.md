@@ -1,5 +1,7 @@
 # Issue 18: architecture records reconciled with implementation
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 Verified 2026-09-07 against the production build at revision 6f75aa2.
 
 Three architecture decisions no longer described the implementation. Each was

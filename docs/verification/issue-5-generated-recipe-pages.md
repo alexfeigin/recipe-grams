@@ -1,5 +1,7 @@
 # Issue #5 Generated Recipe Pages Verification
 
+> Historical record. See [the evidence index](README.md) for what this directory is; run `npm run verify` for current verification.
+
 ## Commands
 
 - `npm run build`
@@ -21,3 +23,11 @@
 - `docs/verification/issue-5-screenshots/en-pizza-phone.png`
 - `docs/verification/issue-5-screenshots/he-pizza-desktop.png`
 - `docs/verification/issue-5-screenshots/he-pizza-phone.png`
+
+## Checkpoint context (added 2026-09-07)
+
+The 77 pages counted here are the site at revision `1d82c68`, which held 38
+English and 38 Hebrew recipes: 76 recipe pages plus the English landing page. A
+build today generates 86 pages from 41 pairs. `scripts/verify-issue-5.mjs` was
+renamed to `scripts/verify-recipe-pages.mjs`, with `verify:issue5` kept as an
+alias. The screenshots listed above are preserved in this directory.
