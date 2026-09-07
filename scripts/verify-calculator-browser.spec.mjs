@@ -1,53 +1,20 @@
 import { expect, test } from "@playwright/test";
-import { calculatePoolish } from "../src/lib/poolishCalculator.ts";
 
 import { baseUrl } from "./browser-target.mjs";
-const defaults = {
-  desiredDough: "1700",
-  hydration: "0.7",
-  poolishShare: "0.667",
-  poolishHydration: "1",
-  poolishYeast: "0.013",
-  restYeast: "0",
-  salt: "0.027",
-  pizzaCount: "3",
-};
 
-test("rejects nonfinite inputs, overflow, and impossible rounded splits", () => {
-  for (const field of Object.keys(defaults).filter(
-    (field) => field !== "pizzaCount",
-  )) {
-    for (const value of [
-      "",
-      " ",
-      "NaN",
-      "Infinity",
-      "-Infinity",
-      "1e309",
-      "-0.01",
-    ]) {
-      expect(
-        calculatePoolish("generic", { ...defaults, [field]: value }).ok,
-        `${field}=${value}`,
-      ).toBe(false);
-    }
-  }
-  expect(
-    calculatePoolish("generic", {
-      ...defaults,
-      desiredDough: "1e308",
-      salt: "1e308",
-    }).ok,
-  ).toBe(false);
-  expect(
-    calculatePoolish("generic", {
-      ...defaults,
-      desiredDough: "1",
-      hydration: "0.5",
-      poolishShare: "0.5",
-    }).ok,
-  ).toBe(false);
-});
+// Arithmetic, rounding, and rejection rules live in
+// scripts/poolish-calculation.test.mjs, which needs no browser. These tests
+// cover what a reader sees: validation, copying, localized formatting, and the
+// mode and language interactions around them.
+const formulaFields = [
+  "desiredDough",
+  "hydration",
+  "poolishShare",
+  "poolishHydration",
+  "poolishYeast",
+  "restYeast",
+  "salt",
+];
 
 for (const language of ["en", "he"]) {
   test.describe(language, () => {
@@ -63,9 +30,7 @@ for (const language of ["en", "he"]) {
       ["restYeast", "-0.01"],
       ["desiredDough", "0"],
       ["poolishShare", "1.01"],
-      ...Object.keys(defaults)
-        .filter((field) => field !== "pizzaCount")
-        .map((field) => [field, ""]),
+      ...formulaFields.map((field) => [field, ""]),
     ]) {
       test(`rejects ${field}=${value} and recovers`, async ({ page }) => {
         const input = page.locator(`[data-field="${field}"]`);
@@ -103,7 +68,7 @@ for (const language of ["en", "he"]) {
       );
     });
 
-    test("preserves default and pizza quantities, zero ratios, and minimum yeast", async ({
+    test("renders localized quantities across mode and pizza-count changes", async ({
       page,
     }) => {
       const unit = language === "en" ? "g" : " גרם";
@@ -114,15 +79,12 @@ for (const language of ["en", "he"]) {
           );
         }
       };
+      // Representative outputs only: whole grams, a zero, and the one field
+      // carrying a decimal. The full quantity tables are checked without a
+      // browser in scripts/poolish-calculation.test.mjs.
       await expectOutputs({
         totalFlour: 1000,
-        totalWater: 700,
         targetDough: 1700,
-        poolishFlour: 667,
-        poolishWater: 667,
-        poolishYeast: 9,
-        restFlour: 333,
-        restWater: 33,
         restYeast: 0,
         salt: "27.0",
       });
@@ -131,25 +93,14 @@ for (const language of ["en", "he"]) {
           .locator('[data-field="poolishShare"]')
           .evaluate((input) => input.validity.stepMismatch),
       ).toBe(false);
-      await page.locator('[data-field="poolishYeast"]').fill("0");
       await page.locator('[data-field="salt"]').fill("0");
-      await expectOutputs({ poolishYeast: 3, salt: "0.0" });
+      await expectOutputs({ salt: "0.0" });
       await page
         .locator(".mode-switch label")
         .filter({ hasText: language === "en" ? "Pizza preset" : "פריסט פיצה" })
         .click();
-      await expectOutputs({
-        totalFlour: 500,
-        totalWater: 350,
-        targetDough: 850,
-        poolishFlour: 333,
-        poolishWater: 333,
-        poolishYeast: 4,
-        restFlour: 167,
-        restWater: 17,
-        restYeast: 0,
-        salt: "13.5",
-      });
+      await expect(page.locator("[data-pizza-controls]")).toBeVisible();
+      await expectOutputs({ targetDough: 850, salt: "13.5" });
       for (const value of ["", "0", "-1", "1.5"]) {
         await page.locator('[data-field="pizzaCount"]').fill(value);
         await expect(page.locator("[data-copy-button]")).toBeDisabled();
@@ -157,7 +108,8 @@ for (const language of ["en", "he"]) {
       }
       await page.locator('[data-field="pizzaCount"]').fill("1");
       await expect(page.locator("[data-copy-button]")).toBeEnabled();
-      await expectOutputs({ targetDough: 283, poolishYeast: 3 });
+      await expect(page.locator("[data-validation-message]")).toBeEmpty();
+      await expectOutputs({ targetDough: 283 });
     });
 
     test("carries the selected mode into every language-switch link", async ({

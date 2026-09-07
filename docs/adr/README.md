@@ -34,3 +34,4 @@ Each record is a short, dated-by-number statement of one decision. Records are n
 | 0028 | [Retain published images unless evidence supports removal](0028-retain-published-images-unless-evidence-supports-removal.md)                                                   | Current                          |
 | 0029 | [Own header behavior in typed browser modules](0029-own-header-behavior-in-typed-browser-modules.md)                                                                           | Current                          |
 | 0030 | [Model featured and intentionally unfeatured recipes explicitly](0030-model-featured-and-unlisted-recipes-explicitly.md)                                                       | Current, refines 0017 and 0019   |
+| 0031 | [Check poolish arithmetic without a browser](0031-check-poolish-arithmetic-without-a-browser.md)                                                                               | Current                          |

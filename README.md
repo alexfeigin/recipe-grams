@@ -59,8 +59,8 @@ superseded guides in [docs/history/](docs/history/README.md).
 
 Run **`npm run verify`** from the installed checkout. It checks Astro and
 TypeScript, clears and rebuilds `dist/` including the Pagefind search index,
-runs the generated recipe, catalog, image and link checks, and runs every
-maintained browser suite in Chromium against that build.
+runs the poolish calculation, generated recipe, catalog, image and link checks,
+and runs every maintained browser suite in Chromium against that build.
 
 Verification starts its own Astro preview on an OS-assigned loopback port and
 checks that server's identity before running browser tests. It never reuses or
@@ -84,6 +84,14 @@ the featured-versus-unlisted choice and the warning-versus-error policy.
 in generated recipe pages. It renders Markdown fixtures through the real
 transformation and needs no build, preview server, browser, or `SITE_BASE_URL`,
 so run it while editing `src/lib/recipeLinks.ts`.
+
+`npm run test:poolish-calculation` is the focused check for the poolish
+arithmetic: the default and pizza quantities, rounding, the minimum yeast, and
+every rejected input. It calls `src/lib/poolishCalculator.ts` directly and needs
+no build, preview server, browser, or `SITE_BASE_URL`, so run it while editing
+the formula. What a reader sees — validation messages, copying, localized
+units — stays in `verify:calculator:browser`; see
+[ADR 0031](docs/adr/0031-check-poolish-arithmetic-without-a-browser.md).
 
 For focused checks after a build, use `npm run verify:recipes`,
 `npm run verify:catalog`, or `npm run verify:navigation` (which also checks
