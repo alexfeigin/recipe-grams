@@ -234,7 +234,6 @@ const searchDirection = page.direction;
   .brand {
     display: inline-flex;
     grid-column: 1;
-    flex: 0 1 auto;
     min-width: 0;
     align-items: center;
     gap: 0.8rem;
@@ -282,7 +281,6 @@ const searchDirection = page.direction;
   .nav-panel {
     display: flex;
     grid-column: 2;
-    flex: 1 1 auto;
     min-width: 0;
     align-items: center;
     justify-content: flex-end;
@@ -327,7 +325,6 @@ const searchDirection = page.direction;
     position: relative;
     display: inline-flex;
     grid-column: 3;
-    flex: 0 1 clamp(6.75rem, 10vw, 10rem);
     min-width: 6.75rem;
     align-items: center;
     gap: 0.55rem;
@@ -700,17 +697,12 @@ const searchDirection = page.direction;
     }
 
     .search-area {
-      flex-basis: clamp(5.8rem, 9vw, 7.5rem);
       min-width: 5.8rem;
     }
 
     .search-control {
       min-height: 32px;
       padding-inline: 0.5rem;
-    }
-
-    .search-input {
-      font-size: 1rem;
     }
 
     .language-picker {
@@ -751,7 +743,6 @@ const searchDirection = page.direction;
       display: inline-flex;
       grid-column: 3;
       grid-row: 1;
-      flex: 0 0 auto;
       align-items: center;
       gap: 0.42rem;
       margin-left: auto;
@@ -822,16 +813,11 @@ const searchDirection = page.direction;
       width: 100%;
       min-width: 0;
       max-width: 11rem;
-      flex-basis: auto;
     }
 
     .search-control {
       min-height: 34px;
       padding: 0.18rem 0.55rem;
-    }
-
-    .search-input {
-      font-size: 1rem;
     }
 
     .desktop-language-picker {
