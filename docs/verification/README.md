@@ -57,9 +57,10 @@ checkout, and no copy of them is kept in this repository:
 - Fixed preview ports such as `4322` and `4326` were ad-hoc local servers.
   Verification now starts its own preview on an OS-assigned port.
 
-The commands that still exist are `npm run format:check`, `npm run build`,
-`npm run typecheck`, and the `verify:issue5`/`verify:issue6`/`verify:issue7`
-aliases, which now run the behavior-named checks described in
+The commands that still exist are `npm run format:check`, `npm run build`, and
+`npm run typecheck`. The `verify:issue5`/`verify:issue6`/`verify:issue7` aliases
+these documents ran were retired; the behavior-named checks they pointed at —
+`verify:recipes`, `verify:catalog`, `verify:navigation` — are described in
 [README.md](../../README.md).
 
 ## Screenshots

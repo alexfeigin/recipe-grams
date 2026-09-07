@@ -93,9 +93,6 @@ for (const language of ["en", "he"]) {
         await page.keyboard.press("Shift");
         await alternate.focus();
         await check(alternate, "alternate language focus");
-        await page.screenshot({
-          path: testInfo.outputPath("language-controls.png"),
-        });
         if (width < 881) await page.keyboard.press("Escape");
 
         if (surface === "calculator") {
@@ -121,12 +118,6 @@ for (const language of ["en", "he"]) {
           await page.keyboard.press("Shift");
           await copy.focus();
           await check(copy, "copy focus");
-          await copy.screenshot({
-            path: testInfo.outputPath("copy-focus.png"),
-          });
-          await page
-            .locator(".mode-switch")
-            .screenshot({ path: testInfo.outputPath("calculator-modes.png") });
         }
 
         // The short desktop calculator may never scroll far enough to show it.

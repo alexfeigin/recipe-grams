@@ -1,10 +1,11 @@
+// Expected navigation and recipe-link destinations in the real build. What a
+// page is expected to link to is checked here; whether a destination exists is
+// owned by scripts/verify-generated-links.mjs.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { verifyGeneratedLinks } from "./generated-links.mjs";
 
 const repoRoot = process.cwd();
-const basePath = "/recipe-grams";
 
 function readBuiltPage(...segments) {
   const filePath = path.join(repoRoot, "dist", ...segments, "index.html");
@@ -13,33 +14,6 @@ function readBuiltPage(...segments) {
     `Expected generated page at ${path.relative(repoRoot, filePath)}`,
   );
   return readFileSync(filePath, "utf8");
-}
-
-function builtAssetExists(assetPath) {
-  assert.ok(
-    existsSync(path.join(repoRoot, "dist", assetPath)),
-    `Expected generated asset at dist/${assetPath}`,
-  );
-}
-
-function assertNoBrokenGeneratedImages(html, pageName) {
-  const imageSources = Array.from(
-    html.matchAll(/<img\b[^>]*src="([^"]+)"/g),
-    ([, src]) => src,
-  );
-  const generatedImages = imageSources.filter((src) =>
-    src.startsWith(basePath),
-  );
-
-  assert.ok(
-    generatedImages.length > 0,
-    `Expected ${pageName} to include generated image assets`,
-  );
-
-  for (const src of generatedImages) {
-    const relativePath = src.replace(new RegExp(`^${basePath}/?`), "");
-    builtAssetExists(relativePath);
-  }
 }
 
 function listBuiltPages(directory = path.join(repoRoot, "dist")) {
@@ -85,38 +59,30 @@ assert.match(
 assert.match(englishGrilledChicken, /href="\/recipe-grams\/en\/grill_rub\/"/);
 assert.match(hebrewGrilledChicken, /href="\/recipe-grams\/he\/grill_rub\/"/);
 
+// Recipe images are published at the site root, not under images/ (ADR 0024).
+assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 for (const [pageName, html] of [
   ["English home", englishHome],
   ["Hebrew home", hebrewHome],
-  ["English rice pilaf", englishRicePilaf],
-  ["Hebrew rice pilaf", hebrewRicePilaf],
-  ["English grilled chicken", englishGrilledChicken],
-  ["Hebrew grilled chicken", hebrewGrilledChicken],
 ]) {
-  assert.doesNotMatch(
+  assert.match(
     html,
-    /href="[^"]+\.MD(?:#[^"]*)?"/,
-    `Expected no Markdown recipe hrefs in ${pageName}`,
+    /<img\b[^>]*src="\/recipe-grams\/[^"]+"/,
+    `Expected ${pageName} to include generated image assets`,
   );
-  assertNoBrokenGeneratedImages(html, pageName);
 }
 
+// Every published page, not only the sampled ones, links to generated pages
+// rather than to the Markdown recipes they were rendered from (ADR 0023).
+// Absolute destinations are left alone, so a recipe may still cite a Markdown
+// file hosted elsewhere.
+const localMarkdownHref = /href="(?!\w+:|\/\/)[^"]+\.MD(?:[?#][^"]*)?"/;
 for (const pagePath of listBuiltPages()) {
-  const pageName = pageNameFor(pagePath);
-  const html = readFileSync(pagePath, "utf8");
-
   assert.doesNotMatch(
-    html,
-    /href="[^"]+\.MD(?:#[^"]*)?"/,
-    `Expected no Markdown recipe hrefs in ${pageName}`,
+    readFileSync(pagePath, "utf8"),
+    localMarkdownHref,
+    `Expected no Markdown recipe hrefs in ${pageNameFor(pagePath)}`,
   );
-  assertNoBrokenGeneratedImages(html, pageName);
 }
-
-verifyGeneratedLinks(path.join(repoRoot, "dist"));
-
-assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
-builtAssetExists("pizza.jpg");
-builtAssetExists("grilledchicken.jpeg");
 
 console.log("Navigation verification passed.");

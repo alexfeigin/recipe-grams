@@ -14,7 +14,10 @@ Get yourself a good kitchen scale and start cooking!
 
 ## Working on the site
 
-Prerequisites: Node.js 22.12 or newer and npm 9.6.5 or newer.
+Prerequisites: Node.js 24.20.0 or newer and the npm 11 it ships with. That is
+the version `npm run verify` is run on and the one `.nvmrc` and the `engines`
+field name; `nvm use` picks it up. The package commands import TypeScript
+modules directly, which Node runs without a flag from 24 onward.
 
 ```bash
 npm ci                             # install
@@ -68,9 +71,12 @@ superseded guides in [docs/history/](docs/history/README.md).
 ## Verify the site
 
 Run **`npm run verify`** from the installed checkout. It checks Astro and
-TypeScript, clears and rebuilds `dist/` including the Pagefind search index,
-runs the poolish calculation, generated recipe, catalog, image and link checks,
-and runs every maintained browser suite in Chromium against that build.
+TypeScript, runs the checks that read only source and fixtures, then clears and
+rebuilds `dist/` including the Pagefind search index, runs the checks that read
+that build, and runs every maintained browser suite in Chromium against it.
+Nothing is built until the source-only checks pass, so a wrong formula or a
+broken link rule fails in seconds; see
+[ADR 0033](docs/adr/0033-fail-before-the-build-and-give-each-check-one-owner.md).
 
 Verification starts its own Astro preview on an OS-assigned loopback port and
 checks that server's identity before running browser tests. It never reuses or
@@ -78,8 +84,9 @@ stops another preview. Startup/readiness failures and failed checks exit nonzero
 the owned preview closes after success, failure, or interruption. Run one full
 verification at a time per checkout because builds share `dist/`.
 
-Screenshots, failure traces and test output live under the ignored
-`.astro/verification/browser/` directory. Historical evidence under
+Failure screenshots, traces and test output live under the ignored
+`.astro/verification/browser/` directory. Passing browser checks assert what
+they check rather than saving a screenshot nothing compares. Historical evidence under
 [`docs/verification/`](docs/verification/README.md) is preserved and never
 overwritten by a run. Verification does not format or edit tracked files.
 
@@ -103,9 +110,15 @@ the formula. What a reader sees — validation messages, copying, localized
 units — stays in `verify:calculator:browser`; see
 [ADR 0031](docs/adr/0031-check-poolish-arithmetic-without-a-browser.md).
 
-For focused checks after a build, use `npm run verify:recipes`,
-`npm run verify:catalog`, or `npm run verify:navigation` (which also checks
-generated links and image assets). To explicitly test a running preview or the
+`npm run verify:pure` is every check that needs no build:
+`test:links`, `test:recipe-links`, `test:catalog-intent`, and
+`test:poolish-calculation`. `npm run verify:generated` is every check that reads
+`dist/`: `verify:recipes` for complete source-to-page coverage,
+`verify:catalog`, `verify:navigation` for the destinations a page is expected to
+link to, `verify:links` for whether every destination exists, and
+`verify:search-index` for the Pagefind artifacts. Each is also runnable on its
+own. Existence is checked in one place: `verify:links` parses every published
+page and resolves every reference the way a browser would. To explicitly test a running preview or the
 published site, supply its URL, including the trailing slash:
 
 ```bash
@@ -116,7 +129,11 @@ Browser suites also have focused commands: `verify:recipe-flows:browser`,
 `verify:search-content:browser`, `verify:search:browser`,
 `verify:navigation:browser`, `verify:calculator:browser`,
 `verify:contrast:browser`, and `verify:pizza-links:browser`. All require an
-explicit `SITE_BASE_URL` outside the full verification command. The Pagefind
-content suite also checks the local `dist/pagefind/` files. The older
-`verify:issue*` commands remain compatibility aliases to the behavior-named
-checks; they do not manage a server or build.
+explicit `SITE_BASE_URL` outside the full verification command, and all run
+against a published site as well as a local preview. `verify:search:browser`
+owns how search behaves — expansion, short queries, dismissal, keyboard focus,
+failure and retry — and `verify:search-content:browser` owns what search finds
+in each language. The retired `verify:issue*` aliases named the issues that
+introduced these checks; the behavior-named commands above replace them, and the
+[historical evidence](docs/verification/README.md) that cites the old names is
+kept as written.

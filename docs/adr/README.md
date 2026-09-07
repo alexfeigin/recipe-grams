@@ -36,3 +36,4 @@ Each record is a short, dated-by-number statement of one decision. Records are n
 | 0030 | [Model featured and intentionally unfeatured recipes explicitly](0030-model-featured-and-unlisted-recipes-explicitly.md)                                                       | Current, refines 0017 and 0019   |
 | 0031 | [Check poolish arithmetic without a browser](0031-check-poolish-arithmetic-without-a-browser.md)                                                                               | Current                          |
 | 0032 | [Share one document shell across localized pages](0032-share-one-document-shell-across-localized-pages.md)                                                                     | Current                          |
+| 0033 | [Fail before the build and give each check one owner](0033-fail-before-the-build-and-give-each-check-one-owner.md)                                                             | Current, refines 0031            |

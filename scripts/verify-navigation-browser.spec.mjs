@@ -21,7 +21,7 @@ for (const language of ["en", "he"]) {
   for (const width of [360, 390, 880]) {
     test(`${language} ${width}: keyboard opens, follows links, and closes the drawer`, async ({
       page,
-    }, testInfo) => {
+    }) => {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(homeUrl);
       const trigger = page.getByRole("button", { name: triggerName });
@@ -44,7 +44,6 @@ for (const language of ["en", "he"]) {
           );
         }),
       ).toBe(true);
-      await page.screenshot({ path: testInfo.outputPath("trigger-focus.png") });
 
       await page.keyboard.press("Enter");
       await expect(trigger).toHaveAttribute("aria-expanded", "true");
@@ -52,7 +51,6 @@ for (const language of ["en", "he"]) {
       await expect(links.first()).toBeFocused();
       await page.keyboard.press("Tab");
       await expect(links.nth(1)).toBeFocused();
-      await page.screenshot({ path: testInfo.outputPath("drawer-open.png") });
       await page.keyboard.press("Escape");
       await expect(navigation).toBeHidden();
       await expect(trigger).toBeFocused();
@@ -146,7 +144,7 @@ for (const language of ["en", "he"]) {
   for (const width of [881, 1280]) {
     test(`${language} ${width}: desktop Tab order has visible navigation and no mobile trigger`, async ({
       page,
-    }, testInfo) => {
+    }) => {
       await page.setViewportSize({ width, height: 844 });
       await page.goto(homeUrl);
       await expect(page.locator(".menu-button")).toBeHidden();
@@ -158,9 +156,6 @@ for (const language of ["en", "he"]) {
         await expect(link).toBeFocused();
         await expect(link).toBeVisible();
       }
-      await page.screenshot({
-        path: testInfo.outputPath("desktop-navigation.png"),
-      });
       await page.keyboard.press("Tab");
       await expect(page.getByRole("searchbox")).toBeFocused();
       const languageLink = page.locator(".desktop-language-picker a");

@@ -41,14 +41,37 @@ assert.match(hebrewPizza, /הכנת הפוליש/);
 assert.match(hebrewPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 assert.doesNotMatch(hebrewPizza, /חזרה לתפריט/);
 
-const landingPage = readFileSync(
-  path.join(repoRoot, "dist", "index.html"),
-  "utf8",
-);
-assert.match(landingPage, /href="\/recipe-grams\/en\/pizza_dough\/"/);
-assert.doesNotMatch(
-  landingPage,
-  /github\.com\/alexfeigin\/recipe-grams\/blob\/astro-recipe-blog\/en\/(?:pizza_dough|grilled_chicken_thighs|choclatechip_vegan|quinoa)\.MD/,
-);
+// Landing page cards open generated site recipe pages. This is the destination
+// contract; it says nothing about the links a recipe body may carry.
+for (const [language, landingSegments] of [
+  ["en", []],
+  ["he", ["he"]],
+]) {
+  const landingPage = readFileSync(
+    path.join(repoRoot, "dist", ...landingSegments, "index.html"),
+    "utf8",
+  );
+  const cardDestinations = Array.from(
+    landingPage.matchAll(
+      /<article class="recipe-card"[^>]*>\s*<a href="([^"]+)"/g,
+    ),
+    ([, href]) => href,
+  );
+  assert.ok(
+    cardDestinations.length > 0,
+    `Expected recipe cards on the ${language} landing page`,
+  );
+  for (const href of cardDestinations) {
+    assert.match(
+      href,
+      new RegExp(`^/recipe-grams/${language}/[^/]+/$`),
+      `Expected a generated ${language} recipe page destination`,
+    );
+  }
+  assert.ok(
+    cardDestinations.includes(`/recipe-grams/${language}/pizza_dough/`),
+    `Expected the ${language} pizza dough card to open its generated page`,
+  );
+}
 
 console.log("Recipe page verification passed.");
