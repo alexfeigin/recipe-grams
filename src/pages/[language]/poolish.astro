@@ -1,0 +1,19 @@
+---
+import PoolishCalculatorPage from "../../components/PoolishCalculatorPage.astro";
+import { languages, type RecipeLanguage } from "../../lib/site";
+
+export function getStaticPaths() {
+  return languages.map((language) => ({
+    params: { language },
+    props: { language },
+  }));
+}
+
+type Props = {
+  language: RecipeLanguage;
+};
+
+const { language } = Astro.props;
+---
+
+<PoolishCalculatorPage language={language} />

@@ -64,7 +64,7 @@ for (const language of ["en", "he"]) {
             ? prefix
             : surface === "recipe"
               ? `${language}/pizza_dough/`
-              : `${prefix}poolish/`;
+              : `${language}/poolish/`;
         await page.goto(`${baseUrl}${path}`);
         const measurements = [];
         async function check(locator, state) {

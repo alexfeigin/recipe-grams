@@ -12,13 +12,10 @@ type Props = {
 const page = getPageContext(Astro.props.language, import.meta.env.BASE_URL);
 const language = page.language;
 const text = calculatorLabels[language];
-const calculatorHref = sitePath(
-  page.basePath,
-  language === "he" ? "he/poolish/" : "poolish/",
-);
+const calculatorHref = sitePath(page.basePath, `${language}/poolish/`);
 const languageHref = sitePath(
   page.basePath,
-  page.alternateLanguage === "he" ? "he/poolish/" : "poolish/",
+  `${page.alternateLanguage}/poolish/`,
 );
 const zeroGrams = `0${text.gramUnit}`;
 ---

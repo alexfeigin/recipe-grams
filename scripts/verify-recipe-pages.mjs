@@ -18,7 +18,13 @@ function readBuiltPage(language, slug) {
     existsSync(filePath),
     `Expected generated page for ${language}/${slug}.MD at ${path.relative(repoRoot, filePath)}`,
   );
-  return readFileSync(filePath, "utf8");
+  const page = readFileSync(filePath, "utf8");
+  assert.match(
+    page,
+    /data-pagefind-body/,
+    `Expected ${language}/${slug} to render the recipe body, not a side page sharing its URL`,
+  );
+  return page;
 }
 
 for (const language of languages) {

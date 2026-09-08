@@ -15,7 +15,7 @@ const formulaFields = [
 for (const language of ["en", "he"]) {
   test.describe(language, () => {
     test.beforeEach(async ({ page }) => {
-      await page.goto(`${baseUrl}${language === "he" ? "he/" : ""}poolish/`);
+      await page.goto(`${baseUrl}${language}/poolish/`);
       await expect(page.locator('[data-output="totalFlour"]')).toContainText(
         "1000",
       );
@@ -109,7 +109,7 @@ for (const language of ["en", "he"]) {
       page,
     }) => {
       const otherLanguage = language === "en" ? "he" : "en";
-      const otherCalculator = `${baseUrl}${otherLanguage === "he" ? "he/" : ""}poolish/`;
+      const otherCalculator = `${baseUrl}${otherLanguage}/poolish/`;
       const switches = page.locator("a[data-language-switch]");
       await expect(switches).toHaveCount(2);
       for (const link of await switches.all()) {
@@ -145,7 +145,7 @@ for (const language of ["en", "he"]) {
       for (const link of await switches.all()) {
         await expect(link).toHaveAttribute(
           "href",
-          `${new URL(`${baseUrl}${language === "he" ? "he/" : ""}poolish/`).pathname}?mode=pizza`,
+          `${new URL(`${baseUrl}${language}/poolish/`).pathname}?mode=pizza`,
         );
       }
     });

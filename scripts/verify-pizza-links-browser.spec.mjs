@@ -9,7 +9,7 @@ for (const language of ["en", "he"]) {
   test(`${language}: pizza resources work and calculator stays out of global navigation`, async ({
     page,
   }) => {
-    const calculatorPath = language === "he" ? "he/poolish/" : "poolish/";
+    const calculatorPath = `${language}/poolish/`;
     const calculatorHref = `${productionBase}${calculatorPath}?mode=pizza`;
     if (baseUrl !== productionBase) {
       await page.route(`${productionBase}**`, async (route) => {
