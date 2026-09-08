@@ -89,7 +89,7 @@
 
 ## לחנונים
 
-1. התאימו את כמויות הבצק בעזרת [מחשבון פוליש](https://alexfeigin.github.io/recipe-grams/he/poolish/).
+1. התאימו את כמויות הבצק בעזרת [מחשבון פוליש](https://alexfeigin.github.io/recipe-grams/he/poolish/?mode=pizza).
 2. הלוגיקה של המחשבון זמינה גם בתור [סקריפט פוליש באש](https://github.com/alexfeigin/recipe-grams/blob/master/poolish_calc.sh).
 
 משקל בצק רצוי: 566 גרם מכין 2 פיצות בקוטר 12 אינץ' כל אחת במשקל 283 גרם
