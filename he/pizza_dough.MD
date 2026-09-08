@@ -3,7 +3,7 @@
 # מתכון לבצק פיצה
 
 [ויטו יאקופלי ביוטיוב](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)  
-[ויטו בגרסה אחרת](https://www.youtube.com/watch?v=OjsCEJ8CWlg&t=180s)
+[ויטו בגרסה אחרת](https://www.youtube.com/watch?v=OjsCEJ8CWlg&t=180s)  
 [סטטיסטיקות לחנונים](#לחנונים)
 
 ## מה זה פוליש
