@@ -2,7 +2,7 @@
 
 # Pizza Dough Recipe
 
-[Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)
+[Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)  
 [Vito another version](https://www.youtube.com/watch?v=OjsCEJ8CWlg&t=180s)
 [Stats for nerds](#for-nerds)
 
