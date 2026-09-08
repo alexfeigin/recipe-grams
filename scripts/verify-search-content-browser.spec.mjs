@@ -1,9 +1,3 @@
-// What search finds: indexed body terms, the category a result shows, and the
-// recipe each result opens, in both languages. How search behaves — expansion,
-// short queries, dismissal, keyboard focus, failure and retry — is owned by
-// scripts/verify-search-browser.spec.mjs, and the Pagefind build artifacts by
-// scripts/verify-search-index.mjs, so this suite also runs against a published
-// site with no local build.
 import { expect, test } from "@playwright/test";
 
 import { baseUrl } from "./browser-target.mjs";

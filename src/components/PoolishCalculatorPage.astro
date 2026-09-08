@@ -1,12 +1,4 @@
 ---
-// Poolish calculator page for one language: the form and the panel its weights
-// are written into. The browser behavior belongs to
-// src/scripts/poolishCalculatorPage.ts, which is handed the rendered
-// calculator, and the arithmetic to calculatePoolish in
-// src/lib/poolishCalculator.ts, the TypeScript port of poolish_calc.sh. The
-// page is noindex and unlinked from navigation, and all of its copy lives in
-// src/i18n/calculator.ts so the two languages stay in step (ADR 0034). The
-// document shell, header, and language-derived setup belong to SitePage.
 import SitePage from "../layouts/SitePage.astro";
 import { calculatorLabels } from "../i18n/calculator";
 import { getPageContext } from "../lib/pageContext";
@@ -24,8 +16,6 @@ const calculatorHref = sitePath(
   page.basePath,
   language === "he" ? "he/poolish/" : "poolish/",
 );
-// The language switch stays on the calculator; the reader's mode is added to
-// the link in the browser, where the query string is known.
 const languageHref = sitePath(
   page.basePath,
   page.alternateLanguage === "he" ? "he/poolish/" : "poolish/",
@@ -275,7 +265,6 @@ const zeroGrams = `0${text.gramUnit}`;
 
 <style>
   :root {
-    /* Page-only accents for the calculator's phase, mode, and note surfaces. */
     --tomato-dark: #7f2f24;
     --olive-dark: #40492c;
     --blue: #395f6f;

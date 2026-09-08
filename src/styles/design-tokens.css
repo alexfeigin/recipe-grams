@@ -1,7 +1,4 @@
 :root {
-  /* Base theme shared by the landing, recipe, and calculator pages, and by the
-     header they embed. Pages declare only what they vary, such as their own
-     --shadow depth or page-only accent shades. */
   color-scheme: light;
   --paper: #f8f4ec;
   --surface: #fffdf8;
@@ -18,7 +15,6 @@
     "Segoe UI",
     sans-serif;
 
-  /* Shared controls: white labels have 4.86:1 contrast (hover is darker). */
   --control-accent: #487889;
   --control-on-accent: #ffffff;
   --control-accent-hover: color-mix(

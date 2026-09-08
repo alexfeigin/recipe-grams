@@ -9,12 +9,8 @@ for (const language of ["en", "he"]) {
   test(`${language}: pizza resources work and calculator stays out of global navigation`, async ({
     page,
   }) => {
-    // The recipe sends the reader straight to the pizza preset, so the link
-    // carries the mode the calculator reads out of the query.
     const calculatorPath = language === "he" ? "he/poolish/" : "poolish/";
     const calculatorHref = `${productionBase}${calculatorPath}?mode=pizza`;
-    // Keep the Markdown's production URL useful on GitHub, while clicking it
-    // against the build under test when this runs locally.
     if (baseUrl !== productionBase) {
       await page.route(`${productionBase}**`, async (route) => {
         const target = route.request().url().replace(productionBase, baseUrl);
@@ -47,7 +43,6 @@ for (const language of ["en", "he"]) {
     await expect(page.locator("[data-pagefind-body]")).toHaveCount(0);
     await expect(page.locator('[data-field="pizzaCount"]')).toBeVisible();
     await expect(page.locator('[data-field="desiredDough"]')).toBeHidden();
-    // The calculator's language picker links to its paired localization.
     await expect(
       page.locator('#main-navigation a[href*="poolish"]'),
     ).toHaveCount(0);

@@ -1,12 +1,3 @@
-// Browser behavior for the poolish calculator page, the counterpart to
-// ./siteHeader for the one other surface with interactive markup (ADR 0029).
-// The page hands the rendered calculator to initializePoolishCalculator once
-// and everything else is internal: every element the behavior needs is resolved
-// from that root up front and named in a type, so markup the behavior depends
-// on cannot go missing quietly. Arithmetic and rejection rules stay in
-// ../lib/poolishCalculator, and every word stays in ../i18n/calculator; this
-// module only reads the form, runs the calculation, and writes what it
-// returns.
 import { calculatePoolish } from "../lib/poolishCalculator";
 import type {
   CalculatorFields,
@@ -18,13 +9,9 @@ import type { CalculatorLabels } from "../i18n/calculator";
 import { isRecipeLanguage } from "../lib/site";
 import { setLanguageSwitchQuery } from "./languageSwitch";
 
-// One element per field the calculation reads and one per weight it returns.
-// Naming the weights after CalculatorResult is what keeps a misspelled output
-// — `totalFluor` for `totalFlour` — a type error instead of a blank quantity.
 type CalculatorInputs = Record<keyof CalculatorFields, HTMLInputElement>;
 type CalculatorOutputs = Record<keyof CalculatorResult, HTMLElement>;
 
-// Salt is the only weight fine enough to be worth a decimal.
 const outputDigits: Record<keyof CalculatorResult, number> = {
   targetDough: 0,
   totalFlour: 0,
@@ -109,10 +96,6 @@ function requireModeInputs(form: HTMLFormElement) {
   };
 }
 
-/**
- * Wire up one rendered poolish calculator. The root element carries the
- * language the messages need, so a page only has to hand over the element.
- */
 export function initializePoolishCalculator(root: HTMLElement): void {
   const labels = requireLabels(root);
   const form = requireElement<HTMLFormElement>(root, "[data-calculator-form]");
@@ -138,9 +121,6 @@ export function initializePoolishCalculator(root: HTMLElement): void {
     "[data-validation-message]",
   );
 
-  // The weights the copy button would put on the clipboard, and the count of
-  // renders behind them: a copy that resolves after an edit belongs to a batch
-  // the reader has already moved on from, so its feedback is dropped.
   let currentResult: CalculatorResult | null = null;
   let revision = 0;
 
@@ -159,9 +139,6 @@ export function initializePoolishCalculator(root: HTMLElement): void {
     window.history.replaceState({}, "", url);
   }
 
-  // The header renders a language-switch link in both its desktop and its
-  // mobile layout. Both carry the selected mode so the reader lands on the
-  // same calculator in the other language.
   function syncLanguageSwitch() {
     const mode = urlMode();
     const query = new URLSearchParams();
@@ -258,7 +235,6 @@ export function initializePoolishCalculator(root: HTMLElement): void {
   });
   copyButton.addEventListener("click", copyWeights);
 
-  // A reader can arrive on a mode, from the other language or a shared link.
   const requestedMode = urlMode();
   if (requestedMode) {
     modeInputs[requestedMode].checked = true;

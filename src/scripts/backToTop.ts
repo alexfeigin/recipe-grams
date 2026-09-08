@@ -1,14 +1,9 @@
-// Browser behavior for the floating back-to-top button. It owns its own
-// visibility, scrolling, and post-scroll focus, and it is initialized with the
-// element to focus afterwards so it never has to reach into the header's
-// markup on its own.
 const fadeStart = 140;
 const fadeEnd = 720;
 const minimumOpacity = 0.14;
 
 export type BackToTopOptions = {
   button: HTMLElement;
-  /** Focused after scrolling, so keyboard users continue from the page top. */
   focusTarget: HTMLElement;
 };
 

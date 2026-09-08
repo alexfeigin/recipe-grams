@@ -42,9 +42,7 @@ for (const language of ["en", "he"]) {
         (element) => element.getBoundingClientRect().width,
       );
 
-      // The header animates its columns rather than snapping to the expanded
-      // layout. Read the declared transition, which no longer depends on the
-      // runner sampling a frame while the animation is still running.
+      // Sampling animation frames makes this assertion depend on runner timing.
       const columnMotion = await header.evaluate((element) => {
         const style = getComputedStyle(element);
         const index = style.transitionProperty

@@ -90,7 +90,6 @@ export function calculatePoolish(
     return { ok: false, error: "invalidSplit" };
   }
   const result = calculateRecipe(inputs);
-  // Rounded phase weights must also fit the batch, even at very small sizes.
   if (result.restWater < 0 || result.restFlour < 0) {
     return { ok: false, error: "invalidSplit" };
   }

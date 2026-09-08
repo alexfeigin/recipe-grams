@@ -1,8 +1,3 @@
-// Shared site vocabulary: the languages the site publishes, the identity of a
-// localized recipe, and the URL helper every page uses to build site-relative
-// links. This module holds no recipe data, no translated copy, and reads no
-// files, so pages and components can import it directly. Interface
-// translations live in src/i18n (ADR 0034).
 export const languages = ["en", "he"] as const;
 export type RecipeLanguage = (typeof languages)[number];
 

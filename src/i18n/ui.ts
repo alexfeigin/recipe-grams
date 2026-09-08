@@ -1,18 +1,9 @@
-// Interface translations for the shared site chrome: the header, the landing
-// page, and the labels every localized surface reads. One module per surface
-// under src/i18n, each exporting Record<RecipeLanguage, ...> so both languages
-// are required and a half-translated interface cannot build (ADR 0034). A side
-// page of its own keeps its copy in its own module here — see ./calculator.
-// This module holds no recipe content: recipe bodies live in en/ and he/, and
-// per-recipe titles and descriptions in src/lib/recipeCatalog.ts.
 import type {
   RecipeCategoryId,
   RecipeLanguage,
   RecipeMarkerId,
 } from "../lib/site";
 
-// How each language names itself in the language picker, shown the same way on
-// every page whatever language it is written in.
 export const languageNames: Record<RecipeLanguage, string> = {
   en: "EN",
   he: "עב",

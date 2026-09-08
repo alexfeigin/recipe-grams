@@ -1,5 +1,3 @@
-// Verification supplies the URL of its own preview. Focused/live runs must
-// explicitly select a target; never silently use a developer's running server.
 if (!process.env.SITE_BASE_URL) {
   throw new Error(
     "No browser target. Run npm run verify, or set SITE_BASE_URL for a focused browser check.",

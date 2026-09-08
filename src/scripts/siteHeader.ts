@@ -1,10 +1,3 @@
-// Browser behavior for the site header: the mobile navigation drawer and the
-// Pagefind-backed search field. Pages hand the header element to
-// initializeSiteHeader once; everything else is internal. Navigation and search
-// coordinate through the controller returned by createNavigation instead of a
-// shared global, and every element lookup is scoped to the header that was
-// passed in, so a page can change one behavior without touching the other or
-// the rest of its markup.
 import { uiLabels } from "../i18n/ui";
 import { isRecipeLanguage, sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
@@ -13,7 +6,6 @@ const mobileNavigationQuery = "(max-width: 880px)";
 const shortestSearchQuery = 2;
 const maximumSearchResults = 8;
 
-/** The only thing search needs from navigation: get the drawer out of the way. */
 type NavigationController = {
   close(): void;
 };
@@ -345,10 +337,6 @@ type PagefindModule = {
   ) => Promise<{ results: { data: () => Promise<PagefindResultData> }[] }>;
 };
 
-/**
- * Wire up one rendered site header. The header element carries the language and
- * base path the behavior needs, so a page only has to hand over the element.
- */
 export function initializeSiteHeader(header: HTMLElement): void {
   const settings = readSettings(header);
   const navigation = createNavigation(header);

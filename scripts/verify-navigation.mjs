@@ -1,6 +1,3 @@
-// Expected navigation and recipe-link destinations in the real build. What a
-// page is expected to link to is checked here; whether a destination exists is
-// owned by scripts/verify-generated-links.mjs.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -59,7 +56,6 @@ assert.match(
 assert.match(englishGrilledChicken, /href="\/recipe-grams\/en\/grill_rub\/"/);
 assert.match(hebrewGrilledChicken, /href="\/recipe-grams\/he\/grill_rub\/"/);
 
-// Recipe images are published at the site root, not under images/ (ADR 0024).
 assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 for (const [pageName, html] of [
   ["English home", englishHome],
@@ -72,10 +68,6 @@ for (const [pageName, html] of [
   );
 }
 
-// Every published page, not only the sampled ones, links to generated pages
-// rather than to the Markdown recipes they were rendered from (ADR 0023).
-// Absolute destinations are left alone, so a recipe may still cite a Markdown
-// file hosted elsewhere.
 const localMarkdownHref = /href="(?!\w+:|\/\/)[^"]+\.MD(?:[?#][^"]*)?"/;
 for (const pagePath of listBuiltPages()) {
   assert.doesNotMatch(

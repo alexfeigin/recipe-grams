@@ -2,10 +2,6 @@ import { expect, test } from "@playwright/test";
 
 import { baseUrl } from "./browser-target.mjs";
 
-// Arithmetic, rounding, and rejection rules live in
-// scripts/poolish-calculation.test.mjs, which needs no browser. These tests
-// cover what a reader sees: validation, copying, localized formatting, and the
-// mode and language interactions around them.
 const formulaFields = [
   "desiredDough",
   "hydration",
@@ -79,9 +75,6 @@ for (const language of ["en", "he"]) {
           );
         }
       };
-      // Representative outputs only: whole grams, a zero, and the one field
-      // carrying a decimal. The full quantity tables are checked without a
-      // browser in scripts/poolish-calculation.test.mjs.
       await expectOutputs({
         totalFlour: 1000,
         targetDough: 1700,
@@ -117,8 +110,6 @@ for (const language of ["en", "he"]) {
     }) => {
       const otherLanguage = language === "en" ? "he" : "en";
       const otherCalculator = `${baseUrl}${otherLanguage === "he" ? "he/" : ""}poolish/`;
-      // The header renders one language-switch link per layout variant, so both
-      // the desktop picker and the mobile actions have to carry the mode.
       const switches = page.locator("a[data-language-switch]");
       await expect(switches).toHaveCount(2);
       for (const link of await switches.all()) {
@@ -151,7 +142,6 @@ for (const language of ["en", "he"]) {
       await expect(page.locator('[data-output="targetDough"]')).toContainText(
         "850",
       );
-      // The mode survives a second switch, back to where the reader started.
       for (const link of await switches.all()) {
         await expect(link).toHaveAttribute(
           "href",

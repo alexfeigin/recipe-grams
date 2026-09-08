@@ -1,9 +1,4 @@
 ---
-// The site header every surface shares. It asks for only what a page decides:
-// the line under the brand and where the language switch and navigation lead.
-// Everything else — direction, the labels, the accessible names, and the link
-// back to this language's landing page — it derives from the language through
-// getPageContext, whose copy comes from src/i18n/ui.ts (ADR 0034).
 import { languageNames } from "../i18n/ui";
 import { getPageContext, type NavItem } from "../lib/pageContext";
 import { sitePath, type RecipeLanguage } from "../lib/site";

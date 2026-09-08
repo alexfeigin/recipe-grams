@@ -1,9 +1,4 @@
 ---
-// One localized recipe page: the recipe's Markdown body rendered into the
-// shared site document. The page decides what only it knows — the recipe's
-// title and description, its social card, its search metadata, and where the
-// language switch leads when the other language has this recipe — and leaves
-// the document shell, header, and language-derived setup to SitePage.
 import SitePage from "../../layouts/SitePage.astro";
 import type { SocialImage } from "../../layouts/SitePage.astro";
 import {
@@ -19,9 +14,6 @@ import {
 import { getPageContext } from "../../lib/pageContext";
 import { sitePath } from "../../lib/site";
 
-// Discovery already read the recipe source tree, so each route carries its
-// recipe forward as a prop. The site is static: only the recipes listed here
-// are ever built, and nothing has to look one up again by URL segment.
 export function getStaticPaths() {
   return listLocalizedRecipes().map((recipe) => ({
     params: {
@@ -46,8 +38,6 @@ const recipeHtml = await renderRecipeBody(recipe, basePath);
 const recipeHref = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
 const title = `${metadata.title} | Recipe-Grams`;
 
-// Without a recipe photo the shared placeholder card stands in, and only then
-// are its dimensions known well enough to publish.
 const fallbackSocialImageSource = "recipe-grams-card-placeholder.png";
 const socialImageSource =
   metadata.socialImage ?? metadata.image ?? fallbackSocialImageSource;
@@ -60,8 +50,6 @@ const socialImage: SocialImage = {
   type: usesFallbackSocialImage ? "image/png" : undefined,
 };
 
-// The language switch stays on this recipe when the other language has it, and
-// falls back to that language's landing page when it does not.
 const alternateRecipe = findLocalizedRecipe(
   page.alternateLanguage,
   recipe.slug,

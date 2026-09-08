@@ -1,9 +1,3 @@
-// Recipe catalog: the metadata that does not belong in the readable Markdown
-// recipe body — browsing intent, markers, and localized titles, descriptions,
-// and images. Adding or editing a recipe's site metadata happens here and
-// nowhere else. This module reads no files and renders nothing: the functions
-// that check the catalog against the recipe source tree are given the
-// discovered recipes by ./recipePages.
 import { uiLabels } from "../i18n/ui.ts";
 import {
   languages,
@@ -20,10 +14,6 @@ export type LocalizedRecipeMetadata = {
   socialImage?: string;
 };
 
-// Where a published recipe belongs in generated browsing. A featured recipe
-// carries the category and order its card needs; an unlisted one records why it
-// is deliberately absent. There is no third state, so a forgotten category can
-// never read as a decision to leave a recipe off the landing page.
 export type FeaturedListing = {
   intent: "featured";
   categoryId: RecipeCategoryId;
@@ -45,7 +35,6 @@ export type RecipeCatalogEntry = {
 
 export type RecipeCatalog = Record<string, RecipeCatalogEntry>;
 
-// A featured recipe of one language, ready for a landing page card.
 export type FeaturedRecipe = {
   slug: string;
   language: RecipeLanguage;
@@ -55,11 +44,6 @@ export type FeaturedRecipe = {
   metadata: LocalizedRecipeMetadata;
 };
 
-// What a catalog check found. An error means the site would publish something
-// wrong — a featured recipe whose card has no title or description — and fails
-// the build. A warning means the site is correct but a maintainer probably
-// wants to know: an uncataloged recipe, an orphan entry, a localization the
-// source tree does not have, or two cards competing for one position.
 export type CatalogDiagnostic = {
   severity: "error" | "warning";
   slug: string;
@@ -537,10 +521,6 @@ export const recipeCatalog: RecipeCatalog = {
   }),
 };
 
-// What a recipe page says about itself when the catalog does not say it. A
-// missing entry and an entry with an empty title read the same to a reader, so
-// they fall back the same way, field by field: whatever the catalog does give —
-// the other text, an image, an explicit social image — is kept.
 const genericMetadata = {
   title: "Recipe-Grams Recipe",
   description:
@@ -579,9 +559,6 @@ export function getRecipeSearchMetadata(
   };
 }
 
-// The cards one localized landing page shows, in featured order. A recipe earns
-// a card when the catalog features it, the recipe exists in every published
-// language, and this language has the title and description a card needs.
 export function selectFeaturedRecipes(
   language: RecipeLanguage,
   recipes: readonly RecipeIdentity[],
@@ -619,11 +596,6 @@ export function selectFeaturedRecipes(
     .sort((first, second) => first.featuredOrder - second.featuredOrder);
 }
 
-// The published recipes the catalog deliberately keeps out of browsing, one
-// entry per localized source that actually exists. Verification uses this to
-// check that an unlisted recipe still publishes and still has no card, without
-// assuming the catalog holds any particular number of unlisted recipes or that
-// every one of them is a complete Recipe Pair.
 export function listUnlistedRecipes(
   recipes: readonly RecipeIdentity[],
   catalog: RecipeCatalog = recipeCatalog,
@@ -637,8 +609,6 @@ export function listUnlistedRecipes(
     );
 }
 
-// Everything the catalog and the recipe source tree can disagree about, checked
-// in one pass over the discovered recipes.
 export function collectCatalogDiagnostics(
   recipes: readonly RecipeIdentity[],
   catalog: RecipeCatalog = recipeCatalog,
@@ -752,9 +722,6 @@ function missingMetadataFields(
   return missing;
 }
 
-// Two cards with the same order inside one category leave their sequence to
-// chance, which is worth reporting. The same order in different categories is
-// fine: each category sorts on its own.
 function duplicateFeaturedOrders(catalog: RecipeCatalog): CatalogDiagnostic[] {
   const slugsByPosition = new Map<string, string[]>();
 
@@ -795,8 +762,6 @@ function featuredRecipe(
   };
 }
 
-// A published recipe kept off the landing page on purpose. The reason is for
-// the next maintainer: it says the omission was a decision.
 function unlistedRecipe(
   reason: string,
   markerIds: RecipeMarkerId[],
@@ -809,8 +774,6 @@ function unlistedRecipe(
   };
 }
 
-// A recipe's social card is its own image unless a localization overrides it,
-// so an entry records the image once and leaves socialImage to the exceptions.
 function localizedMetadata(
   title: string,
   description: string,

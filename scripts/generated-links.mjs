@@ -34,7 +34,6 @@ const referenceAttributes = {
   object: ["data"],
 };
 
-/** Check published HTML references using the same URL resolution as a browser. */
 export function verifyGeneratedLinks(
   directory,
   siteUrl = "https://alexfeigin.github.io/recipe-grams/",

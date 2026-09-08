@@ -41,8 +41,6 @@ assert.match(hebrewPizza, /הכנת הפוליש/);
 assert.match(hebrewPizza, /src="\/recipe-grams\/pizza\.jpg"/);
 assert.doesNotMatch(hebrewPizza, /חזרה לתפריט/);
 
-// Landing page cards open generated site recipe pages. This is the destination
-// contract; it says nothing about the links a recipe body may carry.
 for (const [language, landingSegments] of [
   ["en", []],
   ["he", ["he"]],

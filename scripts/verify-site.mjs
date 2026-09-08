@@ -39,10 +39,7 @@ function run(script, extraEnv = {}) {
 try {
   await run("check");
   await run("typecheck");
-  // Arithmetic, catalog and link fixtures need no build, so a failure in them
-  // stops the run before it spends a build and a browser on it (ADR 0033).
   await run("verify:pure");
-  // Remove stale routes and index fragments before producing the tested build.
   await rm("dist", { recursive: true, force: true });
   await run("build");
   await run("verify:generated");

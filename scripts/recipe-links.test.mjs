@@ -1,6 +1,3 @@
-// Destination fixtures for generated recipe pages. These run the real Markdown
-// AST plugin and the real renderer, so they need no build, preview server,
-// browser, or SITE_BASE_URL.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
@@ -12,7 +9,6 @@ import {
 const basePath = "/recipe-grams/";
 
 for (const [label, language, destination, expected] of [
-  // Recipe links, as written in a localized recipe under `en/` or `he/`.
   ["bare recipe link", "en", "grill_rub.MD", "/recipe-grams/en/grill_rub/"],
   ["dot-slash recipe link", "en", "./salt.MD", "/recipe-grams/en/salt/"],
   ["Hebrew recipe link", "he", "salt.MD", "/recipe-grams/he/salt/"],
@@ -26,7 +22,6 @@ for (const [label, language, destination, expected] of [
   ],
   ["encoded fragment", "he", "salt.MD#%D7%9C", "/recipe-grams/he/salt/#%D7%9C"],
   ["recipe query", "en", "salt.MD?print=1", "/recipe-grams/en/salt/?print=1"],
-  // Images, published from the recipe source tree at the site root.
   ["image", "en", "../images/pizza.jpg", "/recipe-grams/pizza.jpg"],
   ["Hebrew image", "he", "../images/peta.jpeg", "/recipe-grams/peta.jpeg"],
   [
@@ -35,7 +30,6 @@ for (const [label, language, destination, expected] of [
     "../images/steps/one.png",
     "/recipe-grams/steps/one.png",
   ],
-  // Destinations that must survive untouched.
   ["external .MD", "en", "https://example.com/SPEC.MD", undefined],
   ["uppercase scheme", "en", "HTTPS://example.com/SPEC.MD", undefined],
   ["protocol relative", "en", "//example.com/SPEC.MD", undefined],

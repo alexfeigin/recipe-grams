@@ -1,8 +1,3 @@
-// Landing page verification: the built pages against the published catalog.
-// The eligibility rules themselves are checked with fixtures in
-// scripts/catalog-intent.test.mjs; this script checks that the pages the build
-// produced show exactly the recipes the catalog features, in the catalog's
-// order, and that nothing here needs a list of exceptions to stay green.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -28,7 +23,6 @@ function attribute(element, name) {
   return element.attrs?.find((attr) => attr.name === name)?.value;
 }
 
-/** The recipe card links of a landing page, in the order they are rendered. */
 function landingCardHrefs(html) {
   return elements(parse(html))
     .filter(
@@ -98,9 +92,6 @@ for (const categoryId of [
   );
 }
 
-// The catalog and the recipe source tree must agree before the built pages can
-// be judged against them. Warnings are reported and tolerated by policy;
-// incomplete featured metadata is an error.
 const localizedRecipes = languages.flatMap((language) =>
   markdownRecipes(language).map((slug) => ({ language, slug })),
 );
@@ -118,9 +109,6 @@ assert.deepEqual(
   "The published catalog must not describe an incomplete featured recipe",
 );
 
-// Generated browsing coverage against the catalog: every featured recipe has a
-// card, in its category section and in its featured order, and nothing else
-// does.
 const homesByLanguage = { en: englishHome, he: hebrewHome };
 
 for (const language of languages) {
@@ -139,13 +127,6 @@ for (const language of languages) {
   );
 }
 
-// A deliberately unfeatured recipe publishes the pages its sources call for and
-// stays off the landing pages, without any verification exception naming it.
-// Only the localized sources that exist are checked: featuring the last
-// unlisted recipe, or writing one in a single language, is valid output rather
-// than a verification failure. Whole-site source-to-page coverage belongs to
-// scripts/verify-recipe-pages.mjs, and the card comparison above already states
-// the complete set of landing page destinations.
 for (const recipe of listUnlistedRecipes(localizedRecipes)) {
   readBuiltPage(recipe.language, recipe.slug);
   assert.doesNotMatch(

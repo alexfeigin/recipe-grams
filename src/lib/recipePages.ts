@@ -1,10 +1,3 @@
-// Build-time recipe pages: discovering the localized recipes in the recipe
-// source tree, assembling landing page data from the catalog, and rendering a
-// recipe's Markdown body into site HTML. Everything here runs at build time and
-// touches the filesystem; shared labels and URLs live in ./site, published link
-// destinations in ./recipeLinks, and recipe metadata in ./recipeCatalog, which
-// this module hands the discovered recipes so the two can be checked against
-// each other.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -48,8 +41,6 @@ export type CategorySection = {
 
 const repoRoot = process.cwd();
 
-// The recipe set the catalog was last checked against, so a build that renders
-// hundreds of pages reports each disagreement once.
 let lastCheckedRecipes = "";
 
 // One renderer per language and base path: the destination plugin is fixed at
@@ -78,10 +69,6 @@ export function listLocalizedRecipes(): LocalizedRecipe[] {
   return recipes;
 }
 
-// Discovery is where the catalog meets the recipe source tree, so it is where
-// the two are checked against each other: once per set of discovered recipes,
-// rather than once per generated page. Warnings are printed and the build goes
-// on; errors stop it, because they describe a page the site should not publish.
 function reportCatalogDiagnostics(recipes: LocalizedRecipe[]): void {
   const checked = recipes
     .map((recipe) => `${recipe.language}/${recipe.slug}`)
@@ -115,8 +102,6 @@ function reportCatalogDiagnostics(recipes: LocalizedRecipe[]): void {
   lastCheckedRecipes = checked;
 }
 
-// The slugs that exist in both languages, counted from one already discovered
-// recipe list so a caller never walks the recipe source tree twice.
 function listRecipePairs(localizedRecipes: LocalizedRecipe[]): string[] {
   const slugsByLanguage = new Map<RecipeLanguage, Set<string>>();
 
@@ -151,8 +136,6 @@ export function findLocalizedRecipe(
 
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   const labels = uiLabels[language];
-  // One walk of the recipe source tree per call: the pair count and the
-  // featured cards are two readings of the same discovered set.
   const localizedRecipes = listLocalizedRecipes();
   const pairedSlugs = listRecipePairs(localizedRecipes);
   const cards: RecipeCard[] = selectFeaturedRecipes(
@@ -179,8 +162,6 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     }))
     .filter((section) => section.recipes.length > 0);
 
-  // What the landing page lists. Direction, locale, labels, and home URLs are
-  // language-derived page setup and belong to ./pageContext, not here.
   return {
     recipePairCount: pairedSlugs.length,
     categoryCount: categorySections.length,

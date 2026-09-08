@@ -124,8 +124,6 @@ for (const language of ["en", "he"]) {
   test(`${language}: back to top returns to the page start and focuses the brand`, async ({
     page,
   }) => {
-    // Reduced motion keeps the jump instant, which is also the behavior the
-    // button is expected to honor.
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(homeUrl);

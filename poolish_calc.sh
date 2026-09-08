@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Function to round a number to the nearest integer
 round() {
   local x
   if [ $# -gt 0 ]; then
@@ -18,8 +17,6 @@ max() {
   (( a >= b )) && echo "$a" || echo "$b"
 }
 
-
-# Function to display help message
 _show_help_calculate_dough_recipe() {
     echo "Usage: $0 [options]"
     echo ""
@@ -34,9 +31,7 @@ _show_help_calculate_dough_recipe() {
     echo "  --help                                     Display this help message"
 }
 
-# Function to calculate dough recipe
 calculate_dough_recipe() {
-    # Default values
     desired_dough="1700"
     hydration_percentage="0.70"
     poolish_percentage="(2/3)"
@@ -45,7 +40,6 @@ calculate_dough_recipe() {
     rest_dough_yeast_percentage="0"
     salt_percentage="0.027"
 
-    # Parse named arguments
     while [[ "$#" -gt 0 ]]; do
         case $1 in
             -d|--desired-dough) desired_dough="$2"; shift ;;
@@ -61,22 +55,18 @@ calculate_dough_recipe() {
         shift
     done
 
-    # Calculate total flour and total water
     total_flour=$(echo "scale=10; $desired_dough / (1 + $hydration_percentage)" | bc | round)
     total_water=$(echo "scale=10; $desired_dough - $total_flour" | bc | round)
 
-    # Calculate poolish ingredients
     poolish_flour=$(echo "scale=10; $total_flour * $poolish_percentage" | bc | round)
     poolish_water=$(echo "scale=10; $poolish_flour * $poolish_hydration_percentage" | bc | round)
     poolish_yeast=$(max $(echo "scale=10; $poolish_flour * $poolish_yeast_percentage" | bc | round) 3)
 
-    # Calculate rest of ingredients
     rest_flour=$(echo "scale=10; $total_flour - $poolish_flour" | bc | round)
     rest_water=$(echo "scale=10; $total_water - $poolish_water" | bc | round)
     rest_yeast=$(echo "scale=10; $total_flour * $rest_dough_yeast_percentage" | bc | round)
     salt=$(printf "%.1f\n" "$(echo "scale=3; $total_flour * $salt_percentage" | bc)")
 
-    # Print the recipe
     echo ""
     echo "Dough Recipe:"
     echo "-------------"

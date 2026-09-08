@@ -1,8 +1,3 @@
-// Catalog intent fixtures: which recipes earn a landing page card, and what the
-// catalog reports when it disagrees with the recipe source tree. Every case is
-// a small hand-written catalog, so these checks describe the rules rather than
-// re-deriving them from the published catalog. They need no build, preview
-// server, browser, or SITE_BASE_URL.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -42,7 +37,6 @@ function unlisted(reason, title = "Unlisted") {
   };
 }
 
-// The fallback a page shows when the catalog gives it no usable text.
 const generic = {
   title: "Recipe-Grams Recipe",
   description:
@@ -139,8 +133,6 @@ test("an unlisted recipe with missing metadata warns instead of failing", () => 
   assert.equal(messagesFor(diagnostics, "warning").length, 1);
   assert.match(diagnostics[0].message, /he\/helper\.MD is unlisted/);
 
-  // The warning says the page falls back to the generic title and description,
-  // so the page it describes has to actually get them.
   assert.deepEqual(
     getRecipeMetadata({ language: "he", slug: "helper" }, catalog),
     {
@@ -260,9 +252,6 @@ test("verification checks the unlisted pages the source tree actually has", () =
     removed: unlisted("Kept for a recipe that no longer exists."),
   };
 
-  // One localized source means one page to require: the missing Hebrew
-  // counterpart is a warning, not a page verification may demand. An orphan
-  // entry names no page at all.
   assert.deepEqual(listUnlistedRecipes(recipes, catalog), [
     { language: "en", slug: "helper" },
   ]);
