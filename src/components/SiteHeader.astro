@@ -192,15 +192,27 @@ const searchDirection = page.direction;
 
 <script>
   import { initializeBackToTop } from "../scripts/backToTop";
+  import {
+    initializeLanguageSwitch,
+    setLanguageSwitchHash,
+  } from "../scripts/languageSwitch";
   import { initializeSiteHeader } from "../scripts/siteHeader";
 
   const header = document.querySelector<HTMLElement>("[data-site-header]");
   const backToTop = document.querySelector<HTMLElement>("[data-back-to-top]");
   const brand = header?.querySelector<HTMLElement>(".brand");
 
-  if (header) initializeSiteHeader(header);
-  if (backToTop && brand)
-    initializeBackToTop({ button: backToTop, focusTarget: brand });
+  if (header) {
+    initializeSiteHeader(header);
+    initializeLanguageSwitch(header);
+  }
+  if (backToTop && brand && header)
+    initializeBackToTop({
+      button: backToTop,
+      focusTarget: brand,
+      onLocationChange: () =>
+        setLanguageSwitchHash(window.location.hash, header),
+    });
 </script>
 
 <style>

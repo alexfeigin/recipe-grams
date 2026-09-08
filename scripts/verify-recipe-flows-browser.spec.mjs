@@ -10,15 +10,14 @@ test("English landing card opens a generated recipe page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Rice Pilaf" })).toBeVisible();
 });
 
-test("Recipe language switch opens the matching localized recipe", async ({
-  page,
-}) => {
-  await page.goto(`${baseUrl}en/rice_pilaf/`);
-  await page.getByLabel("Language").getByRole("link", { name: "עב" }).click();
+test("Recipe language switch preserves a shared fragment", async ({ page }) => {
+  await page.goto(`${baseUrl}en/pizza_dough/#nerd-stats`);
+  await page.locator(".desktop-language-picker a").click();
 
-  await expect(page).toHaveURL(`${baseUrl}he/rice_pilaf/`);
+  await expect(page).toHaveURL(`${baseUrl}he/pizza_dough/#nerd-stats`);
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.getByRole("heading", { name: "פילאף אורז" })).toBeVisible();
+  await expect(page.locator("#nerd-stats")).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: "לחנונים" })).toBeVisible();
 });
 
 test("Internal Markdown recipe links resolve to generated pages", async ({

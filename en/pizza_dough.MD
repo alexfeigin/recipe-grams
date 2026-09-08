@@ -4,7 +4,7 @@
 
 [Vito Iacopelli on Youtube](https://www.youtube.com/watch?v=LlrmaFmNdts&t=60s)  
 [Vito another version](https://www.youtube.com/watch?v=OjsCEJ8CWlg&t=180s)  
-[Stats for nerds](#for-nerds)
+[Stats for nerds](#nerd-stats)
 
 ## What is Poolish
 
@@ -90,6 +90,8 @@ Salt: 9g
 | :-----------------------------: | :---------------------------------: |
 |  ![Pizza](../images/pizza.jpg)  | ![Par-baked](../images/pizza2.jpeg) |
 | ![Slice](../images/pizza3.jpeg) |                                     |
+
+<span id="nerd-stats"></span>
 
 ## For nerds
 

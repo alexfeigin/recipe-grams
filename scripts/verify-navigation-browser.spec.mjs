@@ -2,6 +2,34 @@ import { expect, test } from "@playwright/test";
 
 import { baseUrl } from "./browser-target.mjs";
 
+test("localized landing-page fragments match and survive language switching", async ({
+  page,
+}) => {
+  const fragments = [];
+
+  for (const path of ["", "he/"]) {
+    await page.goto(`${baseUrl}${path}`);
+    const localizedFragments = await page
+      .locator('a[href^="#"]')
+      .evaluateAll((links) =>
+        links.map((link) => link.getAttribute("href")).filter(Boolean),
+      );
+
+    for (const fragment of localizedFragments) {
+      await expect(page.locator(fragment)).toHaveCount(1);
+    }
+    fragments.push(localizedFragments);
+  }
+
+  expect(fragments[0]).toEqual(fragments[1]);
+
+  await page.goto(baseUrl);
+  await page.locator('a[href="#mains"]').first().click();
+  await expect(page).toHaveURL(`${baseUrl}#mains`);
+  await page.locator(".desktop-language-picker a").click();
+  await expect(page).toHaveURL(`${baseUrl}he/#mains`);
+});
+
 async function tabTo(page, target) {
   for (let index = 0; index < 12; index++) {
     await page.keyboard.press("Tab");
@@ -121,22 +149,30 @@ for (const language of ["en", "he"]) {
     await expect(navigation).toBeHidden();
   });
 
-  test(`${language}: back to top returns to the page start and focuses the brand`, async ({
+  test(`${language}: back to top clears the fragment before language switching`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(homeUrl);
+    await page.goto(`${homeUrl}#sweets`);
     const backToTop = page.locator("[data-back-to-top]");
-    await expect(backToTop).toBeHidden();
-    await page.evaluate(() =>
-      window.scrollTo(0, document.documentElement.scrollHeight),
-    );
     await expect(backToTop).toBeVisible();
     await backToTop.click();
     await expect(page.locator(".brand")).toBeFocused();
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page).toHaveURL(homeUrl);
     await expect(backToTop).toBeHidden();
+
+    const alternateHomeUrl = language === "en" ? `${baseUrl}he/` : baseUrl;
+    const languageSwitch = page.locator(
+      ".mobile-actions a[data-language-switch]",
+    );
+    await expect(languageSwitch).toHaveAttribute(
+      "href",
+      new URL(alternateHomeUrl).pathname,
+    );
+    await languageSwitch.click();
+    await expect(page).toHaveURL(alternateHomeUrl);
   });
 
   for (const width of [881, 1280]) {

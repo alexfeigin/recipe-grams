@@ -5,11 +5,13 @@ const minimumOpacity = 0.14;
 export type BackToTopOptions = {
   button: HTMLElement;
   focusTarget: HTMLElement;
+  onLocationChange: () => void;
 };
 
 export function initializeBackToTop({
   button,
   focusTarget,
+  onLocationChange,
 }: BackToTopOptions): void {
   let pendingFrame = 0;
 
@@ -43,6 +45,17 @@ export function initializeBackToTop({
   }
 
   button.addEventListener("click", () => {
+    if (window.location.hash) {
+      const destination = new URL(window.location.href);
+      destination.hash = "";
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${destination.pathname}${destination.search}`,
+      );
+      onLocationChange();
+    }
+
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
