@@ -1,41 +1,44 @@
-# Architecture decision records
+# Architecture decisions
 
-Each record is a short, dated-by-number statement of one decision. Records are never rewritten or deleted: a decision that no longer describes the implementation keeps its original text and gains a closing line pointing at the record that replaced or clarified it, so the history stays readable. Read the current record for how the project works today, and the superseded one for why it once worked differently.
+Read the accepted ADRs that match the work; a task can require several. Each has a
+short context/decision/reason paragraph, with consequences where needed. ADRs
+0036–0042 consolidate existing decisions; archived 0001–0035 retain their original
+identities and wording. The archive is only for investigating earlier choices.
 
-| #    | Decision                                                                                                                                                                       | Status                           |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| 0001 | [Preserve Markdown recipes as the source of truth](0001-preserve-markdown-recipes-as-source.md)                                                                                | Current                          |
-| 0002 | [Build a static Astro site for GitHub Pages](0002-build-a-static-astro-site-for-github-pages.md)                                                                               | Current                          |
-| 0003 | [Use Pagefind for static recipe search](0003-use-pagefind-for-static-recipe-search.md)                                                                                         | Current                          |
-| 0004 | [Use language and filename for site recipe URLs](0004-use-language-and-filename-for-site-recipe-urls.md)                                                                       | Current                          |
-| 0005 | [Publish all localized recipe files](0005-publish-all-localized-recipe-files.md)                                                                                               | Current                          |
-| 0006 | [Prefer a recipe catalog over parsing the legacy index](0006-prefer-a-recipe-catalog-over-parsing-the-legacy-index.md)                                                         | Current, clarified by 0025       |
-| 0007 | [Store site metadata in Astro code](0007-store-site-metadata-in-astro-code.md)                                                                                                 | Current                          |
-| 0008 | [Remove legacy back links from recipes](0008-remove-legacy-back-links-from-recipes.md)                                                                                         | Superseded by 0023               |
-| 0009 | [Use English as the site root language](0009-use-english-as-the-site-root-language.md)                                                                                         | Current, clarified by 0035       |
-| 0010 | [Build locally to dist before manual Pages publishing](0010-build-locally-to-dist-before-manual-pages-publishing.md)                                                           | Current                          |
-| 0011 | [Render Markdown as recipe body content for MVP](0011-render-markdown-as-recipe-body-content-for-mvp.md)                                                                       | Current                          |
-| 0012 | [Defer Recipe JSON-LD](0012-defer-recipe-json-ld.md)                                                                                                                           | Current                          |
-| 0013 | [Provide localized landing pages](0013-provide-localized-landing-pages.md)                                                                                                     | Current                          |
-| 0014 | [Use a mobile navigation drawer](0014-use-a-mobile-navigation-drawer.md)                                                                                                       | Superseded in part by 0027       |
-| 0015 | [Place Astro project at repo root](0015-place-astro-project-at-repo-root.md)                                                                                                   | Current                          |
-| 0016 | [Link public images to root images](0016-link-public-images-to-root-images.md)                                                                                                 | Superseded by 0024               |
-| 0017 | [Warn on missing recipe metadata](0017-warn-on-missing-recipe-metadata.md)                                                                                                     | Current                          |
-| 0018 | [Update agent recipe workflow for site metadata](0018-update-agent-recipe-workflow-for-site-metadata.md)                                                                       | Current                          |
-| 0019 | [Use complete pair-level metadata with warnings](0019-use-complete-pair-level-metadata-with-warnings.md)                                                                       | Current, refined by 0030         |
-| 0020 | [Use semantic markers and localized categories](0020-use-semantic-markers-and-localized-categories.md)                                                                         | Current                          |
-| 0021 | [Search current language pages in the nav popup](0021-search-current-language-pages-in-the-nav-popup.md)                                                                       | Current                          |
-| 0022 | [Use page-level RTL for Hebrew](0022-use-page-level-rtl-for-hebrew.md)                                                                                                         | Current                          |
-| 0023 | [Preserve recipe back links in source and strip them in the site](0023-preserve-recipe-back-links-in-source-and-strip-them-in-the-site.md)                                     | Current, supersedes 0008         |
-| 0024 | [Serve site images directly from the root image directory](0024-serve-site-images-directly-from-the-root-image-directory.md)                                                   | Current, supersedes 0016         |
-| 0025 | [Keep the legacy index for Markdown readers and the catalog for generated browsing](0025-keep-the-legacy-index-for-markdown-readers-and-the-catalog-for-generated-browsing.md) | Current, clarifies 0006          |
-| 0026 | [Separate site vocabulary, recipe catalog, and build-time page modules](0026-separate-site-vocabulary-catalog-and-build-time-modules.md)                                       | Current                          |
-| 0027 | [Keep search and language switching in the header at every width](0027-keep-search-and-language-switching-in-the-header.md)                                                    | Current, supersedes 0014 in part |
-| 0028 | [Retain published images unless evidence supports removal](0028-retain-published-images-unless-evidence-supports-removal.md)                                                   | Current                          |
-| 0029 | [Own header behavior in typed browser modules](0029-own-header-behavior-in-typed-browser-modules.md)                                                                           | Current                          |
-| 0030 | [Model featured and intentionally unfeatured recipes explicitly](0030-model-featured-and-unlisted-recipes-explicitly.md)                                                       | Current, refines 0017 and 0019   |
-| 0031 | [Check poolish arithmetic without a browser](0031-check-poolish-arithmetic-without-a-browser.md)                                                                               | Current                          |
-| 0032 | [Share one document shell across localized pages](0032-share-one-document-shell-across-localized-pages.md)                                                                     | Current                          |
-| 0033 | [Fail before the build and give each check one owner](0033-fail-before-the-build-and-give-each-check-one-owner.md)                                                             | Current, refines 0031            |
-| 0034 | [Store interface translations in src/i18n](0034-store-interface-translations-in-src-i18n.md)                                                                                   | Current, refines 0026            |
-| 0035 | [Route side pages under their language](0035-route-side-pages-under-their-language.md)                                                                                         | Current, clarifies 0009          |
+| When working on                                                                                     | Read                                                                                           |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Recipe source files, Markdown rendering or links, `index.MD`, image paths or retention              | [0036 — Sources and publication](0036-preserve-readable-recipe-sources.md)                     |
+| Catalog entries, landing cards/order, categories, markers, preview metadata, or catalog diagnostics | [0037 — Catalog](0037-model-catalog-browsing-intent-explicitly.md)                             |
+| Routes, slugs, language switching, interface translations, RTL, or adding a localized page          | [0038 — URLs and languages](0038-use-explicit-localized-routes-and-copy.md)                    |
+| Module boundaries, shared page shell/context, browser script interfaces, or calculator logic        | [0039 — Module responsibilities](0039-separate-page-assembly-and-feature-modules.md)           |
+| Pagefind, search behavior, header controls, or the navigation drawer                                | [0040 — Search and navigation](0040-keep-static-search-and-language-controls-in-the-header.md) |
+| Test coverage, check ownership/order, or preview-server lifecycle                                   | [0041 — Verification](0041-verify-at-the-owning-layer-before-expensive-checks.md)              |
+| Astro hosting configuration, build output, GitHub Pages, or deployment                              | [0042 — Build and release](0042-build-a-static-site-and-publish-manually.md)                   |
+
+For example, changing a recipe's category needs Catalog; adding a side page needs
+URLs and languages plus Module responsibilities; changing search interactions needs Search
+and navigation plus Verification. Routine tasks do not require reading every topic.
+
+[Product](../../PRODUCT.md) owns reader behavior, [Design](../../DESIGN.md) owns
+visual rules, and [Development](../development.md) owns commands. The repository
+skills own authoring and publishing procedures.
+
+## Maintaining decisions
+
+Use `$domain-modeling` for ADRs and glossary changes. Its ADR format is a short
+title plus 1–3 sentences of context, decision, and reason; optional status,
+alternatives, or consequences belong only where they help. Add a new ADR only
+when the decision is hard to reverse, surprising without context, and the result
+of a real tradeoff.
+
+- Keep files in `docs/adr/` as `NNNN-descriptive-slug.md`. Scan for the highest
+  number and increment it; the next number after this consolidation is **0043**.
+  Keep existing IDs stable, including those preserved in the archive.
+- Clarifications update the relevant ADR. For a qualifying changed decision,
+  create the next numbered record, identify what it replaces, and mark the old
+  status `superseded by ADR-NNNN`. Preserve the earlier rationale.
+- Route each task to its accepted ADRs in this table; keep superseded records out
+  of the normal reading path. Flag proposals that contradict an accepted ADR by
+  its number and explain why the choice should be revisited.
+- Group related decisions by topic. Add a separate file when an independent
+  decision meets the skill's criteria, rather than for every implementation edit.

@@ -28,7 +28,7 @@ references, about 143 KB together:
 - Generated output: a fresh `dist/` contains no page, script, or Pagefind file
   that references any of the three. They reach `dist/` only because
   `publicDir: "./images"` copies the whole directory, as
-  [ADR 0024](../adr/0024-serve-site-images-directly-from-the-root-image-directory.md)
+  [ADR 0024](../history/decisions.md#adr-0024)
   established.
 - Legacy index: `index.MD` links seven of the nine title icons —
   `spaghetti`, `rice`, `meat_on_bone`, `green_salad`, `chestnut`, `cake`, and
@@ -75,7 +75,7 @@ None is available, in either direction.
 
 All three are **retained in place**, and no published file changed. The reasons
 are recorded as current guidance in
-[ADR 0028](../adr/0028-retain-published-images-unless-evidence-supports-removal.md):
+[ADR 0028](../history/decisions.md#adr-0028):
 
 - `cookie.png` and `doughnut.png` — retained as the unused spares of the
   nine-icon title set, kept with their siblings for a future `index.MD`

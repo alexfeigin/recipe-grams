@@ -1,17 +1,29 @@
-# AGENTS.md — Recipe-Grams
+# Recipe-Grams
 
-Recipe-Grams is a bilingual Markdown recipe collection and Astro site. Recipe Markdown is the human-readable source; catalog metadata controls generated-site browsing and previews.
+Bilingual Markdown recipes with a static Astro site. Preserve the readable
+recipe sources and their existing paths.
 
-## Repo Skills
+## Workflows
 
-Load every skill whose branch applies before acting:
+Load every applicable repository skill before acting:
 
-- Before any file-changing task, use `$recipe-grams-safety` to protect and synchronize the shared working tree.
-- For recipe additions or edits—including translation, measurements, images, catalog metadata, markers, and the legacy index—use `$recipe-grams-authoring`.
-- For recipe or site verification, release commits, pushes, and GitHub Pages deployment, use `$recipe-grams-publishing`.
+- Any file change: `$recipe-grams-safety` protects and synchronizes the shared checkout.
+- Recipe text, translations, measurements, images, catalog, markers, or index: `$recipe-grams-authoring`.
+- Recipe/site verification, release commits, pushes, or deployment: `$recipe-grams-publishing`.
+- ADR or glossary changes: `$domain-modeling`; follow the numbering and routing rules in the [decision index](docs/adr/README.md#maintaining-decisions).
 
-Name future repo-specific skill folders `recipe-grams-*` so Git tracks them while locally installed skills remain private.
+Name tracked repository skills `recipe-grams-*`; other locally installed skills remain private.
 
-## Guidance
+## Context by task
 
-Read [PRODUCT.md](PRODUCT.md) for what the site does today, [DESIGN.md](DESIGN.md) for the visual rules and supported viewports, [CONTEXT.md](CONTEXT.md) for the vocabulary, and [docs/adr/](docs/adr/README.md) for the decisions behind the architecture. [README.md](README.md) has the local development and `npm run verify` commands, and [docs/adding-a-recipe.he.md](docs/adding-a-recipe.he.md) summarizes the workflow in Hebrew. Historical material is marked as such and is not instruction: [docs/verification/](docs/verification/README.md), [docs/specs/](docs/specs/0001-astro-recipe-blog.md), and [docs/history/](docs/history/README.md). Accepted UI behavior is the authority whenever older written guidance disagrees; correct the guidance rather than the accepted behavior.
+[README.md](README.md) is the entry point and setup guide. For recipe or site work,
+use the [decision index](docs/adr/README.md) to select the topic files that apply.
+Load every matching topic, rather than the whole decision collection.
+
+Load [PRODUCT.md](PRODUCT.md) for product behavior, [DESIGN.md](DESIGN.md) for UI
+work, and [docs/development.md](docs/development.md) for checks. Consult
+[CONTEXT.md](CONTEXT.md) when a domain term needs explaining.
+
+Read [history](docs/history/README.md) only to investigate an earlier choice;
+archived ADRs and verification notes are not instructions. Accepted UI behavior
+takes precedence over older guidance.
