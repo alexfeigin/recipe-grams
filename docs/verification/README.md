@@ -1,9 +1,9 @@
 # Verification evidence
 
 These are historical checkpoints, not a test plan. For current checks and failure
-artifacts, read [Development](../development.md). Records and screenshots stay as
-written; a new run never overwrites them. “Recorded in” names the commit that added
-the record.
+artifacts, read [Development](../development.md). Checkpoint prose and screenshots
+stay as written; links may follow documents that move, and a new run never
+overwrites the evidence. “Recorded in” names the commit that added the record.
 
 ## Records
 

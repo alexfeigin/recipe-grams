@@ -27,11 +27,11 @@ verification passes. Commit source changes before deploying them.
 
 The deployment checkout is `~/sources/alexfeigin.github.io/` on every workstation.
 
-1. Inspect its `git status --short --branch` before syncing or copying. Apply
-   `$recipe-grams-safety` there too: preserve unfinished work and resolve its
-   disposition with the user, then synchronize the clean branch using
-   `git pull --ff-only`. Confirm this is the publishing `master` branch. Resolve
-   divergence explicitly; do not erase local commits or edits to match origin.
+1. Inspect its `git status --short --branch` before syncing or copying. Preserve
+   unfinished work and resolve its disposition with the user, then synchronize
+   the clean branch using `git pull --ff-only`. Confirm this is the publishing
+   `master` branch. Resolve divergence explicitly; do not erase local commits or
+   edits to match origin.
 2. In `~/sources/recipe-grams/`, produce a clean build:
 
    ```bash

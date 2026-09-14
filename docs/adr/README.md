@@ -32,8 +32,8 @@ when the decision is hard to reverse, surprising without context, and the result
 of a real tradeoff.
 
 - Keep files in `docs/adr/` as `NNNN-descriptive-slug.md`. Scan for the highest
-  number and increment it; the next number after this consolidation is **0043**.
-  Keep existing IDs stable, including those preserved in the archive.
+  number and increment it. Keep existing IDs stable, including those preserved
+  in the archive.
 - Clarifications update the relevant ADR. For a qualifying changed decision,
   create the next numbered record, identify what it replaces, and mark the old
   status `superseded by ADR-NNNN`. Preserve the earlier rationale.
