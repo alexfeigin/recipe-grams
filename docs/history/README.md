@@ -1,21 +1,24 @@
-# Archived documents
+# History
 
-Superseded documents are kept here rather than deleted, so the earlier way of
-working stays readable. Nothing in this directory is current instruction.
+Start with the [current documentation](../../README.md#read-only-what-your-task-needs)
+for work on the project. The material below preserves decisions and evidence from
+earlier revisions; it is not current instruction.
 
-## `איך לעלות מתכון לגיטהאב.docx`
+| Material                                                         | What it preserves                                                                |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [Original decision archive](decisions.md)                        | The original 35 records in one file, with a topic index and replacement summary. |
+| [Astro migration spec](../specs/0001-astro-recipe-blog.md)       | The August 2026 plan, including alternatives later changed.                      |
+| [Verification evidence](../verification/README.md)               | Dated checks, limitations, and screenshots from earlier checkpoints.             |
+| [Original Hebrew Word guide](איך%20לעלות%20מתכון%20לגיטהאב.docx) | The pre-Astro recipe workflow (added in `8983e22`, last edited in `41b5f58`).    |
 
-A Hebrew Word guide to adding a recipe, written before the Astro site existed
-(added in commit `8983e22`, last touched in `41b5f58`). It described six steps:
-sync in the editor, add a `.MD` file under the right language directory, format
-the text with a chatbot including the back-to-menu link, paste a translation
-under the other language with the same filename, add the new rows to `index.MD`,
-then commit and sync.
+The Word guide describes six steps: sync in the editor, add a lowercase `.MD`
+filename without spaces, format the recipe with a chatbot and retain its back
+link, add the translation under the same filename, update `index.MD`, then commit
+and sync. It predates catalog metadata, site verification, and deployment to the
+separate Pages repository. The [current Hebrew guide](../adding-a-recipe.he.md)
+replaces it.
 
-Those steps still describe the recipe source correctly, but the guide predates
-three things the site now requires: catalog metadata in
-`src/lib/recipeCatalog.ts`, verification with `npm run verify`, and publishing
-the built site to the separate `alexfeigin.github.io` repository. It was
-replaced by [docs/adding-a-recipe.he.md](../adding-a-recipe.he.md), the concise
-Hebrew guide, with [AGENTS.md](../../AGENTS.md) and the skills under
-[`.agents/skills/`](../../.agents/skills/) owning the full workflow.
+The original ADR files have been combined into `decisions.md`; their numbers and
+wording remain, with links adjusted to the archive. Historical notes may still
+mention the former paths as checkpoint evidence. A record's “today,” counts,
+commands, and file locations refer to its own checkpoint, not current guidance.

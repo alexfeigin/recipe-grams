@@ -1,14 +1,9 @@
 # Build Astro Recipe Blog From Legacy Markdown Recipes
 
-> **Historical migration spec.** This records what was planned and agreed for the
-> August 2026 move from a Markdown-only repository to the Astro site, and it is
-> kept as written. It is not a description of the site today and not a
-> contributor instruction. For current behavior read [PRODUCT.md](../../PRODUCT.md)
-> and [DESIGN.md](../../DESIGN.md), for the workflow read
-> [AGENTS.md](../../AGENTS.md) and the skills it names, for commands read
-> [README.md](../../README.md), and for the decisions that superseded parts of
-> this plan read [docs/adr/](../adr/README.md). Where this spec and current
-> behavior disagree, current behavior and the ADRs are right.
+> **Historical migration spec.** The August 2026 plan is preserved below,
+> including choices later changed. For current rules use [Architecture](../adr/README.md)
+> and the [documentation map](../../README.md#read-only-what-your-task-needs).
+> The [decision history](../history/decisions.md#replacements-and-clarifications) explains the changes.
 
 ## Problem Statement
 
