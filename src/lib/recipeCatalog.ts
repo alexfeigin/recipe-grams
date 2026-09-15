@@ -314,7 +314,7 @@ export const recipeCatalog: RecipeCatalog = {
   }),
   paodequeijo: featuredRecipe("doughs_starches", [], 3, {
     en: localizedMetadata(
-      "Pao de Queijo",
+      "Pão de Queijo",
       "Brazilian cheese bread with a chewy center.",
       "paude.jpeg",
     ),
