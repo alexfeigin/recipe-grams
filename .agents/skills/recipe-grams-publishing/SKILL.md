@@ -30,9 +30,8 @@ The deployment checkout is `~/sources/alexfeigin.github.io/` on every workstatio
 1. Inspect its `git status --short --branch` before syncing or copying. Preserve
    unfinished work and resolve its disposition with the user, then synchronize
    the clean branch using `git pull --ff-only`. Confirm this is the publishing
-   `master` branch. Inspect host-root `robots.txt` for rules or sitemap entries
-   from other projects before replacing it. Resolve divergence explicitly; do
-   not erase local commits or edits to match origin.
+   `master` branch. Resolve divergence explicitly; do not erase local commits or
+   edits to match origin.
 2. In `~/sources/recipe-grams/`, produce a clean build:
 
    ```bash
@@ -40,21 +39,17 @@ The deployment checkout is `~/sources/alexfeigin.github.io/` on every workstatio
    npm run build
    ```
 
-3. In the synchronized deployment checkout, sync the site and host-root crawler file:
+3. In the synchronized deployment checkout, replace only the published site:
 
    ```bash
-   rsync -av --delete --exclude /robots.txt ~/sources/recipe-grams/dist/ ~/sources/alexfeigin.github.io/recipe-grams/
-   cp ~/sources/recipe-grams/dist/robots.txt ~/sources/alexfeigin.github.io/robots.txt
-   git add recipe-grams robots.txt
+   rsync -av --delete ~/sources/recipe-grams/dist/ ~/sources/alexfeigin.github.io/recipe-grams/
+   git add recipe-grams
    git diff --cached --stat
    git commit -m "{short commit message}"
    git push
    ```
 
-   The host-root `robots.txt` applies to every project on this Pages host. If one
-   already exists with other rules or sitemap entries, preserve them when adding
-   this site's generated sitemap reference. Inspect the staged scope before committing.
-   If the build produces no changes,
+   Inspect the staged scope before committing. If the build produces no changes,
    report that the published files already match; an empty commit is unnecessary.
 4. If syncing or pushing discovers remote changes, integrate them carefully;
    involve the user only for a decision or conflict requiring their input.
