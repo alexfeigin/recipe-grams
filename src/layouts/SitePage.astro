@@ -70,6 +70,7 @@ const socialImageUrl = new URL(
     />
     <slot name="head" />
     {canonical && <link rel="canonical" href={pageUrl} />}
+    <link rel="sitemap" href={sitePath(page.basePath, "sitemap-index.xml")} />
     {noindex && <meta name="robots" content="noindex" />}
     <FaviconLinks />
     <title>{title}</title>
