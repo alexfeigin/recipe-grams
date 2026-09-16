@@ -12,8 +12,11 @@ and independent of a deployment service or CI workflow.
 ## Consequences
 
 Pagefind indexes the generated HTML after Astro builds. The deployment checkout
-is `~/sources/alexfeigin.github.io/`; only its `recipe-grams/` directory receives
-the built output. Committing source and deploying the site are separate steps;
+is `~/sources/alexfeigin.github.io/`; its `recipe-grams/` directory receives
+the site build. The generated `robots.txt` is published at the host root because
+crawlers do not read one under `/recipe-grams/`. It advertises this site's
+sitemap and allows crawling without adding restrictions to the shared host.
+Committing source and deploying the site are separate steps;
 the [publishing workflow](../../.agents/skills/recipe-grams-publishing/SKILL.md)
 owns the procedure.
 

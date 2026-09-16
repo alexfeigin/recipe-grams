@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import robotsTxt from "astro-robots-txt";
 
 export default defineConfig({
   site: "https://alexfeigin.github.io",
@@ -11,5 +12,6 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.endsWith("/google897e637a154db3cd.html"),
     }),
+    robotsTxt(),
   ],
 });
