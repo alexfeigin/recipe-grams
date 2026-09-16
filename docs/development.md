@@ -48,8 +48,8 @@ the preview lifecycle separately. Generated checks split responsibilities:
 destinations; `verify:links` owns destination existence; `verify:static-assets`
 owns image placement; `verify:search-index`
 owns Pagefind artifacts; `verify:search-console` owns the exact verification file;
-`verify:sitemap` checks that every built page except the Search Console
-verification endpoint appears in the sitemap.
+`verify:sitemap` checks that every built page except the static Search Console
+verification file appears in the sitemap.
 
 The build creates `sitemap-index.xml` and a numbered sitemap under `dist/`.
 After publishing the build, submit
