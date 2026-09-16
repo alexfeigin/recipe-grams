@@ -36,7 +36,7 @@ as routine evidence. Check touched-file formatting separately with
 | Preview lifecycle                                             | `npm run test:preview`                                                                            |
 | All source/fixture checks in the pre-build group              | `npm run verify:pure`                                                                             |
 | Built pages, catalog, navigation, links, and search artifacts | `npm run verify:generated` (needs a build)                                                        |
-| New and legacy image URLs from one source                     | `npm run verify:static-assets` (needs a build)                                                    |
+| Images published only under `/images/`                        | `npm run verify:static-assets` (needs a build)                                                    |
 | Google Search Console verification file                       | `npm run verify:search-console` (needs a build)                                                   |
 | Generated sitemap and page coverage                           | `npm run verify:sitemap` (needs a build)                                                          |
 | Reader interactions                                           | `verify:*:browser` commands in `package.json` (need an explicit target outside full verification) |
@@ -46,7 +46,7 @@ the preview lifecycle separately. Generated checks split responsibilities:
 `verify:recipes` owns source-to-page coverage and landing card destinations;
 `verify:catalog` owns card membership/order; `verify:navigation` owns expected
 destinations; `verify:links` owns destination existence; `verify:static-assets`
-owns image copy parity; `verify:search-index`
+owns image placement; `verify:search-index`
 owns Pagefind artifacts; `verify:search-console` owns the exact verification file;
 `verify:sitemap` checks that every built page except the Search Console
 verification endpoint appears in the sitemap.

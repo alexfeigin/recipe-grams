@@ -25,7 +25,10 @@ assert.ok(files.length > 0, "Expected recipe images");
 for (const file of files) {
   const source = readFileSync(path.join(images, file));
   assert.deepEqual(readFileSync(path.join(dist, "images", file)), source);
-  assert.deepEqual(readFileSync(path.join(dist, file)), source);
+  assert.ok(
+    !existsSync(path.join(dist, file)),
+    `${file} should publish only under images/`,
+  );
 }
 
-console.log(`${files.length} images have new and legacy published URLs.`);
+console.log(`${files.length} images publish only under images/.`);
