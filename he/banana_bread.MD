@@ -38,6 +38,6 @@
 - 20 גרם (4 כפיות) אבקת אפייה
 - 400 גרם שוקולד מריר קצוץ
 
-|                            ★                            |                      ★                      |
-| :-----------------------------------------------------: | :-----------------------------------------: |
-| ![Banana Bread With lioric](../images/bananaBread1.jpg) | ![Banana Bread](../images/bananaBread2.jpg) |
+|                               ★                                |                         ★                          |
+| :------------------------------------------------------------: | :------------------------------------------------: |
+| ![Banana Bread With lioric](../public/images/bananaBread1.jpg) | ![Banana Bread](../public/images/bananaBread2.jpg) |

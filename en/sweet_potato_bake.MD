@@ -27,4 +27,4 @@ Makes one muffin tin or 2 loaf pans.
 6. Add the eggs, flour, baking powder, remaining olive oil, and seasonings. Mix well.
 7. Pour into the prepared pan or pans and bake for 30-35 minutes, until golden and set in the center.
 
-![Sweet Potato Bake](../images/sweet_potato_bake.jpg)
+![Sweet Potato Bake](../public/images/sweet_potato_bake.jpg)

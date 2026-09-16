@@ -23,4 +23,4 @@
 6. Use a spoon to form cookie shapes and arrange them on the tray, leaving space between each.
 7. Bake for 12-13 minutes until the cookies are set and slightly cracked on top. They will be soft but will firm up after cooling.
 
-![vegan chochip](../images/Veganchoc.jpeg)
+![vegan chochip](../public/images/Veganchoc.jpeg)

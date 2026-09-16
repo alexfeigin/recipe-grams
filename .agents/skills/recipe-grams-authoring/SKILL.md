@@ -20,12 +20,12 @@ normalizing grammar and structure.
    without frontmatter or Hebrew RTL wrappers. Link peer recipes as `./grill_rub.MD`.
 3. Use grams rather than cups; convert volume measurements when reasonable and
    put uncertain assumptions in the recipe text.
-4. Put web-ready images in `images/` with clear filenames, compressing/resizing
+4. Put web-ready images in `public/images/` with clear filenames, compressing/resizing
    oversized originals while retaining enough detail for pages and previews.
-   Link useful body images from both localizations as `../images/file.ext`, after
+   Link useful body images from both localizations as `../public/images/file.ext`, after
    the recipe unless its existing layout suggests otherwise. Confirm paths resolve.
    Existing unreferenced images stay unless positive evidence supports removal;
-   see [image ownership and retention](../../../docs/adr/0036-preserve-readable-recipe-sources.md).
+   see [image ownership and retention](../../../docs/adr/0043-serve-static-assets-from-public.md).
 5. Update `src/lib/recipeCatalog.ts` with localized titles and descriptions,
    markers, and explicit preview images. Use `featuredRecipe(category, markers,
    order, localizations)` with a unique order within its category, or

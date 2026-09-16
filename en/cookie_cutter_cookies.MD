@@ -36,6 +36,6 @@
 - If the dough crumbles and does not come together, add a tablespoon of softened butter or a teaspoon or two of cold milk or water :)
 - It's more challenging to make shortcrust pastry with spelt flour – it's possible but more difficult.
 
-|                   ★                    |                   ★                    |
-| :------------------------------------: | :------------------------------------: |
-| ![cookie](../images/cookiecutter.jpeg) | ![cookie](../images/cookiecutter2.jpg) |
+|                       ★                       |                       ★                       |
+| :-------------------------------------------: | :-------------------------------------------: |
+| ![cookie](../public/images/cookiecutter.jpeg) | ![cookie](../public/images/cookiecutter2.jpg) |

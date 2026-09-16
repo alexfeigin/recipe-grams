@@ -2,12 +2,12 @@
 
 Read the accepted ADRs that match the work; a task can require several. Each has a
 short context/decision/reason paragraph, with consequences where needed. ADRs
-0036–0042 consolidate existing decisions; archived 0001–0035 retain their original
+0037–0043 consolidate existing decisions; archived 0001–0035 retain their original
 identities and wording. The archive is only for investigating earlier choices.
 
 | When working on                                                                                     | Read                                                                                           |
 | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Recipe source files, Markdown rendering or links, `index.MD`, image paths or retention              | [0036 — Sources and publication](0036-preserve-readable-recipe-sources.md)                     |
+| Recipe source files, Markdown rendering or links, `index.MD`, image paths or retention              | [0043 — Sources and static assets](0043-serve-static-assets-from-public.md)                    |
 | Catalog entries, landing cards/order, categories, markers, preview metadata, or catalog diagnostics | [0037 — Catalog](0037-model-catalog-browsing-intent-explicitly.md)                             |
 | Routes, slugs, language switching, interface translations, RTL, or adding a localized page          | [0038 — URLs and languages](0038-use-explicit-localized-routes-and-copy.md)                    |
 | Module boundaries, shared page shell/context, browser script interfaces, or calculator logic        | [0039 — Module responsibilities](0039-separate-page-assembly-and-feature-modules.md)           |

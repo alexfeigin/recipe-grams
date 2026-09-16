@@ -24,4 +24,4 @@
 7. Toast the pine nuts or sliced almonds in a dry pan until golden.
 8. Place the roasted sweet potatoes on a plate and spoon the beef and onion mixture over them. Drizzle with tahini and a little silan, then finish with the toasted pine nuts or almonds.
 
-![Ground Beef over Roasted Sweet Potato](../images/ground_beef_on_sweet_potato.jpg)
+![Ground Beef over Roasted Sweet Potato](../public/images/ground_beef_on_sweet_potato.jpg)

@@ -27,4 +27,4 @@
 4. Cover and refrigerate for 15–30 minutes to let the flavors develop.
 5. Toss again before serving.
 
-![coleslaw](../images/coleslaw.jpg)
+![coleslaw](../public/images/coleslaw.jpg)

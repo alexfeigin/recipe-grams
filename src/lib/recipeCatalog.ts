@@ -782,6 +782,6 @@ function localizedMetadata(
   return {
     title,
     description,
-    image,
+    image: image ? `images/${image}` : undefined,
   };
 }

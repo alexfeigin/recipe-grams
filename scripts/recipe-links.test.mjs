@@ -22,13 +22,23 @@ for (const [label, language, destination, expected] of [
   ],
   ["encoded fragment", "he", "salt.MD#%D7%9C", "/recipe-grams/he/salt/#%D7%9C"],
   ["recipe query", "en", "salt.MD?print=1", "/recipe-grams/en/salt/?print=1"],
-  ["image", "en", "../images/pizza.jpg", "/recipe-grams/pizza.jpg"],
-  ["Hebrew image", "he", "../images/peta.jpeg", "/recipe-grams/peta.jpeg"],
+  [
+    "image",
+    "en",
+    "../public/images/pizza.jpg",
+    "/recipe-grams/images/pizza.jpg",
+  ],
+  [
+    "Hebrew image",
+    "he",
+    "../public/images/peta.jpeg",
+    "/recipe-grams/images/peta.jpeg",
+  ],
   [
     "nested image",
     "en",
-    "../images/steps/one.png",
-    "/recipe-grams/steps/one.png",
+    "../public/images/steps/one.png",
+    "/recipe-grams/images/steps/one.png",
   ],
   ["external .MD", "en", "https://example.com/SPEC.MD", undefined],
   ["uppercase scheme", "en", "HTTPS://example.com/SPEC.MD", undefined],
@@ -72,7 +82,7 @@ async function render(markdown, language) {
 test("rewrites inline link and image destinations", async () => {
   const html = await render(
     "[Rub](./grill_rub.MD) and [salt](../he/salt.MD#for-nerds)\n\n" +
-      "![Pizza](../images/pizza.jpg)\n",
+      "![Pizza](../public/images/pizza.jpg)\n",
     "en",
   );
   assert.match(html, /<a href="\/recipe-grams\/en\/grill_rub\/">Rub<\/a>/);
@@ -80,17 +90,23 @@ test("rewrites inline link and image destinations", async () => {
     html,
     /<a href="\/recipe-grams\/he\/salt\/#for-nerds">salt<\/a>/,
   );
-  assert.match(html, /<img src="\/recipe-grams\/pizza\.jpg" alt="Pizza">/);
+  assert.match(
+    html,
+    /<img src="\/recipe-grams\/images\/pizza\.jpg" alt="Pizza">/,
+  );
   assert.doesNotMatch(html, /__ASTRO_IMAGE_/);
 });
 
 test("rewrites reference-style link and image destinations", async () => {
   const html = await render(
-    "[Rub][rub] and ![Pizza][pizza]\n\n[rub]: ./grill_rub.MD\n[pizza]: ../images/pizza.jpg\n",
+    "[Rub][rub] and ![Pizza][pizza]\n\n[rub]: ./grill_rub.MD\n[pizza]: ../public/images/pizza.jpg\n",
     "en",
   );
   assert.match(html, /<a href="\/recipe-grams\/en\/grill_rub\/">Rub<\/a>/);
-  assert.match(html, /<img src="\/recipe-grams\/pizza\.jpg" alt="Pizza">/);
+  assert.match(
+    html,
+    /<img src="\/recipe-grams\/images\/pizza\.jpg" alt="Pizza">/,
+  );
 });
 
 test("leaves external destinations external", async () => {
@@ -104,12 +120,12 @@ test("leaves external destinations external", async () => {
 
 test("leaves link-shaped text in code untouched", async () => {
   const html = await render(
-    "Write `[Rub](grill_rub.MD)` first.\n\n```\n[Rub](grill_rub.MD)\n![P](../images/pizza.jpg)\n```\n",
+    "Write `[Rub](grill_rub.MD)` first.\n\n```\n[Rub](grill_rub.MD)\n![P](../public/images/pizza.jpg)\n```\n",
     "en",
   );
   assert.match(html, /<code>\[Rub\]\(grill_rub\.MD\)<\/code>/);
   assert.equal(html.match(/grill_rub\.MD/g)?.length, 2);
-  assert.match(html, /\.\.\/images\/pizza\.jpg/);
+  assert.match(html, /\.\.\/public\/images\/pizza\.jpg/);
   assert.doesNotMatch(html, /<a href/);
 });
 

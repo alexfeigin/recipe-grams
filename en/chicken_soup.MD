@@ -34,4 +34,4 @@
 5. Deglaze again and transfer the cabbage to the soup pot.
 6. Cook all the vegetables with the chicken in the broth for an additional 5 minutes to blend the flavors.
 
-![Chicken and Vegetable Soup](../images/chicken_soup.jpg)
+![Chicken and Vegetable Soup](../public/images/chicken_soup.jpg)

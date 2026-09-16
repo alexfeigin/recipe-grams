@@ -17,6 +17,6 @@
 4. Bake for 10 minutes or until toasted.
 5. Cool on a wire rack.
 
-|                    ★                    |                    ★                     |
-| :-------------------------------------: | :--------------------------------------: |
-| ![cookie](../images/almondcoconut.jpeg) | ![cookie](../images/almondcoconut2.jpeg) |
+|                       ★                        |                        ★                        |
+| :--------------------------------------------: | :---------------------------------------------: |
+| ![cookie](../public/images/almondcoconut.jpeg) | ![cookie](../public/images/almondcoconut2.jpeg) |

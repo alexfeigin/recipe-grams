@@ -86,10 +86,10 @@ Salt: 9g
 
 - Once baked, remove the pizza from the oven, back to a cooling rack, let it cool briefly before serving.
 
-|                ★                |                  ★                  |
-| :-----------------------------: | :---------------------------------: |
-|  ![Pizza](../images/pizza.jpg)  | ![Par-baked](../images/pizza2.jpeg) |
-| ![Slice](../images/pizza3.jpeg) |                                     |
+|                   ★                    |                     ★                      |
+| :------------------------------------: | :----------------------------------------: |
+|  ![Pizza](../public/images/pizza.jpg)  | ![Par-baked](../public/images/pizza2.jpeg) |
+| ![Slice](../public/images/pizza3.jpeg) |                                            |
 
 <span id="nerd-stats"></span>
 

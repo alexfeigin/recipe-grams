@@ -38,7 +38,7 @@ const recipeHtml = await renderRecipeBody(recipe, basePath);
 const recipeHref = sitePath(basePath, `${recipe.language}/${recipe.slug}/`);
 const title = `${metadata.title} | Recipe-Grams`;
 
-const fallbackSocialImageSource = "recipe-grams-card-placeholder.png";
+const fallbackSocialImageSource = "images/recipe-grams-card-placeholder.png";
 const socialImageSource =
   metadata.socialImage ?? metadata.image ?? fallbackSocialImageSource;
 const usesFallbackSocialImage = socialImageSource === fallbackSocialImageSource;

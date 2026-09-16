@@ -32,4 +32,4 @@
 8. Add 2-3 tablespoons of boiling water to the remaining mixture in the bowl, stir well, and pour into the tray. Flatten well and put it immediately in the oven for another bake. Bake for 40 minutes, rotating the tray after 20 minutes. The second baking time is reduced by 5 minutes.
 9. Cool completely and break into desired-sized pieces.
 
-![a party!](../images/crackers.jpeg)
+![a party!](../public/images/crackers.jpeg)

@@ -13,7 +13,7 @@ completion rule for new recipes.
 
 1. Check touched Markdown, Astro, and TypeScript formatting with
    `npx prettier --check <files>`; apply `--write` where needed.
-2. Check touched Markdown image links resolve under `images/`.
+2. Check touched Markdown image links resolve under `public/images/`.
 3. Run `npm run check`; finish with no new Astro errors or warnings.
 4. Choose relevant checks from [Development](../../../docs/development.md).
    When site generation could change, run at least `npm run typecheck` and

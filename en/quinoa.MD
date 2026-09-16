@@ -21,4 +21,4 @@ Cut the sweet potatoes into thick slices and then into quarters, mixing them wit
 Add twice the amount of water as quinoa, plus an additional quarter cup for the sweet potatoes.
 Bring the pot to a boil, reduce to low heat, and cover for 15 minutes. After 15 minutes, turn off the heat and leave covered for 10 more minutes, then open and stir.
 
-![Quinoa](../images/quinoa.jpg)
+![Quinoa](../public/images/quinoa.jpg)

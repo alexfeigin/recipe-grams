@@ -25,4 +25,4 @@
 
 For a full pack of pasta, double the amount of sweet paprika, but one can of tomato paste should suffice. You can add a second can for a thicker texture.
 
-![pasta](../images/paprikesh.jpeg)
+![pasta](../public/images/paprikesh.jpeg)

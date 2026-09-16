@@ -24,4 +24,4 @@
 - Add all other ingredients and mix well to a soft sticky dough, ice-cream scoop to baking parchment.
 - Bake (fan off) for 20 min, or until golden (not brown).
 
-![Nice balls](../images/paude.jpeg)
+![Nice balls](../public/images/paude.jpeg)

@@ -56,14 +56,14 @@ assert.match(
 assert.match(englishGrilledChicken, /href="\/recipe-grams\/en\/grill_rub\/"/);
 assert.match(hebrewGrilledChicken, /href="\/recipe-grams\/he\/grill_rub\/"/);
 
-assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
+assert.match(englishPizza, /src="\/recipe-grams\/images\/pizza\.jpg"/);
 for (const [pageName, html] of [
   ["English home", englishHome],
   ["Hebrew home", hebrewHome],
 ]) {
   assert.match(
     html,
-    /<img\b[^>]*src="\/recipe-grams\/[^"]+"/,
+    /<img\b[^>]*src="\/recipe-grams\/images\/[^"]+"/,
     `Expected ${pageName} to include generated image assets`,
   );
 }

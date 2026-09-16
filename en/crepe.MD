@@ -45,4 +45,4 @@ I like the consistency of the batter with 260g of liquids. if you like you can s
 - Cook until the crêpe starts to dry and edges start to lift, flip and cook for a few seconds.
 - After cooking a crêpe it's a good idea to wipe the pan with a paper towel to remove residue, so it will be nonstick for the next one.
 
-![Crêpe](../images/crepe.jpg)
+![Crêpe](../public/images/crepe.jpg)

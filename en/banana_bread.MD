@@ -38,6 +38,6 @@
 - 20g (4 teaspoons) baking powder
 - 400g chopped dark chocolate
 
-|                            ★                            |                      ★                      |
-| :-----------------------------------------------------: | :-----------------------------------------: |
-| ![Banana Bread With Lioric](../images/bananaBread1.jpg) | ![Banana Bread](../images/bananaBread2.jpg) |
+|                               ★                                |                         ★                          |
+| :------------------------------------------------------------: | :------------------------------------------------: |
+| ![Banana Bread With Lioric](../public/images/bananaBread1.jpg) | ![Banana Bread](../public/images/bananaBread2.jpg) |

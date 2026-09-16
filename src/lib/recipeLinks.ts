@@ -6,6 +6,7 @@ type MarkdownPlugin = NonNullable<
   SatteriMarkdownProcessorOptions["mdastPlugins"]
 >[number];
 
+const publicDirectory = "public";
 const imagesDirectory = "images";
 const recipeExtension = ".MD";
 
@@ -27,7 +28,11 @@ export function resolveSiteDestination(
   }
 
   const segments = sourcePath.split("/");
-  if (segments[0] === imagesDirectory && segments.length > 1) {
+  if (
+    segments[0] === publicDirectory &&
+    segments[1] === imagesDirectory &&
+    segments.length > 2
+  ) {
     return `${sitePath(basePath, segments.slice(1).join("/"))}${suffix}`;
   }
 

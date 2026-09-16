@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0043
 ---
 
 # Preserve readable recipe sources alongside the site

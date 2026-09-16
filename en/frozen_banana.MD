@@ -16,4 +16,4 @@
 3. Place on parchment paper and freeze for 30 minutes.
 4. Transfer to a bag and store in the freezer.
 
-![Delish](../images/frozen_banana.jpeg)
+![Delish](../public/images/frozen_banana.jpeg)

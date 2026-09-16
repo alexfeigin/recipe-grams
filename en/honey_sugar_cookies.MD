@@ -22,6 +22,6 @@
 7. Chill cut shapes in the refrigerator for 10 minutes prior to baking to help retain their shape.
 8. Bake for 7-10 minutes, or until bottoms are slightly golden. Allow to cool on the pan for at least 10 minutes before transferring to a wire rack to cool completely.
 
-|                   ★                    |                    ★                    |
-| :------------------------------------: | :-------------------------------------: |
-| ![cookie](../images/honeycookies.jpeg) | ![cookie](../images/honeycookies2.jpeg) |
+|                       ★                       |                       ★                        |
+| :-------------------------------------------: | :--------------------------------------------: |
+| ![cookie](../public/images/honeycookies.jpeg) | ![cookie](../public/images/honeycookies2.jpeg) |

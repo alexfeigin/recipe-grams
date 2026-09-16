@@ -19,7 +19,7 @@
 5. If you don't have a food processor, use the well method to mix the ingredients.
 6. Flour the dough, wrap it in plastic, and let it rest at room temperature for 30 minutes.
 
-|                        ★                        |                       ★                       |
-| :---------------------------------------------: | :-------------------------------------------: |
-|       ![Pilmeni](../images/pilmeni1.jpg)        | ![Pilmeni fried](../images/pilmeni_fried.jpg) |
-| ![Pilmeni frozen](../images/pilmeni_frozen.jpg) |      ![Pilmeni](../images/pilmeni2.jpg)       |
+|                           ★                            |                          ★                           |
+| :----------------------------------------------------: | :--------------------------------------------------: |
+|       ![Pilmeni](../public/images/pilmeni1.jpg)        | ![Pilmeni fried](../public/images/pilmeni_fried.jpg) |
+| ![Pilmeni frozen](../public/images/pilmeni_frozen.jpg) |      ![Pilmeni](../public/images/pilmeni2.jpg)       |

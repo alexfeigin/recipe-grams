@@ -54,6 +54,6 @@ Round cake pan, 22 cm.
 - 35 grams (1/4 cup) cocoa powder
 - 1/4 teaspoon baking soda
 
-|                     ★                     |                     ★                      |
-| :---------------------------------------: | :----------------------------------------: |
-| ![Chocolate cake1](../images/chocake.jpg) | ![Chocolate cake2](../images/chocake2.jpg) |
+|                        ★                         |                         ★                         |
+| :----------------------------------------------: | :-----------------------------------------------: |
+| ![Chocolate cake1](../public/images/chocake.jpg) | ![Chocolate cake2](../public/images/chocake2.jpg) |

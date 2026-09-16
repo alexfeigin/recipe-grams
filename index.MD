@@ -5,8 +5,8 @@
 <br>
 
 <div align="center" style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="images/titles_for_index/spaghetti.png" alt="Pretzel" width="70" height="70" style="margin: 5px;">
-    <img src="images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">
+    <img src="public/images/titles_for_index/spaghetti.png" alt="Pretzel" width="70" height="70" style="margin: 5px;">
+    <img src="public/images/titles_for_index/rice.png" alt="Chicken" width="70" height="70" style="margin: 5px;">
 </div>
 
 | Hebrew (he)                                | English (en)                                  |
@@ -22,7 +22,7 @@
 <br>
 <br>
 
-<img src="images/titles_for_index/meat_on_bone.png" alt="prez" width="70" height="70">
+<img src="public/images/titles_for_index/meat_on_bone.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                    | English (en)                                                                  |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -38,7 +38,7 @@
 
 <br>
 <br>
-<img src="images/titles_for_index/green_salad.png" alt="prez" width="70" height="70">
+<img src="public/images/titles_for_index/green_salad.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                         | English (en)                                           |
 | --------------------------------------------------- | ------------------------------------------------------ |
@@ -51,7 +51,7 @@
 <br>
 
 <div align="center" style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="images/titles_for_index/chestnut.png" alt="Basics" width="70" height="70" style="margin: 5px;">
+    <img src="public/images/titles_for_index/chestnut.png" alt="Basics" width="70" height="70" style="margin: 5px;">
 </div>
 
 | Hebrew (he)                          | English (en)                       |
@@ -61,7 +61,7 @@
 <br>
 <br>
 
-<img src="images/titles_for_index/cake.png" alt="prez" width="70" height="70">
+<img src="public/images/titles_for_index/cake.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                                                                     | English (en)                                                                            |
 | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@
 <br>
 <br>
 
-<img src="images/titles_for_index/pretzel.png" alt="prez" width="70" height="70">
+<img src="public/images/titles_for_index/pretzel.png" alt="prez" width="70" height="70">
 
 | Hebrew (he)                    | English (en)                         |
 | ------------------------------ | ------------------------------------ |

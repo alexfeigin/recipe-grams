@@ -22,4 +22,4 @@
 - Liquids in the pan should be preserved in a container in the freezer.
   - Fats will separate, can be used for frying vegetables to add chicken seasoning.
   - Brown liquid is gold, can be used to flavor anything.
-    ![Chicken station](../images/grilledchicken.jpeg)
+    ![Chicken station](../public/images/grilledchicken.jpeg)

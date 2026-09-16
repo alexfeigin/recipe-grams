@@ -28,6 +28,6 @@
 7. Use a cookie cutter to create cookies and carefully transfer them to a baking sheet.
 8. Bake at 170°C for 10-12 minutes or until the cookies are lightly browned.
 
-|                        ★                         |                   ★                    |
-| :----------------------------------------------: | :------------------------------------: |
-| ![Happy birthday!](../images/leopardcookie.jpeg) | ![Choclate cake2](../images/print.jpg) |
+|                            ★                            |                       ★                       |
+| :-----------------------------------------------------: | :-------------------------------------------: |
+| ![Happy birthday!](../public/images/leopardcookie.jpeg) | ![Choclate cake2](../public/images/print.jpg) |

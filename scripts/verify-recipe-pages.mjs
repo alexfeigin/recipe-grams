@@ -37,14 +37,14 @@ const englishPizza = readBuiltPage("en", "pizza_dough");
 assert.match(englishPizza, /<html[^>]+lang="en"/);
 assert.match(englishPizza, /Pizza Dough Recipe/);
 assert.match(englishPizza, /Poolish Preparation/);
-assert.match(englishPizza, /src="\/recipe-grams\/pizza\.jpg"/);
+assert.match(englishPizza, /src="\/recipe-grams\/images\/pizza\.jpg"/);
 assert.doesNotMatch(englishPizza, /Back to index|Back to Menu/);
 
 const hebrewPizza = readBuiltPage("he", "pizza_dough");
 assert.match(hebrewPizza, /<html[^>]+lang="he"[^>]+dir="rtl"/);
 assert.match(hebrewPizza, /מתכון לבצק פיצה/);
 assert.match(hebrewPizza, /הכנת הפוליש/);
-assert.match(hebrewPizza, /src="\/recipe-grams\/pizza\.jpg"/);
+assert.match(hebrewPizza, /src="\/recipe-grams\/images\/pizza\.jpg"/);
 assert.doesNotMatch(hebrewPizza, /חזרה לתפריט/);
 
 for (const [language, landingSegments] of [

@@ -34,4 +34,4 @@ A quick, no-fry schnitzel recipe using a flour-egg slurry and baked in the oven.
 - 250g spiced breadcrumbs (store bought, use your favorite, use more as needed to coat thoroughly)
 - Olive oil
 
-![Oven-baked schnitzel](../images/shnitzel.jpg)
+![Oven-baked schnitzel](../public/images/shnitzel.jpg)

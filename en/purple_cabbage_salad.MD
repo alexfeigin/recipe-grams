@@ -23,4 +23,4 @@
 2. In a dry non-stick pan, toast the sesame seeds, sunflower seeds separately, and the pine nuts separately until they all start to brown and smell fragrant. Spread them out on a flat plate to cool.
 3. Before serving, mix everything together with the pine nuts, sesame seeds, and seeds.
 
-![Purple cabbage salad](../images/purple_cabbage_salad.jpg)
+![Purple cabbage salad](../public/images/purple_cabbage_salad.jpg)
