@@ -18,7 +18,7 @@ The site has no backend, client router, or UI framework runtime.
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `en/*.MD`, `he/*.MD`       | Ingredients, method, notes, and body images; no frontmatter or RTL wrappers.                                                          |
 | `index.MD`                 | Hand-maintained bilingual index and emoji markers for GitHub readers.                                                                 |
-| `images/`                  | One source for Markdown images and all public site assets.                                                                            |
+| `images/`                  | One source for Markdown images and public image assets.                                                                               |
 | `src/lib/recipeCatalog.ts` | Pair-level metadata keyed by slug: localized titles/descriptions, browsing intent, semantic markers, and explicit card/social images. |
 
 Every localized Markdown file generates a recipe page eligible for search.
@@ -44,6 +44,10 @@ owner's decision). Repository searches cannot establish whether a public URL is
 used elsewhere. The spare `cookie.png` and `doughnut.png` title icons and
 `leopard_expm.jpeg` pattern reference are deliberately retained; their evidence is
 in [ADR 0028](../history/decisions.md#adr-0028).
+
+The Google Search Console verification file is site infrastructure with an exact
+public path. Its static endpoint lives in `src/pages/`, separate from recipe
+images, and the generated-site checks protect its filename and response body.
 
 Consolidates historical ADRs 0001, 0005, 0006, 0007, 0008, 0011, 0012, 0015, 0016, 0018, 0023, 0024, 0025, 0028; see the
 [original records](../history/decisions.md#topic-index).

@@ -36,6 +36,7 @@ as routine evidence. Check touched-file formatting separately with
 | Preview lifecycle                                             | `npm run test:preview`                                                                            |
 | All source/fixture checks in the pre-build group              | `npm run verify:pure`                                                                             |
 | Built pages, catalog, navigation, links, and search artifacts | `npm run verify:generated` (needs a build)                                                        |
+| Google Search Console verification file                       | `npm run verify:search-console` (needs a build)                                                   |
 | Reader interactions                                           | `verify:*:browser` commands in `package.json` (need an explicit target outside full verification) |
 
 The pure checks need no build, browser, or `SITE_BASE_URL`. `test:preview` exercises
@@ -43,7 +44,7 @@ the preview lifecycle separately. Generated checks split responsibilities:
 `verify:recipes` owns source-to-page coverage and landing card destinations;
 `verify:catalog` owns card membership/order; `verify:navigation` owns expected
 destinations; `verify:links` owns destination existence; `verify:search-index`
-owns Pagefind artifacts.
+owns Pagefind artifacts; `verify:search-console` owns the exact verification file.
 
 The link checker resolves local references as a browser does, including the site
 base, queries, and HTML/SVG fragments. External resources, CSS URLs, and `srcset`
