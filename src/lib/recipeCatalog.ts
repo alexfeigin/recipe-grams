@@ -76,6 +76,16 @@ export const recipeCatalog: RecipeCatalog = {
       "borscht.jpg",
     ),
   }),
+  carrot_cake_muffins: featuredRecipe("sweets", [], 28.375, {
+    en: localizedMetadata(
+      "Easy Sweet Carrot Muffins or Loaf Cake",
+      "A lightly sweet carrot batter that works as muffins or a loaf cake.",
+    ),
+    he: localizedMetadata(
+      "מאפינס או עוגת גזר מתוקה וקלה",
+      "בלילת גזר מתוקה וקלה שמתאימה למאפינס או לעוגת אינגליש קייק.",
+    ),
+  }),
   carrot_salad: featuredRecipe("salads_pickles", ["favorite", "vegan"], 17, {
     en: localizedMetadata(
       "Sweet and Sour Carrot Salad",
