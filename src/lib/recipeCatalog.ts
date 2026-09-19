@@ -451,6 +451,18 @@ export const recipeCatalog: RecipeCatalog = {
       "תוספת אורז פילאף אמינה עם כמויות ברורות.",
     ),
   }),
+  rustic_chicken_lentil_soup: featuredRecipe("mains", [], 14.5, {
+    en: localizedMetadata(
+      "Rustic Chicken Soup with Red Lentils and Potatoes",
+      "A hearty chicken soup with red lentils, potatoes, hawaij, and dill.",
+      "rustic_chicken_lentil_soup.jpg",
+    ),
+    he: localizedMetadata(
+      "מרק עוף כפרי עם עדשים כתומות ותפוחי אדמה",
+      "מרק עוף סמיך ומנחם עם עדשים כתומות, תפוחי אדמה, חוויאג׳ ושמיר.",
+      "rustic_chicken_lentil_soup.jpg",
+    ),
+  }),
   salt: unlistedRecipe("Seasoning reference note rather than a recipe.", [], {
     en: localizedMetadata("Salt", "A small helper note for salt measurements."),
     he: localizedMetadata("מלח", "הערת עזר קצרה למדידות מלח."),
