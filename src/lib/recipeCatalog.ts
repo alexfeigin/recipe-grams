@@ -184,6 +184,16 @@ export const recipeCatalog: RecipeCatalog = {
       "coleslaw.jpg",
     ),
   }),
+  goldilocks_cookies: featuredRecipe("sweets", [], 23.25, {
+    en: localizedMetadata(
+      "Goldilocks and the Three Bears Style Cookies",
+      "Chocolate butter cookies made with Shokolit, rolled thin and cut into shapes.",
+    ),
+    he: localizedMetadata(
+      "עוגיות בסגנון זהבה ושלושת הדובים",
+      "עוגיות חמאה עם שוקולית, מרודדות דק וקרוצות בצורות שאוהבים.",
+    ),
+  }),
   cookie_cutter_cookies: featuredRecipe("sweets", [], 23, {
     en: localizedMetadata(
       "Cookie Cutter Butter Cookies",

@@ -69,6 +69,7 @@
 | [עוגיות קוקוס ושקדים עם שוקולד](he/coconut_almond_choclate_cookies.MD)🍪🅥       | [Coconut Almond Chocolate Cookies](en/coconut_almond_choclate_cookies.MD)🍪🅥            |
 | [עוגיות שוקולדצ׳יפ טבעוניות](he/choclatechip_vegan.MD) 🍪🅥                      | [vegan chocolate chip cookies](en/choclatechip_vegan.MD) 🍪 🅥                           |
 | [עוגיות חמאה לחיתוך צורות](he/cookie_cutter_cookies.MD) 🍪                      | [Cookie Cutter Butter Cookies](en/cookie_cutter_cookies.MD) 🍪                          |
+| [עוגיות בסגנון זהבה ושלושת הדובים](he/goldilocks_cookies.MD) 🍪                 | [Goldilocks and the Three Bears Style Cookies](en/goldilocks_cookies.MD) 🍪             |
 | [עוגיות מנומרות](he/leopard_cookies.MD) 🐆                                      | [Leopard Cookies](en/leopard_cookies.MD)🐆                                              |
 | [קאפקייקס וניל](he/vanila_cupcakes.MD) 🧁★                                      | [Vanilla Cupcakes](en/vanila_cupcakes.MD) 🧁★                                           |
 | [שוקטים](he/chouquettes.MD) 🧈★                                                 | [Chouquettes](en/chouquettes.MD) 🧈★                                                    |
