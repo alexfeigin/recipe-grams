@@ -29,3 +29,5 @@
    - Loaf cake: about 40–50 minutes; begin checking after 35 minutes.
 8. The muffins or cake are ready when a toothpick inserted into the center comes out without wet batter and with a few moist crumbs.
 9. Cool for at least 10–15 minutes before removing from the pan or slicing.
+
+![Carrot muffin](../public/images/carrot_cake_muffin.jpg)
