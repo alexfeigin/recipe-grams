@@ -25,3 +25,5 @@
 ## אחסון
 
 שומרים בקופסה אטומה בטמפרטורת החדר.
+
+![עוגיות לפני ואחרי האפייה](../public/images/goldilocks_cookies_before_after.jpg)

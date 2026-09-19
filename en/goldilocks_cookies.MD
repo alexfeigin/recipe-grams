@@ -25,3 +25,5 @@
 ## Storage
 
 Store in an airtight container at room temperature.
+
+![Cookies before and after baking](../public/images/goldilocks_cookies_before_after.jpg)

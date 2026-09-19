@@ -188,10 +188,12 @@ export const recipeCatalog: RecipeCatalog = {
     en: localizedMetadata(
       "Goldilocks and the Three Bears Style Cookies",
       "Chocolate butter cookies made with Shokolit, rolled thin and cut into shapes.",
+      "goldilocks_cookies_before_after.jpg",
     ),
     he: localizedMetadata(
       "עוגיות בסגנון זהבה ושלושת הדובים",
       "עוגיות חמאה עם שוקולית, מרודדות דק וקרוצות בצורות שאוהבים.",
+      "goldilocks_cookies_before_after.jpg",
     ),
   }),
   cookie_cutter_cookies: featuredRecipe("sweets", [], 23, {
