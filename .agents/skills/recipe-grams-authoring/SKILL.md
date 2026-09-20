@@ -5,8 +5,9 @@ description: Add or change Recipe-Grams recipes end to end. Use for bilingual re
 
 # Recipe-Grams Authoring
 
-Use `$recipe-grams-safety` before editing. Work in the user's language; clarify
-only missing details that block a usable recipe. Preserve the recipe while
+Use `$recipe-grams-safety` before editing, retaining its preparation across phase
+handoffs. Work in the user's language; clarify only missing details that block a
+usable recipe. Preserve the recipe while
 normalizing grammar and structure.
 
 ## Author or edit
@@ -28,7 +29,7 @@ normalizing grammar and structure.
    see [image ownership and retention](../../../docs/adr/0043-serve-static-assets-from-public.md).
 5. Update `src/lib/recipeCatalog.ts` with localized titles and descriptions,
    markers, and explicit preview images. Use `featuredRecipe(category, markers,
-   order, localizations)` with a unique order within its category, or
+order, localizations)` with a unique order within its category, or
    `unlistedRecipe(reason, markers, localizations)` for a helper the user wants
    omitted from landing browsing. Pass an image filename as the third argument
    of each `localizedMetadata(...)` call to select a card/social image; body
@@ -44,4 +45,6 @@ normalizing grammar and structure.
 
 Complete when paired recipes are usable, catalog/index changes agree, image links
 resolve, and markers are consistent. Unless the user excludes publication, finish
-a new recipe through `$recipe-grams-publishing`.
+a new recipe through `$recipe-grams-publishing`. Use the shared
+[verification selection policy](../../../docs/development.md#select-verification)
+for development feedback and completion; carry passing evidence into publishing.

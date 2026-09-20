@@ -17,8 +17,17 @@ Link existence differs from expected navigation; search artifacts differ from
 search content and interactions. Keep these assertions with their respective
 owners instead of repeating them across suites.
 
-[Development](../development.md) owns the commands, execution order, preview
-lifecycle, and artifact locations. The runner's preview identity and cleanup are
+Use focused feedback during implementation and the final integration gate for
+application logic, interaction, and recipe/site-source changes covered by it.
+Documentation/report-only work needs source/diff review. A release always needs
+verified current output. A passing final gate supplies the checking, build,
+generated-output, and browser evidence; unchanged work does not require replaying
+those stages. Failures or relevant changes invalidate affected evidence and must
+be addressed before completion.
+
+[Development](../development.md#select-verification) owns check selection,
+commands, execution order, preview lifecycle, and artifact locations.
+The runner's preview identity and cleanup are
 part of verification correctness, not just test setup.
 
 Consolidates historical ADRs 0031, 0033; see the

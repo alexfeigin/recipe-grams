@@ -22,8 +22,10 @@ Linux may also need `npx playwright install-deps chromium`.
 For search and production URLs, run `npm run build` then `npm run preview`:
 Pagefind indexes built HTML, so search has no index in the dev server.
 
-Run `npm run verify` for the full site check. See
-[development and verification](docs/development.md) for focused checks and failure artifacts.
+Use the [verification selection policy](docs/development.md#select-verification)
+to choose development feedback and the completion gate. The
+[task-to-source/check table](docs/development.md#choose-a-focused-check) maps
+changes to their owners, companion obligations, and focused checks.
 
 ## Read only what your task needs
 
