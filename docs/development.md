@@ -3,6 +3,38 @@
 [README](../README.md#work-locally) covers installation and dev/build/preview.
 [package.json](../package.json) lists every command; use `npm run` to list them locally.
 
+## Select verification
+
+- **Documentation or reports only:** review content, source, links, and the diff;
+  check touched-document formatting where useful. Disposable HTML reports need
+  no application tests, site build, browser, screenshots, or implementation of
+  their recommendations. Recipe Markdown is site source and belongs in the next
+  category.
+- **Application logic, interaction, and recipe/site-source changes covered by the
+  gate:** use the narrowest relevant existing check from the table below during
+  implementation, then run `npm run verify` on the finished work. Preserve
+  meaningful existing coverage; add assertions for behavior contracts worth
+  protecting, not tests that merely mirror implementation.
+- **Release:** publish verified current output. Reuse the final gate's `dist/`
+  only while relevant source, configuration, dependencies, and output still
+  match the successful run. Missing, overwritten, or uncertain output requires
+  a fresh gate. Committing unchanged source or handing off to publishing does
+  not invalidate evidence. Verification alone does not authorize a release;
+  follow the [publishing workflow](../.agents/skills/recipe-grams-publishing/SKILL.md)
+  within the user's delivery scope and publication exclusions.
+
+A successful final gate already checks, builds, verifies generated output, and
+runs browser tests. Do not manually replay its stages immediately before or
+after it without a specific reason. Stop when the applicable evidence passes.
+A failure or subsequent relevant change invalidates the affected evidence;
+resolve it and reverify before completion. A specific uncovered concern can
+justify an additional check; record what it addresses.
+
+Routine UI maintenance uses existing interaction assertions, including keyboard
+focus tests, without a mandatory visual audit. Substantial new UI with unsettled
+coverage can warrant visual exploration; capture testable expectations in
+automated assertions and end the visual loop once the behavior is satisfactory.
+
 ## Full verification
 
 ```bash
@@ -27,19 +59,36 @@ as routine evidence. Check touched-file formatting separately with
 
 ## Choose a focused check
 
-| Changed concern                                               | Command / ownership                                                                               |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Catalog eligibility and diagnostics                           | `npm run test:catalog-intent`                                                                     |
-| Markdown links and images                                     | `npm run test:recipe-links`                                                                       |
-| Poolish formula and rejections                                | `npm run test:poolish-calculation`                                                                |
-| Generated link resolver                                       | `npm run test:links`                                                                              |
-| Preview lifecycle                                             | `npm run test:preview`                                                                            |
-| All source/fixture checks in the pre-build group              | `npm run verify:pure`                                                                             |
-| Built pages, catalog, navigation, links, and search artifacts | `npm run verify:generated` (needs a build)                                                        |
-| Images published only under `/images/`                        | `npm run verify:static-assets` (needs a build)                                                    |
-| Google Search Console verification file                       | `npm run verify:search-console` (needs a build)                                                   |
-| Generated sitemap and page coverage                           | `npm run verify:sitemap` (needs a build)                                                          |
-| Reader interactions                                           | `verify:*:browser` commands in `package.json` (need an explicit target outside full verification) |
+This is the task-to-source/check map. Read the matching topics in the
+[decision index](adr/README.md) for ownership rules. The checks below provide
+focused feedback; they do not replace the completion policy above. Generated
+checks need a current build, and focused browser commands need an explicit
+target outside full verification (see below).
+
+| Changed concern                                               | Source owners and companion obligations                                                                                                                                                                                                                                                            | Focused feedback                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Documentation or disposable reports                           | Use the [README map](../README.md#read-only-what-your-task-needs) to find relevant guidance; edit only the requested artifact.                                                                                                                                                                     | Content/source/diff review only; formatting where useful.                                                                                                                                                                                        |
+| Recipes, catalog, index, or images                            | `en/*.MD`, `he/*.MD`, `src/lib/recipeCatalog.ts`, `index.MD`, `public/images/`; `src/lib/recipePages.ts` discovers and renders them. Follow [authoring](../.agents/skills/recipe-grams-authoring/SKILL.md) for paired translations, catalog/index alignment, explicit preview images, and markers. | Review affected companions and image paths; `npm run test:catalog-intent` and `npm run test:recipe-links` test rules with fixtures. `verify:recipes` and `verify:catalog` check actual built pages and cards.                                    |
+| Catalog eligibility and diagnostics                           | `src/lib/recipeCatalog.ts`, `scripts/catalog-intent.test.mjs`; preserve intentional featured/unlisted status and localized metadata.                                                                                                                                                               | `npm run test:catalog-intent`                                                                                                                                                                                                                    |
+| Markdown destinations and images                              | `src/lib/recipeLinks.ts`, consumed by `src/lib/recipePages.ts`; fixtures in `scripts/recipe-links.test.mjs`. Preserve readable `.MD` source links while transforming site destinations.                                                                                                            | `npm run test:recipe-links`; `verify:pizza-links:browser` covers the existing pizza link regression.                                                                                                                                             |
+| Header, drawer, or search                                     | `src/components/SiteHeader.astro`, `src/scripts/siteHeader.ts`, `src/i18n/ui.ts`, `src/scripts/languageSwitch.ts`; keep language/RTL copy and scoped header behavior aligned.                                                                                                                      | `verify:navigation:browser` owns drawer keyboard focus; `verify:search:browser` owns search interactions, and `verify:search-content:browser` owns localized results. Assertions live in the matching `scripts/verify-*-browser.spec.mjs` files. |
+| Landing scrolling and back to top                             | `src/components/LandingPage.astro`, `src/scripts/backToTop.ts`, `src/scripts/languageSwitch.ts`; preserve the focus destination and fragment/language behavior.                                                                                                                                    | `verify:navigation:browser` includes back-to-top fragment clearing and language switching; `verify:recipe-flows:browser` covers browsing flows.                                                                                                  |
+| Poolish formula and rejections                                | `src/lib/poolishCalculator.ts`; independent expected quantities and rejection cases in `scripts/poolish-calculation.test.mjs`. Keep arithmetic coverage here.                                                                                                                                      | `npm run test:poolish-calculation`                                                                                                                                                                                                               |
+| Calculator interaction and localized copy                     | `src/components/PoolishCalculatorPage.astro`, `src/scripts/poolishCalculatorPage.ts`, `src/i18n/calculator.ts`; keep modes, validation, clipboard output, and language/query state aligned.                                                                                                        | `verify:calculator:browser` owns visible feedback and recovery, not arithmetic cases.                                                                                                                                                            |
+| Shared shell, metadata, or theme                              | `src/layouts/SitePage.astro`, `src/lib/pageContext.ts`, `src/components/SocialMeta.astro`, `src/components/FaviconLinks.astro`, `src/styles/design-tokens.css`; pages retain their own content/styles. Follow [Design](../DESIGN.md) for visual changes and ADR 0039 for shell/context boundaries. | `verify:contrast:browser` for control contrast; existing navigation, recipe-flow, and calculator browser suites for affected surfaces.                                                                                                           |
+| Generated link resolver                                       | `scripts/generated-links.mjs`, `scripts/generated-links.test.mjs`; keep destination existence separate from expected navigation.                                                                                                                                                                   | `npm run test:links`                                                                                                                                                                                                                             |
+| Preview lifecycle                                             | `scripts/preview-server.mjs`, `scripts/preview-server.test.mjs`; preserve preview ownership, identity, and cleanup.                                                                                                                                                                                | `npm run test:preview`                                                                                                                                                                                                                           |
+| All source/fixture checks in the pre-build group              | The pure suites selected by `package.json`.                                                                                                                                                                                                                                                        | `npm run verify:pure`                                                                                                                                                                                                                            |
+| Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                     | `npm run verify:generated`                                                                                                                                                                                                                       |
+| Images published only under `/images/`                        | `public/images/`, `scripts/verify-static-assets.mjs`; retain existing assets according to ADR 0043.                                                                                                                                                                                                | `npm run verify:static-assets`                                                                                                                                                                                                                   |
+| Google Search Console verification file                       | `public/google*.html`, `scripts/verify-search-console.mjs`; preserve the exact verification content.                                                                                                                                                                                               | `npm run verify:search-console`                                                                                                                                                                                                                  |
+| Generated sitemap and page coverage                           | `astro.config.mjs`, `src/layouts/SitePage.astro`, `scripts/verify-sitemap.mjs`; keep hosting/base URLs aligned.                                                                                                                                                                                    | `npm run verify:sitemap`                                                                                                                                                                                                                         |
+| Other reader interactions                                     | Existing `scripts/verify-*-browser.spec.mjs` assertions and their feature owners.                                                                                                                                                                                                                  | Matching `verify:*:browser` command in `package.json`.                                                                                                                                                                                           |
+
+Recipe sources use uppercase `.MD`; include them when searching, for example
+`rg --files -g '*.md' -g '*.MD'`. Modules executed directly by Node need explicit
+`.ts` extensions in TypeScript imports, including transitive imports (see the
+pure calculation tests); Astro's extensionless imports are not a Node template.
 
 The pure checks need no build, browser, or `SITE_BASE_URL`. `test:preview` exercises
 the preview lifecycle separately. Generated checks split responsibilities:

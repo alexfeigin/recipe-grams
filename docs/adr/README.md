@@ -25,9 +25,11 @@ skills own authoring and publishing procedures.
 
 ## Maintaining decisions
 
-Use `$domain-modeling` for ADRs and glossary changes. Its ADR format is a short
-title plus 1–3 sentences of context, decision, and reason; optional status,
-alternatives, or consequences belong only where they help. Add a new ADR only
+This tracked procedure is sufficient for ADR and glossary changes in a fresh
+clone. The private `$domain-modeling` skill is optional and need not be installed.
+
+Use a short ADR title plus 1–3 sentences of context, decision, and reason;
+optional status, alternatives, or consequences belong only where they help. Add a new ADR only
 when the decision is hard to reverse, surprising without context, and the result
 of a real tradeoff.
 
@@ -41,4 +43,21 @@ of a real tradeoff.
   of the normal reading path. Flag proposals that contradict an accepted ADR by
   its number and explain why the choice should be revisited.
 - Group related decisions by topic. Add a separate file when an independent
-  decision meets the skill's criteria, rather than for every implementation edit.
+  decision meets the three criteria above, rather than for every implementation edit.
+
+### Maintaining the glossary
+
+[CONTEXT.md](../../CONTEXT.md) owns domain vocabulary. Check existing terms before
+adding or changing one, and reconcile conflicting usage with the relevant source
+owner. Each entry names a canonical term, gives a short definition (one or two
+sentences), and lists terms to avoid:
+
+```md
+**Canonical Term**:
+A short definition of the domain concept.
+_Avoid_: Confusing synonym, overloaded alternative
+```
+
+Keep implementation decisions in ADRs and reader behavior in
+[Product](../../PRODUCT.md). The glossary contains domain terms, not a spec or
+implementation notes.
