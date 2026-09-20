@@ -21,40 +21,35 @@ that evidence forward while its inputs remain current.
 For recipe publishing, commit and push the current Recipe-Grams branch after
 verification passes. Commit source changes before deploying them.
 
-## Deploy GitHub Pages
+## Publish GitHub Pages
 
-The deployment checkout is `~/sources/alexfeigin.github.io/` on every workstation.
+**Trigger:** Run a live publication only when the user has authorized a release.
+Ordinary verification, review, and report work ends without invoking the
+publication command. Commit and push the source branch first.
 
-1. Inspect its `git status --short --branch` before syncing or copying. Preserve
-   unfinished work and resolve its disposition with the user, then synchronize
-   the clean branch using `git pull --ff-only`. Confirm this is the publishing
-   `master` branch. Resolve divergence explicitly; do not erase local commits or
-   edits to match origin.
-2. Publish only verified current output from the Recipe-Grams checkout being
-   released, following the [release evidence policy](../../../docs/development.md#select-verification).
-   Reuse the clean `dist/` produced by its successful final gate. If relevant
-   inputs changed or the output is missing, overwritten, or cannot be tied to
-   that run, run the gate before copying. A commit or handoff alone does not
-   invalidate verification; do not rebuild unchanged verified output.
+**Command:** From the committed, pushed source checkout being released, run:
 
-3. From the verified Recipe-Grams checkout, replace only the published site in
-   the synchronized deployment checkout, then commit and push there:
+```bash
+npm run publish:site -- --message "{short commit message}"
+```
 
-   ```bash
-   rsync -av --delete dist/ ~/sources/alexfeigin.github.io/recipe-grams/
-   git -C ~/sources/alexfeigin.github.io add recipe-grams
-   git -C ~/sources/alexfeigin.github.io diff --cached --stat
-   git -C ~/sources/alexfeigin.github.io commit -m "{short commit message}"
-   git -C ~/sources/alexfeigin.github.io push
-   ```
+The destination defaults to `~/sources/alexfeigin.github.io/`; use
+`--destination <checkout>` for the same repository at another path. The helper
+runs the final gate once, owns that run's output, replaces only
+`recipe-grams/`, and pushes the deployment commit. Do not run a separate final
+gate immediately before it.
 
-   Inspect the staged scope before committing. If the build produces no changes,
-   report that the published files already match; an empty commit is unnecessary.
+**Success:** Carry forward the helper's source revision, destination, deployment
+revision or no-change result, and site link. Stop after a successful push; Pages
+may take time to update, and publication does not include live-site polling or a
+post-push browser audit.
 
-4. If syncing or pushing discovers remote changes, integrate them carefully;
-   involve the user only for a decision or conflict requiring their input.
-5. Stop after a successful push. Report the deployment and that Pages may take
-   time to update; do not poll or run post-push tests.
+**Exceptions:** The helper preserves dirty or staged destination work and stops
+on source-state problems, unexpected identity or branch, divergence, concurrent
+verification, scoped-copy violations, and failed Git operations. Report its
+actionable error and leave recovery state visible. Resolve exceptional state
+explicitly, preserving unrelated work; a rejected push is not retried through
+reset, rebase, stash, or force-push.
 
 Finish in the user's language. Link a new recipe's Hebrew and English pages and
 index; link the main site for a broad site change, or the affected pages otherwise.

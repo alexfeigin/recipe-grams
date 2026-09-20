@@ -1,0 +1,583 @@
+import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
+import {
+  cp,
+  lstat,
+  mkdtemp,
+  readdir,
+  readFile,
+  realpath,
+  rename,
+  rm,
+} from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { acquireCheckoutOperationLock } from "./checkout-operation-lock.mjs";
+
+const defaultDestination = path.join(
+  os.homedir(),
+  "sources",
+  "alexfeigin.github.io",
+);
+const expectedDestinationRemote =
+  "git@github.com:alexfeigin/alexfeigin.github.io.git";
+const publishedSubtree = "recipe-grams";
+const publishingBranch = "master";
+const siteUrl = "https://alexfeigin.github.io/recipe-grams/";
+
+function commandText(command, args) {
+  return [command, ...args].join(" ");
+}
+
+export function runProcess(
+  command,
+  args,
+  { cwd, env = process.env, inherit = false } = {},
+) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd,
+      env,
+      stdio: inherit ? "inherit" : ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    if (!inherit) {
+      child.stdout.setEncoding("utf8");
+      child.stderr.setEncoding("utf8");
+      child.stdout.on("data", (chunk) => (stdout += chunk));
+      child.stderr.on("data", (chunk) => (stderr += chunk));
+    }
+    child.once("error", reject);
+    child.once("close", (code, signal) => {
+      if (code === 0) return resolve({ stdout, stderr });
+      const detail = stderr.trim() || stdout.trim();
+      reject(
+        new Error(
+          `${commandText(command, args)} failed (${signal ?? code})${detail ? `: ${detail}` : ""}`,
+        ),
+      );
+    });
+  });
+}
+
+async function git(root, args, options) {
+  return runProcess("git", ["-C", root, ...args], options);
+}
+
+function cleanOutput(result) {
+  return result.stdout.trim();
+}
+
+async function optionalGitOutput(root, args) {
+  try {
+    return cleanOutput(await git(root, args));
+  } catch {
+    return "";
+  }
+}
+
+function isInside(parent, candidate) {
+  const relative = path.relative(parent, candidate);
+  return (
+    relative !== "" &&
+    !relative.startsWith(`..${path.sep}`) &&
+    relative !== ".."
+  );
+}
+
+function normalizeRemote(value, repositoryRoot) {
+  const remote = value
+    .trim()
+    .replace(/\/+$/, "")
+    .replace(/\.git$/, "");
+  const scp = remote.match(/^(?:[^@]+@)?([^:]+):(.+)$/);
+  if (scp && !remote.includes("://")) {
+    return `${scp[1].toLowerCase()}/${scp[2].replace(/^\/+/, "")}`;
+  }
+  try {
+    const url = new URL(remote);
+    if (url.protocol !== "file:") {
+      return `${url.hostname.toLowerCase()}/${url.pathname.replace(/^\/+/, "")}`;
+    }
+    return path.resolve(fileURLToPath(url));
+  } catch {
+    return path.resolve(repositoryRoot, remote);
+  }
+}
+
+async function requireRepositoryRoot(candidate, label) {
+  let resolved;
+  try {
+    resolved = await realpath(candidate);
+  } catch (error) {
+    throw new Error(
+      `${label} does not exist or cannot be resolved: ${candidate}`,
+      {
+        cause: error,
+      },
+    );
+  }
+  let reported;
+  try {
+    reported = cleanOutput(
+      await git(resolved, ["rev-parse", "--show-toplevel"], { cwd: resolved }),
+    );
+  } catch (error) {
+    throw new Error(`${label} is not a Git repository root: ${resolved}`, {
+      cause: error,
+    });
+  }
+  if ((await realpath(reported)) !== resolved) {
+    throw new Error(`${label} must be the Git repository root: ${resolved}`);
+  }
+  return resolved;
+}
+
+async function requireClean(root, label) {
+  const status = cleanOutput(
+    await git(root, ["status", "--porcelain=v1", "--untracked-files=all"]),
+  );
+  if (status) {
+    throw new Error(`${label} has uncommitted or staged work:\n${status}`);
+  }
+}
+
+async function sourceState(sourceRoot, { fetch = false } = {}) {
+  await requireClean(sourceRoot, "Source checkout");
+  let branch;
+  try {
+    branch = cleanOutput(
+      await git(sourceRoot, ["symbolic-ref", "--quiet", "--short", "HEAD"]),
+    );
+  } catch (error) {
+    throw new Error("Source checkout must be on a branch, not detached HEAD.", {
+      cause: error,
+    });
+  }
+  const remote = await optionalGitOutput(sourceRoot, [
+    "config",
+    "--get",
+    `branch.${branch}.remote`,
+  ]);
+  const mergeRef = await optionalGitOutput(sourceRoot, [
+    "config",
+    "--get",
+    `branch.${branch}.merge`,
+  ]);
+  if (!remote || !mergeRef || remote === ".") {
+    throw new Error(
+      `Source branch ${branch} must track a pushed remote branch before publication.`,
+    );
+  }
+  if (fetch) await git(sourceRoot, ["fetch", "--quiet", remote]);
+  let upstreamRevision;
+  try {
+    upstreamRevision = cleanOutput(
+      await git(sourceRoot, ["rev-parse", "--verify", "@{upstream}"]),
+    );
+  } catch (error) {
+    throw new Error(
+      `Source branch ${branch} has no resolvable upstream. Push it before publication.`,
+      { cause: error },
+    );
+  }
+  const revision = cleanOutput(await git(sourceRoot, ["rev-parse", "HEAD"]));
+  if (revision !== upstreamRevision) {
+    throw new Error(
+      `Source branch ${branch} is not exactly at its upstream revision. Push committed source changes and resolve remote differences first.`,
+    );
+  }
+  return { branch, revision };
+}
+
+async function validatePublishedSubtree(destinationRoot) {
+  const target = path.resolve(destinationRoot, publishedSubtree);
+  if (!isInside(destinationRoot, target) || target === destinationRoot) {
+    throw new Error(`Invalid published subtree: ${target}`);
+  }
+  try {
+    const stats = await lstat(target);
+    if (stats.isSymbolicLink() || !stats.isDirectory()) {
+      throw new Error(
+        `Published subtree must be a real directory when it exists: ${target}`,
+      );
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  return target;
+}
+
+async function destinationState(
+  destinationRoot,
+  expectedRemote,
+  { requireSynchronized = false } = {},
+) {
+  const branch = await optionalGitOutput(destinationRoot, [
+    "symbolic-ref",
+    "--quiet",
+    "--short",
+    "HEAD",
+  ]);
+  if (branch !== publishingBranch) {
+    throw new Error(
+      `Destination must be on ${publishingBranch}; found ${branch || "detached HEAD"}.`,
+    );
+  }
+  const remote = await optionalGitOutput(destinationRoot, [
+    "config",
+    "--get",
+    "remote.origin.url",
+  ]);
+  if (
+    normalizeRemote(remote, destinationRoot) !==
+    normalizeRemote(expectedRemote, destinationRoot)
+  ) {
+    throw new Error(
+      `Destination origin is ${remote || "missing"}; expected ${expectedRemote}.`,
+    );
+  }
+  const upstream = await optionalGitOutput(destinationRoot, [
+    "rev-parse",
+    "--abbrev-ref",
+    "@{upstream}",
+  ]);
+  if (upstream !== `origin/${publishingBranch}`) {
+    throw new Error(
+      `Destination ${publishingBranch} must track origin/${publishingBranch}; found ${upstream || "no upstream"}.`,
+    );
+  }
+  await requireClean(destinationRoot, "Destination checkout");
+  await validatePublishedSubtree(destinationRoot);
+  const revision = cleanOutput(
+    await git(destinationRoot, ["rev-parse", "HEAD"]),
+  );
+  const upstreamRevision = cleanOutput(
+    await git(destinationRoot, ["rev-parse", "@{upstream}"]),
+  );
+  if (requireSynchronized && revision !== upstreamRevision) {
+    throw new Error(
+      `Destination ${publishingBranch} is not exactly at origin/${publishingBranch}. Resolve local or remote commits before publication.`,
+    );
+  }
+  return {
+    branch,
+    revision,
+  };
+}
+
+async function changedDestinationPaths(destinationRoot) {
+  const results = await Promise.all([
+    git(destinationRoot, ["diff", "--name-only", "-z"]),
+    git(destinationRoot, ["diff", "--cached", "--name-only", "-z"]),
+    git(destinationRoot, ["ls-files", "--others", "--exclude-standard", "-z"]),
+  ]);
+  return new Set(
+    results.flatMap(({ stdout }) => stdout.split("\0").filter(Boolean)),
+  );
+}
+
+function pathsOutsidePublishedSubtree(paths) {
+  return [...paths].filter(
+    (entry) =>
+      entry !== publishedSubtree && !entry.startsWith(`${publishedSubtree}/`),
+  );
+}
+
+async function hashTreeEntry(hash, root, entryPath) {
+  const relative = path.relative(root, entryPath).split(path.sep).join("/");
+  const stats = await lstat(entryPath);
+  if (stats.isSymbolicLink()) {
+    throw new Error(
+      `Generated output contains an unsupported symbolic link: ${relative}`,
+    );
+  }
+  if (stats.isDirectory()) {
+    hash.update(`d\0${relative}\0`);
+    const entries = await readdir(entryPath);
+    entries.sort();
+    for (const entry of entries) {
+      await hashTreeEntry(hash, root, path.join(entryPath, entry));
+    }
+    return;
+  }
+  if (!stats.isFile()) {
+    throw new Error(
+      `Generated output contains an unsupported file type: ${relative}`,
+    );
+  }
+  hash.update(`f\0${relative}\0${stats.mode & 0o111}\0`);
+  hash.update(await readFile(entryPath));
+}
+
+export async function digestTree(root) {
+  const stats = await lstat(root);
+  if (!stats.isDirectory() || stats.isSymbolicLink()) {
+    throw new Error(`Expected a real output directory: ${root}`);
+  }
+  const hash = createHash("sha256");
+  await hashTreeEntry(hash, root, root);
+  return hash.digest("hex");
+}
+
+export async function replacePublishedSubtree({
+  sourceOutput,
+  destinationRoot,
+  targetSubtree,
+}) {
+  const gitDirectoryValue = cleanOutput(
+    await git(destinationRoot, [
+      "rev-parse",
+      "--path-format=absolute",
+      "--git-dir",
+    ]),
+  );
+  const gitDirectory = path.resolve(destinationRoot, gitDirectoryValue);
+  const temporaryRoot = await mkdtemp(path.join(gitDirectory, "publish-site-"));
+  const prepared = path.join(temporaryRoot, "prepared");
+  const previous = path.join(temporaryRoot, "previous");
+  let movedPrevious = false;
+  let preserveRecovery = false;
+  try {
+    await cp(sourceOutput, prepared, {
+      recursive: true,
+      preserveTimestamps: true,
+      verbatimSymlinks: true,
+    });
+    try {
+      await rename(targetSubtree, previous);
+      movedPrevious = true;
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    try {
+      await rename(prepared, targetSubtree);
+    } catch (error) {
+      if (movedPrevious) {
+        try {
+          await rename(previous, targetSubtree);
+        } catch (rollbackError) {
+          preserveRecovery = true;
+          throw new Error(
+            `Could not install the prepared site or restore the previous subtree. Recovery files remain at ${temporaryRoot}.`,
+            { cause: rollbackError },
+          );
+        }
+      }
+      throw error;
+    }
+  } finally {
+    if (!preserveRecovery) {
+      await rm(temporaryRoot, { recursive: true, force: true });
+    }
+  }
+}
+
+async function defaultVerify({ sourceRoot, lockToken }) {
+  await runProcess("npm", ["run", "verify"], {
+    cwd: sourceRoot,
+    env: { ...process.env, RECIPE_GRAMS_CHECKOUT_LOCK: lockToken },
+    inherit: true,
+  });
+}
+
+export async function publishSite({
+  sourceRoot,
+  destination = defaultDestination,
+  message,
+  expectedRemote = expectedDestinationRemote,
+  verify = defaultVerify,
+  copy = replacePublishedSubtree,
+  log = console.log,
+}) {
+  if (!message?.trim())
+    throw new Error("Publication requires a non-empty --message.");
+  const resolvedSource = await requireRepositoryRoot(
+    sourceRoot,
+    "Source checkout",
+  );
+  const resolvedDestination = await requireRepositoryRoot(
+    destination,
+    "Destination checkout",
+  );
+  if (
+    resolvedSource === resolvedDestination ||
+    isInside(resolvedSource, resolvedDestination) ||
+    isInside(resolvedDestination, resolvedSource)
+  ) {
+    throw new Error(
+      "Source and destination repositories must be separate paths.",
+    );
+  }
+  const output = path.resolve(resolvedSource, "dist");
+  if (!isInside(resolvedSource, output)) {
+    throw new Error(`Invalid generated output path: ${output}`);
+  }
+  const target = await validatePublishedSubtree(resolvedDestination);
+  const lock = await acquireCheckoutOperationLock(resolvedSource, {
+    purpose: "site publication",
+  });
+
+  try {
+    const initialSource = await sourceState(resolvedSource, { fetch: true });
+    await destinationState(resolvedDestination, expectedRemote);
+    try {
+      await git(resolvedDestination, [
+        "pull",
+        "--ff-only",
+        "origin",
+        publishingBranch,
+      ]);
+    } catch (error) {
+      throw new Error(
+        "Destination could not fast-forward from origin/master. Resolve its divergence without reset, rebase, stash, or force-push, then retry.",
+        { cause: error },
+      );
+    }
+    const synchronizedDestination = await destinationState(
+      resolvedDestination,
+      expectedRemote,
+      { requireSynchronized: true },
+    );
+
+    log(`Verifying source revision ${initialSource.revision}...`);
+    await verify({ sourceRoot: resolvedSource, lockToken: lock.token });
+
+    const verifiedSource = await sourceState(resolvedSource);
+    if (verifiedSource.revision !== initialSource.revision) {
+      throw new Error(
+        "Source revision changed during verification; nothing was copied.",
+      );
+    }
+    const currentDestination = await destinationState(
+      resolvedDestination,
+      expectedRemote,
+      { requireSynchronized: true },
+    );
+    if (currentDestination.revision !== synchronizedDestination.revision) {
+      throw new Error(
+        "Destination revision changed during verification; nothing was copied.",
+      );
+    }
+
+    const outputDigest = await digestTree(output);
+    await copy({
+      sourceOutput: output,
+      destinationRoot: resolvedDestination,
+      targetSubtree: target,
+    });
+    if ((await digestTree(output)) !== outputDigest) {
+      throw new Error(
+        "Generated output changed while it was being copied; publication stopped.",
+      );
+    }
+    if ((await digestTree(target)) !== outputDigest) {
+      throw new Error(
+        "Published subtree does not exactly match the verified output.",
+      );
+    }
+    const finalSource = await sourceState(resolvedSource);
+    if (finalSource.revision !== initialSource.revision) {
+      throw new Error(
+        "Source revision changed before publication commit; publication stopped.",
+      );
+    }
+
+    const changedPaths = await changedDestinationPaths(resolvedDestination);
+    const unexpectedChanges = pathsOutsidePublishedSubtree(changedPaths);
+    if (unexpectedChanges.length) {
+      throw new Error(
+        `Destination gained changes outside ${publishedSubtree}/; refusing to stage or commit:\n${unexpectedChanges.join("\n")}`,
+      );
+    }
+
+    await git(resolvedDestination, ["add", "--all", "--", publishedSubtree]);
+    const staged = (
+      await git(resolvedDestination, ["diff", "--cached", "--name-only", "-z"])
+    ).stdout
+      .split("\0")
+      .filter(Boolean);
+    const outside = pathsOutsidePublishedSubtree(staged);
+    if (outside.length) {
+      throw new Error(
+        `Refusing to commit staged paths outside ${publishedSubtree}/:\n${outside.join("\n")}`,
+      );
+    }
+
+    log(`Source revision: ${initialSource.revision}`);
+    log(`Destination: ${resolvedDestination} (${publishedSubtree}/)`);
+    if (staged.length === 0) {
+      log(
+        "Publication result: published content already matches; no commit or push was needed.",
+      );
+      log(`Site: ${siteUrl}`);
+      return { status: "unchanged", sourceRevision: initialSource.revision };
+    }
+
+    await git(resolvedDestination, ["commit", "-m", message]);
+    const publicationRevision = cleanOutput(
+      await git(resolvedDestination, ["rev-parse", "HEAD"]),
+    );
+    await git(resolvedDestination, ["push", "origin", publishingBranch]);
+    log(`Publication commit: ${publicationRevision}`);
+    log(`Publication result: pushed origin/${publishingBranch}.`);
+    log(`Site: ${siteUrl}`);
+    return {
+      status: "published",
+      sourceRevision: initialSource.revision,
+      publicationRevision,
+    };
+  } finally {
+    await lock.release();
+  }
+}
+
+function usage() {
+  return `Usage: npm run publish:site -- [--destination <checkout>] --message <message>\n\nThis performs a live publication after running the full verification gate.`;
+}
+
+export function parseArguments(args) {
+  const options = { destination: defaultDestination };
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index];
+    if (argument === "--help" || argument === "-h") return { help: true };
+    if (argument === "--destination" || argument === "--message") {
+      const value = args[++index];
+      if (!value) throw new Error(`${argument} requires a value.\n${usage()}`);
+      options[argument.slice(2)] = value;
+      continue;
+    }
+    if (argument.startsWith("--destination=")) {
+      options.destination = argument.slice("--destination=".length);
+      continue;
+    }
+    if (argument.startsWith("--message=")) {
+      options.message = argument.slice("--message=".length);
+      continue;
+    }
+    throw new Error(`Unknown argument: ${argument}\n${usage()}`);
+  }
+  return options;
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  try {
+    const options = parseArguments(process.argv.slice(2));
+    if (options.help) console.log(usage());
+    else {
+      await publishSite({
+        sourceRoot: fileURLToPath(new URL("../", import.meta.url)),
+        ...options,
+      });
+    }
+  } catch (error) {
+    console.error(`Publication failed: ${error.message}`);
+    if (error.cause?.message) console.error(`Cause: ${error.cause.message}`);
+    process.exitCode = 1;
+  }
+}

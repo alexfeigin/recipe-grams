@@ -1,22 +1,19 @@
 import { spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { acquireCheckoutOperationLock } from "./checkout-operation-lock.mjs";
-import { withPreview } from "./preview-server.mjs";
 
 const checkoutRoot = fileURLToPath(new URL("../", import.meta.url));
-process.chdir(checkoutRoot);
 const controller = new AbortController();
 const interrupt = () => controller.abort();
 process.once("SIGINT", interrupt);
 process.once("SIGTERM", interrupt);
 
-function run(script, extraEnv = {}) {
+function run(command, args) {
   controller.signal.throwIfAborted();
   return new Promise((resolve, reject) => {
-    const child = spawn("npm", ["run", script], {
+    const child = spawn(command, args, {
+      cwd: checkoutRoot,
       stdio: "inherit",
-      env: { ...process.env, ...extraEnv },
       detached: process.platform !== "win32",
     });
     const stop = () => {
@@ -33,7 +30,7 @@ function run(script, extraEnv = {}) {
     child.once("close", (code, signal) => {
       controller.signal.removeEventListener("abort", stop);
       if (code === 0) resolve();
-      else reject(new Error(`${script} failed (${signal ?? code})`));
+      else reject(new Error(`${command} failed (${signal ?? code})`));
     });
   });
 }
@@ -41,23 +38,11 @@ function run(script, extraEnv = {}) {
 let lock;
 try {
   lock = await acquireCheckoutOperationLock(checkoutRoot, {
-    purpose: "site verification",
+    purpose: "site build",
     inheritedToken: process.env.RECIPE_GRAMS_CHECKOUT_LOCK,
   });
-  await run("check");
-  await run("typecheck");
-  await run("verify:pure");
-  await rm("dist", { recursive: true, force: true });
-  await run("build", { RECIPE_GRAMS_CHECKOUT_LOCK: lock.token });
-  await run("verify:generated");
-  await run("test:preview");
-  await withPreview(async (baseUrl) => {
-    console.log(`Checking this build at ${baseUrl}`);
-    await run("verify:browser", { SITE_BASE_URL: baseUrl });
-  });
-  console.log(
-    "Site verification passed. Artifacts: .astro/verification/browser/",
-  );
+  await run("astro", ["build"]);
+  await run("pagefind", ["--site", "dist"]);
 } catch (error) {
   console.error(error.message);
   process.exitCode = controller.signal.aborted ? 130 : 1;
