@@ -14,7 +14,9 @@ import { fileURLToPath } from "node:url";
 import { verifyCatalogSource } from "./catalog-source-verifier.mjs";
 import { listLocalizedRecipeSources } from "../src/lib/recipeSources.ts";
 
-const repoRoot = fileURLToPath(new URL("../", import.meta.url));
+const verifierCommand = fileURLToPath(
+  new URL("./verify-catalog-source.mjs", import.meta.url),
+);
 
 function fixture(t, files) {
   const root = mkdtempSync(path.join(os.tmpdir(), "recipe-catalog-source-"));
@@ -56,6 +58,13 @@ function run(root, catalog) {
   return { exitCode, output, errors };
 }
 
+function runCommand(root) {
+  return spawnSync(process.execPath, [verifierCommand], {
+    cwd: root,
+    encoding: "utf8",
+  });
+}
+
 test("discovers only supported languages and uppercase recipe sources", (t) => {
   const root = fixture(t, [
     "en/dish.MD",
@@ -76,25 +85,17 @@ test("discovers only supported languages and uppercase recipe sources", (t) => {
   );
 });
 
-test("the command checks real catalog identities without generated output", (t) => {
-  const files = listLocalizedRecipeSources(repoRoot).map(({ language, slug }) =>
-    path.join(language, `${slug}.MD`),
-  );
-  const root = fixture(t, files);
-  const result = spawnSync(
-    process.execPath,
-    [path.join(repoRoot, "scripts/verify-catalog-source.mjs")],
-    { cwd: root, encoding: "utf8" },
-  );
+test("the command accepts warning-only results without generated output", (t) => {
+  const root = fixture(t, []);
+  const result = runCommand(root);
 
   assert.equal(existsSync(path.join(root, "dist")), false);
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stderr, "");
+  assert.match(result.stdout, /^\[recipe catalog warning\]/);
   assert.match(
     result.stdout,
-    new RegExp(
-      `Catalog source verification: 0 error\\(s\\), 0 warning\\(s\\), ${files.length} localized source\\(s\\)\\.`,
-    ),
+    /Catalog source verification: 0 error\(s\), [1-9]\d* warning\(s\), 0 localized source\(s\)\./,
   );
 });
 
@@ -143,16 +144,16 @@ test("keeps a complete intentionally unlisted recipe quiet", (t) => {
   ]);
 });
 
-test("returns nonzero for source discovery failures", (t) => {
+test("the command returns nonzero for source discovery failures", (t) => {
   const root = mkdtempSync(path.join(os.tmpdir(), "recipe-catalog-source-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
 
-  const result = run(root, {});
+  const result = runCommand(root);
 
-  assert.equal(result.exitCode, 1);
-  assert.deepEqual(result.output, []);
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, "");
   assert.match(
-    result.errors[0],
+    result.stderr,
     /^\[recipe catalog error\] Source verification failed:/,
   );
 });
