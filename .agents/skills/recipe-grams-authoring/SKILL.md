@@ -35,6 +35,8 @@ order, localizations)` with a unique order within its category, or
    of each `localizedMetadata(...)` call to select a card/social image; body
    images do not select themselves. For eligibility and build diagnostics, read
    [catalog intent](../../../docs/adr/0037-model-catalog-browsing-intent-explicitly.md).
+   Run `npm run verify:catalog-source` for fast feedback against the real recipe
+   sources and catalog before building the site.
 6. Add or update the `index.MD` row in the appropriate category, with both
    language links and markers. It serves GitHub readers independently of the
    catalog. Keep every affected owner aligned when changing a title, category,
