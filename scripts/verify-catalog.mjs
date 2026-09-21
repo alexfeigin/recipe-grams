@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "parse5";
 import {
-  collectCatalogDiagnostics,
   listUnlistedRecipes,
   selectFeaturedRecipes,
 } from "../src/lib/recipeCatalog.ts";
+import { listLocalizedRecipeSources } from "../src/lib/recipeSources.ts";
 import { uiLabels } from "../src/i18n/ui.ts";
 import { languages } from "../src/lib/site.ts";
 
@@ -36,13 +36,6 @@ function landingCardHrefs(html) {
         .slice(0, 1)
         .map((link) => attribute(link, "href")),
     );
-}
-
-function markdownRecipes(language) {
-  return readdirSync(path.join(repoRoot, language))
-    .filter((file) => file.endsWith(".MD"))
-    .map((file) => file.replace(/\.MD$/, ""))
-    .sort();
 }
 
 function readBuiltPage(...segments) {
@@ -92,22 +85,7 @@ for (const categoryId of [
   );
 }
 
-const localizedRecipes = languages.flatMap((language) =>
-  markdownRecipes(language).map((slug) => ({ language, slug })),
-);
-const diagnostics = collectCatalogDiagnostics(localizedRecipes);
-
-for (const diagnostic of diagnostics) {
-  console.log(`[recipe catalog ${diagnostic.severity}] ${diagnostic.message}`);
-}
-
-assert.deepEqual(
-  diagnostics
-    .filter((diagnostic) => diagnostic.severity === "error")
-    .map((diagnostic) => diagnostic.message),
-  [],
-  "The published catalog must not describe an incomplete featured recipe",
-);
+const localizedRecipes = listLocalizedRecipeSources(repoRoot);
 
 const homesByLanguage = { en: englishHome, he: hebrewHome };
 

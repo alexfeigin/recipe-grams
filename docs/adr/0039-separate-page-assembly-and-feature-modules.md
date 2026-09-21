@@ -15,7 +15,8 @@ pages retain their own content and styling.
 | ---------------------------- | ------------------------------------------------------------------------------------------------ |
 | `src/lib/site.ts`            | Languages, identity/category/marker types, and `sitePath`; no filesystem work or interface copy. |
 | `src/lib/recipeCatalog.ts`   | Catalog data, lookups, eligibility, diagnostics; depends on site vocabulary.                     |
-| `src/lib/recipePages.ts`     | Build-time discovery, landing data, and Markdown rendering; consumes the catalog.                |
+| `src/lib/recipeSources.ts`   | Lightweight build-time discovery of localized Markdown recipe sources.                           |
+| `src/lib/recipePages.ts`     | Landing data, catalog reporting, and Markdown rendering; consumes source discovery and catalog.  |
 | `src/lib/recipeLinks.ts`     | Markdown destination transformation, independently testable with fixtures.                       |
 | `src/lib/pageContext.ts`     | Language-derived direction, social locale, labels, and current/alternate home URLs.              |
 | `src/layouts/SitePage.astro` | Shared document shell, common metadata, theme import, and header.                                |

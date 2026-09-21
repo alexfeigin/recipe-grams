@@ -1,5 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import path from "node:path";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
 import {
@@ -9,18 +8,19 @@ import {
 import { createSiteDestinationPlugin } from "./recipeLinks";
 import { uiLabels } from "../i18n/ui";
 import {
-  isRecipeLanguage,
   languages,
   sitePath,
   type RecipeCategoryId,
-  type RecipeIdentity,
   type RecipeLanguage,
   type RecipeMarkerId,
 } from "./site";
+import {
+  findLocalizedRecipeSource,
+  listLocalizedRecipeSources,
+  type LocalizedRecipe,
+} from "./recipeSources.ts";
 
-export type LocalizedRecipe = RecipeIdentity & {
-  sourcePath: string;
-};
+export type { LocalizedRecipe } from "./recipeSources.ts";
 
 export type RecipeCard = {
   slug: string;
@@ -51,18 +51,7 @@ const markdownRenderers = new Map<
 >();
 
 export function listLocalizedRecipes(): LocalizedRecipe[] {
-  const recipes = languages.flatMap((language) => {
-    const directory = path.join(repoRoot, language);
-
-    return readdirSync(directory)
-      .filter((file) => file.endsWith(".MD"))
-      .sort()
-      .map((file) => ({
-        language,
-        slug: file.replace(/\.MD$/, ""),
-        sourcePath: path.join(directory, file),
-      }));
-  });
+  const recipes = listLocalizedRecipeSources(repoRoot);
 
   reportCatalogDiagnostics(recipes);
 
@@ -122,16 +111,7 @@ export function findLocalizedRecipe(
   language: string | undefined,
   slug: string | undefined,
 ): LocalizedRecipe | undefined {
-  if (!isRecipeLanguage(language) || !slug) {
-    return undefined;
-  }
-
-  const sourcePath = path.join(repoRoot, language, `${slug}.MD`);
-  if (!existsSync(sourcePath)) {
-    return undefined;
-  }
-
-  return { language, slug, sourcePath };
+  return findLocalizedRecipeSource(language, slug, repoRoot);
 }
 
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {

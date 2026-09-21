@@ -46,6 +46,7 @@ try {
   });
   await run("check");
   await run("typecheck");
+  await run("verify:catalog-source");
   await run("verify:pure");
   await rm("dist", { recursive: true, force: true });
   await run("build", { RECIPE_GRAMS_CHECKOUT_LOCK: lock.token });
