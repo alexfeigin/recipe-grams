@@ -33,7 +33,10 @@ separate gate immediately before invoking the helper.
 [Development](../development.md#select-verification) owns check selection,
 commands, execution order, preview lifecycle, and artifact locations.
 The runner's preview identity and cleanup are
-part of verification correctness, not just test setup.
+part of verification correctness, not just test setup. A command that runs a
+selected browser suite owns its preview the same way, rather than trusting an
+externally arranged server; the explicit-URL commands remain for deliberate
+checks of another preview or the published site.
 
 Consolidates historical ADRs 0031, 0033; see the
 [original records](../history/decisions.md#topic-index).

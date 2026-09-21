@@ -63,8 +63,9 @@ as routine evidence. Check touched-file formatting separately with
 This is the task-to-source/check map. Read the matching topics in the
 [decision index](adr/README.md) for ownership rules. The checks below provide
 focused feedback; they do not replace the completion policy above. Generated
-checks need a current build, and focused browser commands need an explicit
-target outside full verification (see below).
+checks need a current build. `verify:focused` builds and owns a preview for one
+browser suite; the per-suite `verify:*:browser` commands need an explicit target
+instead (see below).
 
 | Changed concern                                               | Source owners and companion obligations                                                                                                                                                                                                                                                            | Focused feedback                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -79,13 +80,14 @@ target outside full verification (see below).
 | Shared shell, metadata, or theme                              | `src/layouts/SitePage.astro`, `src/lib/pageContext.ts`, `src/components/SocialMeta.astro`, `src/components/FaviconLinks.astro`, `src/styles/design-tokens.css`; pages retain their own content/styles. Follow [Design](../DESIGN.md) for visual changes and ADR 0039 for shell/context boundaries. | `verify:contrast:browser` for control contrast; existing navigation, recipe-flow, and calculator browser suites for affected surfaces.                                                                                                           |
 | Generated link resolver                                       | `scripts/generated-links.mjs`, `scripts/generated-links.test.mjs`; keep destination existence separate from expected navigation.                                                                                                                                                                   | `npm run test:links`                                                                                                                                                                                                                             |
 | Preview lifecycle                                             | `scripts/preview-server.mjs`, `scripts/preview-server.test.mjs`; preserve preview ownership, identity, and cleanup.                                                                                                                                                                                | `npm run test:preview`                                                                                                                                                                                                                           |
+| Focused browser dispatch and command lifecycle                | `scripts/focused-verification.mjs`, `scripts/verify-focused.mjs`, `scripts/command-lifecycle.mjs`; keep the suite allowlist aligned with the `verify:*:browser` commands, reuse `withPreview` instead of arranging a server, and keep interruption closing child work.                             | `npm run test:focused`                                                                                                                                                                                                                           |
 | Build/publication checkout exclusion and manual publication   | `scripts/build-site.mjs`, `scripts/publish-site.mjs`, `scripts/checkout-operation-lock.mjs`, `scripts/verify-site.mjs`; keep release authorization separate from verification and publish only the verified active checkout through the fixed deployment subtree.                                  | `npm run test:publish-site`                                                                                                                                                                                                                      |
 | All source/fixture checks in the pre-build group              | The pure suites selected by `package.json`.                                                                                                                                                                                                                                                        | `npm run verify:pure`                                                                                                                                                                                                                            |
 | Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                     | `npm run verify:generated`                                                                                                                                                                                                                       |
 | Images published only under `/images/`                        | `public/images/`, `scripts/verify-static-assets.mjs`; retain existing assets according to ADR 0043.                                                                                                                                                                                                | `npm run verify:static-assets`                                                                                                                                                                                                                   |
 | Google Search Console verification file                       | `public/google*.html`, `scripts/verify-search-console.mjs`; preserve the exact verification content.                                                                                                                                                                                               | `npm run verify:search-console`                                                                                                                                                                                                                  |
 | Generated sitemap and page coverage                           | `astro.config.mjs`, `src/layouts/SitePage.astro`, `scripts/verify-sitemap.mjs`; keep hosting/base URLs aligned.                                                                                                                                                                                    | `npm run verify:sitemap`                                                                                                                                                                                                                         |
-| Other reader interactions                                     | Existing `scripts/verify-*-browser.spec.mjs` assertions and their feature owners.                                                                                                                                                                                                                  | Matching `verify:*:browser` command in `package.json`.                                                                                                                                                                                           |
+| Other reader interactions                                     | Existing `scripts/verify-*-browser.spec.mjs` assertions and their feature owners.                                                                                                                                                                                                                  | `npm run verify:focused -- --suite <name>`, or the matching `verify:*:browser` command against an explicit target.                                                                                                                               |
 
 Recipe sources use uppercase `.MD`; include them when searching, for example
 `rg --files -g '*.md' -g '*.MD'`. Modules executed directly by Node need explicit
@@ -116,6 +118,26 @@ Search browser tests separately own interaction (`verify:search:browser`) and
 language-specific content (`verify:search-content:browser`). Calculator browser
 tests own visible validation, recovery, clipboard behavior, localized units, and
 mode switching; arithmetic cases belong to the pure suite.
+
+### Run one browser suite
+
+`npm run verify:focused` builds the current site, starts and identifies its own
+preview, runs one suite against it, and closes that preview after success,
+failure, or interruption:
+
+```bash
+npm run verify:focused -- --suite navigation
+npm run verify:focused -- --suite navigation --grep 'keyboard opens'
+```
+
+`--suite` takes one maintained suite, listed in `package.json` as the
+`verify:*:browser` commands; the optional `--grep` uses Playwright's test-name
+matching. Unknown suites, unknown arguments, missing values, and invalid filters
+fail with the usage before anything is built or started, and a filter matching
+nothing fails instead of reporting success. Every run rebuilds from scratch
+including Pagefind, and the owned preview replaces any `SITE_BASE_URL` already
+in the environment. This is development feedback; it does not replace
+`npm run verify`.
 
 To check a running preview or published site, provide its URL with a trailing slash:
 
