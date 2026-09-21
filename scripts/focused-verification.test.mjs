@@ -338,3 +338,34 @@ test("interruption stops child work and closes the owned preview", async (t) => 
   assert.equal(preview.state.closed, 1);
   assert.equal(existsSync(lockPath(root)), false);
 });
+
+test("interruption during preview cleanup cannot report success", async (t) => {
+  const root = await sandbox(t);
+  const controller = new AbortController();
+  const runner = recordingRunner();
+  const messages = [];
+  let closed = false;
+
+  const preview = async (check) => {
+    try {
+      return await check("http://127.0.0.1:4321/recipe-grams/");
+    } finally {
+      closed = true;
+      controller.abort();
+    }
+  };
+
+  await assert.rejects(
+    focusedRun(root, ["--suite", "navigation"], {
+      run: runner.run,
+      preview,
+      signal: controller.signal,
+      log: (message) => messages.push(message),
+    }),
+    { name: "AbortError" },
+  );
+
+  assert.equal(closed, true);
+  assert.doesNotMatch(messages.join("\n"), /Focused check passed/);
+  assert.equal(existsSync(lockPath(root)), false);
+});

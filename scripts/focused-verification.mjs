@@ -125,6 +125,7 @@ export async function runFocusedVerification(
         );
       }
     });
+    signal?.throwIfAborted();
 
     log(
       `Focused check passed: ${suite}. This is development feedback, not the final gate; finish with npm run verify.`,
