@@ -221,19 +221,23 @@ test("the owned preview URL overrides an inherited SITE_BASE_URL", async (t) => 
   );
   process.env.SITE_BASE_URL = "https://example.invalid/somewhere-else/";
   t.after(() => delete process.env.SITE_BASE_URL);
+  const preview = countingPreview();
 
-  await runCommand(
-    process.execPath,
-    [child, record, "--grep", "keyboard opens"],
+  await focusedRun(
+    root,
+    ["--suite", "navigation", "--grep", "keyboard opens"],
     {
-      cwd: root,
-      env: { SITE_BASE_URL: "http://127.0.0.1:4321/recipe-grams/" },
+      run: (command, args, options) =>
+        command === "npm"
+          ? Promise.resolve()
+          : runCommand(process.execPath, [child, record, ...args], options),
+      preview: preview.preview,
     },
   );
 
   assert.deepEqual(JSON.parse(await readFile(record, "utf8")), {
-    target: "http://127.0.0.1:4321/recipe-grams/",
-    args: ["--grep", "keyboard opens"],
+    target: preview.state.baseUrl,
+    args: ["test", browserSuites.navigation, "--grep", "keyboard opens"],
   });
 });
 
@@ -300,7 +304,7 @@ test("interruption stops child work and closes the owned preview", async (t) => 
   const controller = new AbortController();
   const preview = countingPreview();
 
-  const run = async (command, args, options) => {
+  const run = async (command, _args, options) => {
     if (command === "npm") return;
     setTimeout(() => controller.abort(), 100);
     await runCommand(process.execPath, [child], options);
@@ -314,7 +318,7 @@ test("interruption stops child work and closes the owned preview", async (t) => 
     }),
     (error) => {
       assert.match(error.message, /recipe-flows tests failed \(SIGTERM\)/);
-      assert.doesNotMatch(error.message, /Failure screenshots/);
+      assert.doesNotMatch(error.message, /screenshots and traces/);
       return true;
     },
   );
