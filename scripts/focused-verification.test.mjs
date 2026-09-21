@@ -114,6 +114,18 @@ test("rejects unknown arguments, missing values, and repeated flags", () => {
   );
 });
 
+test("a dash-leading filter is refused with the form that accepts it", () => {
+  assert.throws(
+    () =>
+      parseFocusedSelection(["--suite", "navigation", "--grep", "--- legacy"]),
+    /reads as a flag[\s\S]*--grep="--- legacy"/,
+  );
+  assert.deepEqual(
+    parseFocusedSelection(["--suite", "navigation", "--grep=--- legacy"]),
+    { suite: "navigation", grep: "--- legacy" },
+  );
+});
+
 test("keeps the selected suite and the filter text intact", () => {
   assert.deepEqual(parseFocusedSelection(["--suite", "navigation"]), {
     suite: "navigation",

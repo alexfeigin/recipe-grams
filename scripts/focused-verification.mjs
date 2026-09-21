@@ -47,8 +47,12 @@ export function parseFocusedSelection(argv) {
     let value;
     if (assignment === -1) {
       value = argv[index + 1];
-      if (value === undefined || value.startsWith("--"))
-        throw new UsageError(`${flag} needs a value.`);
+      if (value === undefined) throw new UsageError(`${flag} needs a value.`);
+      if (value.startsWith("--"))
+        throw new UsageError(
+          `${flag} needs a value, but "${value}" reads as a flag. ` +
+            `To match text starting with "--", write ${flag}="${value}".`,
+        );
       index += 1;
     } else {
       value = argument.slice(assignment + 1);
