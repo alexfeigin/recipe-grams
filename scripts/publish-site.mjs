@@ -171,7 +171,19 @@ async function sourceState(sourceRoot, { fetch = false } = {}) {
       `Source branch ${branch} must track a pushed remote branch before publication.`,
     );
   }
-  if (fetch) await git(sourceRoot, ["fetch", "--quiet", remote]);
+  if (fetch) {
+    // Fetch the actual branch: a normal fetch can leave a deleted upstream cached.
+    await git(sourceRoot, ["fetch", "--quiet", remote, mergeRef]);
+    const fetched = cleanOutput(
+      await git(sourceRoot, ["rev-parse", "FETCH_HEAD"]),
+    );
+    const head = cleanOutput(await git(sourceRoot, ["rev-parse", "HEAD"]));
+    if (head !== fetched) {
+      throw new Error(
+        `Source branch ${branch} is not exactly at its upstream revision. Push committed source changes and resolve remote differences first.`,
+      );
+    }
+  }
   let upstreamRevision;
   try {
     upstreamRevision = cleanOutput(
@@ -207,6 +219,24 @@ async function validatePublishedSubtree(destinationRoot) {
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
+  const ignored = (
+    await git(destinationRoot, [
+      "ls-files",
+      "--others",
+      "--ignored",
+      "--exclude-standard",
+      "-z",
+      "--",
+      publishedSubtree,
+    ])
+  ).stdout
+    .split("\0")
+    .filter(Boolean);
+  if (ignored.length) {
+    throw new Error(
+      `Published subtree contains ignored local work; move or account for it before publication:\n${ignored.join("\n")}`,
+    );
+  }
   return target;
 }
 
@@ -226,18 +256,27 @@ async function destinationState(
       `Destination must be on ${publishingBranch}; found ${branch || "detached HEAD"}.`,
     );
   }
-  const remote = await optionalGitOutput(destinationRoot, [
-    "config",
-    "--get",
-    "remote.origin.url",
-  ]);
-  if (
-    normalizeRemote(remote, destinationRoot) !==
-    normalizeRemote(expectedRemote, destinationRoot)
-  ) {
-    throw new Error(
-      `Destination origin is ${remote || "missing"}; expected ${expectedRemote}.`,
-    );
+  for (const direction of ["fetch", "push"]) {
+    const urls = await optionalGitOutput(destinationRoot, [
+      "remote",
+      "get-url",
+      ...(direction === "push" ? ["--push"] : []),
+      "--all",
+      "origin",
+    ]);
+    const remotes = urls.split("\n").filter(Boolean);
+    if (
+      !remotes.length ||
+      remotes.some(
+        (remote) =>
+          normalizeRemote(remote, destinationRoot) !==
+          normalizeRemote(expectedRemote, destinationRoot),
+      )
+    ) {
+      throw new Error(
+        `Destination origin ${direction} URL is ${urls || "missing"}; expected ${expectedRemote}.`,
+      );
+    }
   }
   const upstream = await optionalGitOutput(destinationRoot, [
     "rev-parse",
@@ -320,6 +359,53 @@ export async function digestTree(root) {
   const hash = createHash("sha256");
   await hashTreeEntry(hash, root, root);
   return hash.digest("hex");
+}
+
+async function requireStagedOutput(destinationRoot, output) {
+  const files = (
+    await readdir(output, { recursive: true, withFileTypes: true })
+  )
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.join(entry.parentPath, entry.name))
+    .sort();
+  const hashes = files.length
+    ? cleanOutput(
+        await git(destinationRoot, [
+          "hash-object",
+          "--no-filters",
+          "--",
+          ...files,
+        ]),
+      ).split("\n")
+    : [];
+  const expected = await Promise.all(
+    files.map(async (file, index) => {
+      const mode = (await lstat(file)).mode & 0o111 ? "100755" : "100644";
+      const relative = path.relative(output, file).split(path.sep).join("/");
+      return `${mode} ${hashes[index]} 0\t${publishedSubtree}/${relative}`;
+    }),
+  );
+  const actual = (
+    await git(destinationRoot, [
+      "ls-files",
+      "--stage",
+      "-z",
+      "--",
+      publishedSubtree,
+    ])
+  ).stdout
+    .split("\0")
+    .filter(Boolean)
+    .sort();
+  expected.sort();
+  if (
+    actual.length !== expected.length ||
+    actual.some((entry, index) => entry !== expected[index])
+  ) {
+    throw new Error(
+      "Staged site does not exactly match the verified output. Check destination Git attributes, filters, and file modes; staged work remains available.",
+    );
+  }
 }
 
 export async function replacePublishedSubtree({
@@ -420,7 +506,19 @@ export async function publishSite({
     purpose: "site publication",
   });
 
+  let destinationLock;
   try {
+    const gitDirectory = cleanOutput(
+      await git(resolvedDestination, [
+        "rev-parse",
+        "--path-format=absolute",
+        "--git-dir",
+      ]),
+    );
+    destinationLock = await acquireCheckoutOperationLock(resolvedDestination, {
+      purpose: "destination publication",
+      lockDirectory: gitDirectory,
+    });
     const initialSource = await sourceState(resolvedSource, { fetch: true });
     await destinationState(resolvedDestination, expectedRemote);
     try {
@@ -493,7 +591,13 @@ export async function publishSite({
       );
     }
 
-    await git(resolvedDestination, ["add", "--all", "--", publishedSubtree]);
+    await git(resolvedDestination, [
+      "add",
+      "--force",
+      "--all",
+      "--",
+      publishedSubtree,
+    ]);
     const staged = (
       await git(resolvedDestination, ["diff", "--cached", "--name-only", "-z"])
     ).stdout
@@ -505,6 +609,10 @@ export async function publishSite({
         `Refusing to commit staged paths outside ${publishedSubtree}/:\n${outside.join("\n")}`,
       );
     }
+    await requireStagedOutput(resolvedDestination, output);
+    const stagedTree = cleanOutput(
+      await git(resolvedDestination, ["write-tree"]),
+    );
 
     log(`Source revision: ${initialSource.revision}`);
     log(`Destination: ${resolvedDestination} (${publishedSubtree}/)`);
@@ -520,6 +628,15 @@ export async function publishSite({
     const publicationRevision = cleanOutput(
       await git(resolvedDestination, ["rev-parse", "HEAD"]),
     );
+    if (
+      cleanOutput(
+        await git(resolvedDestination, ["rev-parse", "HEAD^{tree}"]),
+      ) !== stagedTree
+    ) {
+      throw new Error(
+        "Publication commit differs from the verified staged tree (a commit hook may have changed it). The local commit was preserved; nothing was pushed.",
+      );
+    }
     await git(resolvedDestination, ["push", "origin", publishingBranch]);
     log(`Publication commit: ${publicationRevision}`);
     log(`Publication result: pushed origin/${publishingBranch}.`);
@@ -530,7 +647,11 @@ export async function publishSite({
       publicationRevision,
     };
   } finally {
-    await lock.release();
+    try {
+      await destinationLock?.release();
+    } finally {
+      await lock.release();
+    }
   }
 }
 

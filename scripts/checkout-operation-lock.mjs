@@ -24,9 +24,12 @@ async function readOwner(lockPath) {
 
 export async function acquireCheckoutOperationLock(
   checkoutRoot,
-  { purpose, inheritedToken } = {},
+  {
+    purpose,
+    inheritedToken,
+    lockDirectory = path.join(checkoutRoot, ".astro"),
+  } = {},
 ) {
-  const lockDirectory = path.join(checkoutRoot, ".astro");
   const lockPath = path.join(lockDirectory, lockFilename);
   await mkdir(lockDirectory, { recursive: true });
 

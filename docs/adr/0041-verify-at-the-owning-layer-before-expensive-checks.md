@@ -25,6 +25,11 @@ generated-output, and browser evidence; unchanged work does not require replayin
 those stages. Failures or relevant changes invalidate affected evidence and must
 be addressed before completion.
 
+Manual publication runs its own single final gate under a checkout lock so the
+helper owns the exact output it releases. Prior verification remains review
+evidence, but does not substitute for this publication-owned gate; do not run a
+separate gate immediately before invoking the helper.
+
 [Development](../development.md#select-verification) owns check selection,
 commands, execution order, preview lifecycle, and artifact locations.
 The runner's preview identity and cleanup are

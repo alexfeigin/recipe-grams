@@ -5,6 +5,8 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  realpath,
+  rename,
   rm,
   symlink,
   writeFile,
@@ -168,6 +170,287 @@ test("rejects a destination on the wrong branch", async (t) => {
     publishSite(publicationOptions(repositories)),
     /Destination must be on master; found preview/,
   );
+});
+
+test("rejects an unexpected effective push destination before verification", async (t) => {
+  const repositories = await setupRepositories(t);
+  await git(
+    repositories.destination,
+    "config",
+    "remote.origin.pushurl",
+    repositories.sourceRemote,
+  );
+  let verified = false;
+  await assert.rejects(
+    publishSite(
+      publicationOptions(repositories, {
+        verify: async () => {
+          verified = true;
+        },
+      }),
+    ),
+    /Destination .*push.*expected/,
+  );
+  assert.equal(verified, false);
+});
+
+test("preserves ignored local work inside the published subtree", async (t) => {
+  const repositories = await setupRepositories(t);
+  await writeFile(
+    path.join(repositories.destination, ".git", "info", "exclude"),
+    "recipe-grams/local.txt\n",
+  );
+  await writeFile(
+    path.join(repositories.destination, "recipe-grams", "local.txt"),
+    "keep my work\n",
+  );
+  await assert.rejects(
+    publishSite(publicationOptions(repositories)),
+    /ignored.*recipe-grams\/local.txt/s,
+  );
+  assert.equal(
+    await readFile(
+      path.join(repositories.destination, "recipe-grams", "local.txt"),
+      "utf8",
+    ),
+    "keep my work\n",
+  );
+});
+
+test("includes verified output even when destination ignore rules match it", async (t) => {
+  const repositories = await setupRepositories(t);
+  await writeFile(
+    path.join(repositories.destination, ".git", "info", "exclude"),
+    "recipe-grams/new.html\n",
+  );
+  await publishSite(
+    publicationOptions(repositories, {
+      verify: async ({ sourceRoot }) => {
+        await mkdir(path.join(sourceRoot, "dist"));
+        await writeFile(
+          path.join(sourceRoot, "dist", "new.html"),
+          "verified\n",
+        );
+      },
+    }),
+  );
+  assert.equal(
+    (
+      await git(
+        repositories.destinationRemote,
+        "show",
+        "master:recipe-grams/new.html",
+      )
+    ).stdout,
+    "verified\n",
+  );
+});
+
+test("rejects Git filters that change the verified bytes during staging", async (t) => {
+  const repositories = await setupRepositories(t, { published: "OLD\n" });
+  await writeFile(
+    path.join(repositories.destination, ".gitattributes"),
+    "recipe-grams/index.html filter=alter\n",
+  );
+  await commitAll(repositories.destination, "Configure publication attributes");
+  await git(repositories.destination, "push");
+  await git(
+    repositories.destination,
+    "config",
+    "filter.alter.clean",
+    "tr a-z A-Z",
+  );
+  const initial = (
+    await git(repositories.destinationRemote, "rev-parse", "master")
+  ).stdout.trim();
+  await assert.rejects(
+    publishSite(publicationOptions(repositories)),
+    /Staged site does not exactly match/,
+  );
+  assert.equal(
+    (
+      await git(repositories.destinationRemote, "rev-parse", "master")
+    ).stdout.trim(),
+    initial,
+  );
+});
+
+test("publishes a linked source worktree with binary files and executable modes intact", async (t) => {
+  const repositories = await setupRepositories(t);
+  const worktree = path.join(repositories.base, "linked-source");
+  await git(repositories.source, "worktree", "add", "-b", "release", worktree);
+  await git(worktree, "push", "--set-upstream", "origin", "release");
+  await mkdir(path.join(repositories.source, "dist"));
+  await writeFile(
+    path.join(repositories.source, "dist", "index.html"),
+    "primary checkout\n",
+  );
+  const binary = Buffer.from([0, 255, 128, 10]);
+  const result = await publishSite(
+    publicationOptions(repositories, {
+      sourceRoot: worktree,
+      verify: async ({ sourceRoot }) => {
+        assert.equal(sourceRoot, await realpath(worktree));
+        await mkdir(path.join(sourceRoot, "dist", "nested"), {
+          recursive: true,
+        });
+        await writeFile(
+          path.join(sourceRoot, "dist", "nested", "image.bin"),
+          binary,
+        );
+        await writeFile(
+          path.join(sourceRoot, "dist", "run me.sh"),
+          "#!/bin/sh\nexit 0\n",
+          { mode: 0o755 },
+        );
+      },
+    }),
+  );
+  assert.equal(result.status, "published");
+  assert.equal(
+    await readFile(
+      path.join(repositories.source, "dist", "index.html"),
+      "utf8",
+    ),
+    "primary checkout\n",
+  );
+  const committed = await exec(
+    "git",
+    [
+      "-C",
+      repositories.destinationRemote,
+      "show",
+      "master:recipe-grams/nested/image.bin",
+    ],
+    { encoding: "buffer" },
+  );
+  assert.deepEqual(committed.stdout, binary);
+  assert.match(
+    (
+      await git(
+        repositories.destinationRemote,
+        "ls-tree",
+        "master",
+        "recipe-grams/run me.sh",
+      )
+    ).stdout,
+    /^100755 blob/,
+  );
+});
+
+test("does not push output changed by a commit hook", async (t) => {
+  const repositories = await setupRepositories(t);
+  const hook = path.join(
+    repositories.destination,
+    ".git",
+    "hooks",
+    "pre-commit",
+  );
+  await writeFile(
+    hook,
+    "#!/bin/sh\nprintf 'hook changed output\\n' > recipe-grams/index.html\ngit add recipe-grams/index.html\n",
+  );
+  await chmod(hook, 0o755);
+  const initial = (
+    await git(repositories.destinationRemote, "rev-parse", "master")
+  ).stdout.trim();
+  await assert.rejects(
+    publishSite(publicationOptions(repositories)),
+    /Publication commit differs from the verified staged tree/,
+  );
+  assert.equal(
+    (
+      await git(repositories.destinationRemote, "rev-parse", "master")
+    ).stdout.trim(),
+    initial,
+  );
+  assert.notEqual(
+    (await git(repositories.destination, "rev-parse", "HEAD")).stdout.trim(),
+    initial,
+  );
+});
+
+test("rejects a deleted source upstream despite its cached tracking reference", async (t) => {
+  const repositories = await setupRepositories(t);
+  await git(repositories.sourceRemote, "update-ref", "-d", "refs/heads/master");
+  let verified = false;
+  await assert.rejects(
+    publishSite(
+      publicationOptions(repositories, {
+        verify: async () => {
+          verified = true;
+        },
+      }),
+    ),
+    /fetch .*failed/,
+  );
+  assert.equal(verified, false);
+});
+
+test("rejects a staged rename that deletes a file outside the site subtree", async (t) => {
+  const repositories = await setupRepositories(t);
+  const initial = (
+    await git(repositories.destination, "rev-parse", "HEAD")
+  ).stdout.trim();
+  await assert.rejects(
+    publishSite(
+      publicationOptions(repositories, {
+        verify: async ({ sourceRoot }) => {
+          await mkdir(path.join(sourceRoot, "dist"));
+          await writeFile(
+            path.join(sourceRoot, "dist", "index.html"),
+            "preserve me\n",
+          );
+        },
+        copy: async (options) => {
+          await replacePublishedSubtree(options);
+          await rename(
+            path.join(repositories.destination, "unrelated.txt"),
+            path.join(repositories.destination, "recipe-grams", "index.html"),
+          );
+          await git(repositories.destination, "add", "--all");
+        },
+      }),
+    ),
+    /outside recipe-grams\/.*unrelated.txt/s,
+  );
+  assert.equal(
+    (await git(repositories.destination, "rev-parse", "HEAD")).stdout.trim(),
+    initial,
+  );
+});
+
+test("serializes publication from different source checkouts into one destination", async (t) => {
+  const repositories = await setupRepositories(t);
+  const otherSource = path.join(repositories.base, "other-source");
+  await exec("git", ["clone", repositories.sourceRemote, otherSource]);
+  let release;
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  let started;
+  const ready = new Promise((resolve) => {
+    started = resolve;
+  });
+  const options = publicationOptions(repositories);
+  const first = publishSite({
+    ...options,
+    verify: async (context) => {
+      started();
+      await held;
+      await options.verify(context);
+    },
+  });
+  await ready;
+  try {
+    await assert.rejects(
+      publishSite({ ...options, sourceRoot: otherSource }),
+      /Another .*owns this checkout/,
+    );
+  } finally {
+    release();
+    await first;
+  }
 });
 
 for (const staged of [false, true]) {

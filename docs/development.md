@@ -15,11 +15,12 @@
   implementation, then run `npm run verify` on the finished work. Preserve
   meaningful existing coverage; add assertions for behavior contracts worth
   protecting, not tests that merely mirror implementation.
-- **Release:** publish verified current output. Reuse the final gate's `dist/`
-  only while relevant source, configuration, dependencies, and output still
-  match the successful run. Missing, overwritten, or uncertain output requires
-  a fresh gate. Committing unchanged source or handing off to publishing does
-  not invalidate evidence. Verification alone does not authorize a release;
+- **Release:** invoke the publication helper from committed, pushed source. It
+  runs and owns one final gate, then publishes that invocation's exact output.
+  Do not run a separate final gate immediately before it. An earlier verification
+  remains evidence for unchanged source, but its output cannot establish the
+  helper's exclusive ownership and is not reused for publication.
+  Verification alone does not authorize a release;
   follow the [publishing workflow](../.agents/skills/recipe-grams-publishing/SKILL.md)
   within the user's delivery scope and publication exclusions.
 
