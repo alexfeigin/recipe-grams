@@ -3,6 +3,104 @@
 [README](../README.md#work-locally) covers installation and dev/build/preview.
 [package.json](../package.json) lists every command; use `npm run` to list them locally.
 
+## Development environment
+
+`./scripts/init.sh` is the one entry point, and
+[dev-environment.json](../dev-environment.json) is the baseline it reads.
+**Ready** means that baseline is present on a supported host. It does not mean
+that `npm run verify` has passed, that personal skills or credentials exist, or
+that publication is authorized.
+
+| Requirement             | Ready when                                                                                                                                                            | Setup installs with                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Host                    | Apple Silicon macOS (`darwin-arm64`). Other hosts fail before anything is checked or installed.                                                                       | —                                                                                                                            |
+| Node and npm            | The selected versions satisfy `engines` in package.json. `.nvmrc` is the version setup installs, not an exact requirement.                                            | `nvm install` (reads `.nvmrc`) when nvm exists, otherwise Homebrew's `node`; `npm install --global npm@<major>` for old npm. |
+| JavaScript dependencies | `node_modules/.package-lock.json` matches package-lock.json and the packages are present.                                                                             | `npm ci`                                                                                                                     |
+| Chromium                | Playwright's `chromium` and `chromium-headless-shell` for the installed `playwright-core` revision are complete in its browser cache.                                 | `npx playwright install chromium`                                                                                            |
+| Impeccable (UI design)  | Every declared file matches its pinned hash, each SKILL.md copy carries the current [project route](#impeccable-project-route), and no Impeccable hook is registered. | The pinned release bundle through Impeccable's installer.                                                                    |
+
+The Matt Pocock skills in the declaration are optional: no tracked instruction
+requires them (AGENTS.md calls `$domain-modeling` optional). Setup installs their
+pinned revision, and the check lists missing or stale ones without failing.
+Personal skills, GitHub credentials, the `gh` CLI, and the Pages deployment
+checkout are outside the baseline.
+
+### Check, setup, and upgrade
+
+- `--check` is read-only, offline, and well under a second. It never builds,
+  runs verification, publishes, or touches Git. It exits 0 when ready, or 1
+  after marking each item missing, wrong version, stale, undeclared, or
+  unexpected.
+- Setup (no option) installs only what the check reports, then checks again.
+  Installers run in a temporary staging project; a checkout copy is replaced
+  only after the staged files match the declaration. Downloaded Impeccable
+  bundles are cached in `~/Library/Caches/recipe-grams/` (`RECIPE_GRAMS_CACHE`
+  overrides it). When a step fails, setup says so and the check keeps
+  reporting what remains.
+- `--upgrade` resolves the newest upstream releases, proves them in staging,
+  records them in dev-environment.json in one write, and then runs setup. When
+  nothing is newer it says so and reinstalls nothing. A failure or interruption
+  before recording leaves the declaration and installed skills unchanged. If
+  setup fails after recording, rerun `./scripts/init.sh`, or run
+  `git checkout -- dev-environment.json` and then `./scripts/init.sh` to return
+  to the previous pins. Commit the updated declaration like any other change.
+
+### External skill sources
+
+Researched September 2026; the pins in dev-environment.json are authoritative.
+
+- **Impeccable** comes from [pbakaus/impeccable](https://github.com/pbakaus/impeccable).
+  `skill-vX.Y.Z` releases publish `universal.zip` with a
+  `universal.zip.sig.json` record. The `impeccable` npm package only installs
+  it; its engine binary comes from `engine-v*` releases with a SHA-256 sidecar.
+  The silent form is `npx --yes impeccable@<installer> install -y
+--providers=claude,codex,gemini,opencode --scope=project --no-hooks`, which
+  writes `.claude`, `.agents` (Codex), `.gemini`, and `.opencode` copies plus
+  Claude agents and an OpenCode command. `--no-hooks` keeps the design detector
+  from running after routine edits.
+- The installer has no version flag: on its own it verifies the latest
+  release's signature and installs it, as does upstream `npx impeccable update`.
+  Setup points `IMPECCABLE_BUNDLE_PATH` at the pinned release zip instead. The
+  installer does not verify a local bundle, so setup first checks the zip's
+  SHA-256 against the declaration. Upgrade runs the normal signed install of
+  the newest release, downloads that release's zip, checks it against the
+  signature record's SHA-256, and requires both to install identical files.
+- **Matt Pocock skills** come from [mattpocock/skills](https://github.com/mattpocock/skills)
+  through the Vercel Labs [`skills` CLI](https://github.com/vercel-labs/skills),
+  as that README documents. Upgrade takes the latest GitHub release (or the
+  default branch if there are no releases) and pins its commit. The silent form
+  is `npx --yes skills@<installer> add https://github.com/mattpocock/skills/tree/<commit>
+--skill <names…> --agent codex --copy --yes` with `DISABLE_TELEMETRY=1`,
+  which writes `.agents/skills/<name>`. Upstream `npx skills update` floats to
+  the latest revision instead. The CLI's `skills-lock.json` stays in staging.
+- Setup needs the network only for missing items (the npm registry, GitHub
+  releases and archives, and Playwright's browser CDN). Upgrade also queries
+  `api.github.com` and `registry.npmjs.org`. No login is needed; set
+  `GH_TOKEN` or `GITHUB_TOKEN` if the unauthenticated GitHub API limit of 60
+  requests an hour runs out. Installing Homebrew asks for an administrator
+  password; nvm does not.
+
+### Impeccable project route
+
+Setup inserts [scripts/impeccable-project-route.md](../scripts/impeccable-project-route.md)
+after the frontmatter of each installed Impeccable SKILL.md and sends Setup's
+context step through `node scripts/impeccable-context.mjs`:
+
+- **Focused maintenance**, such as "Change the search button label" or "Fix an
+  existing drawer focus regression", stops at the route and follows this guide's
+  [task table](#choose-a-focused-check): no interviews, concept selection,
+  screenshots, detector passes, subagents, or design-document rewrites.
+  `--route maintenance` prints the route without running the context loader.
+- **Design work**, such as "Redesign the landing page" or comparing visual
+  directions, continues in Impeccable. `--route design` runs the loader and
+  withholds `AUTONOMY_DIRECTIVE_CHECK`, `SUBAGENT_AUTHORIZATION`, and any
+  directive this project has not reviewed.
+
+Upgrade fails when the Setup text the route replaces has moved or the new loader
+emits an unreviewed directive; classify it in `scripts/dev-environment.mjs` and
+retry. After editing the route file, the check reports the installed copies as
+stale until setup reapplies it.
+
 ## Select verification
 
 - **Documentation or reports only:** review content, source, links, and the diff;
@@ -81,6 +179,8 @@ instead (see below).
 | Generated link resolver                                       | `scripts/generated-links.mjs`, `scripts/generated-links.test.mjs`; keep destination existence separate from expected navigation.                                                                                                                                                                   | `npm run test:links`                                                                                                                                                                                                                             |
 | Preview lifecycle                                             | `scripts/preview-server.mjs`, `scripts/preview-server.test.mjs`; preserve preview ownership, identity, and cleanup.                                                                                                                                                                                | `npm run test:preview`                                                                                                                                                                                                                           |
 | Focused browser dispatch and command lifecycle                | `scripts/focused-verification.mjs`, `scripts/verify-focused.mjs`, `scripts/command-lifecycle.mjs`; keep the suite allowlist aligned with the `verify:*:browser` commands, reuse `withPreview` instead of arranging a server, and keep interruption closing child work.                             | `npm run test:focused`                                                                                                                                                                                                                           |
+| Development environment readiness, setup, and upgrades        | `scripts/init.sh`, `scripts/init-environment.mjs`, `scripts/dev-environment.mjs`, `scripts/dev-environment-setup.mjs`, `dev-environment.json`; keep the check offline and read-only, stage installs before replacing checkout copies, and record upgrades only after staging passes.               | `npm run test:dev-environment`; `./scripts/init.sh --check` against the real checkout.                                                                                                                                                           |
+| Impeccable project route and context wrapper                  | `scripts/impeccable-project-route.md`, `scripts/impeccable-context.mjs`, the adaptation in `scripts/dev-environment.mjs`; keep routine UI fixes on the focused-maintenance route.                                                                                                                  | `npm run test:dev-environment`                                                                                                                                                                                                                   |
 | Build/publication checkout exclusion and manual publication   | `scripts/build-site.mjs`, `scripts/publish-site.mjs`, `scripts/checkout-operation-lock.mjs`, `scripts/verify-site.mjs`; keep release authorization separate from verification and publish only the verified active checkout through the fixed deployment subtree.                                  | `npm run test:publish-site`                                                                                                                                                                                                                      |
 | All source/fixture checks in the pre-build group              | The pure suites selected by `package.json`.                                                                                                                                                                                                                                                        | `npm run verify:pure`                                                                                                                                                                                                                            |
 | Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                     | `npm run verify:generated`                                                                                                                                                                                                                       |

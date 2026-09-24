@@ -5,6 +5,11 @@ recipe sources and their existing paths.
 
 ## Working agreement
 
+Before a task, run `./scripts/init.sh --check`. Run `./scripts/init.sh` only when
+it reports something missing or stale, and `--upgrade` only when the user wants
+newer external skills ([environment](docs/development.md#development-environment)).
+A ready environment is not verification or release authorization.
+
 Establish the requested outcome, source owner, and relevant existing checks using
 the [task-to-source/check table](docs/development.md#choose-a-focused-check).
 Read the guidance routed to that task; expand scope only for a dependency,
