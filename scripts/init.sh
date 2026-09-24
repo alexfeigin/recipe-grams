@@ -5,10 +5,11 @@
 # See docs/development.md#development-environment.
 set -euo pipefail
 
-usage="Usage: ./scripts/init.sh [--check | --upgrade]
+usage="Usage: ./scripts/init.sh [--check | --audit | --upgrade]
   (no option)  install missing or stale requirements at the versions this
-               repository declares, then check readiness
+               repository declares, then audit readiness
   --check      read-only, offline readiness check; run it before each task
+  --audit      read-only, offline check of the pinned UI design skill too
   --upgrade    also upgrade what is installed but too old (Node, npm), move
                managed external skills to their newest upstream releases, and
                record the resolved versions in dev-environment.json
@@ -18,6 +19,7 @@ mode=setup
 case "${1-}" in
 "") ;;
 --check) mode=check ;;
+--audit) mode=audit ;;
 --upgrade) mode=upgrade ;;
 -h | --help)
   echo "$usage"
@@ -230,7 +232,7 @@ provide_node() {
   fi
 }
 
-if [ "$mode" = check ]; then
+if [ "$mode" = check ] || [ "$mode" = audit ]; then
   if ! node_ready && [ -x "$homebrew_prefix/bin/node" ]; then
     # Installed, but this session started before Homebrew joined the PATH.
     use_homebrew

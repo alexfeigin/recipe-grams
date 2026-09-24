@@ -11,6 +11,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 
 // Offline readiness inspection for ./scripts/init.sh. Everything here reads the
 // checkout, its declaration, and local caches; installing lives in
@@ -505,16 +506,7 @@ function inspectDependencies(root, declaration) {
     ];
 
   const problems = [];
-  const stamp = path.join(root, "node_modules", ".recipe-grams-lock.sha256");
-  let installedLockHash = null;
-  try {
-    installedLockHash = readFileSync(stamp, "utf8").trim();
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-  }
   if (!existsSync(lockPath)) problems.push(`${lockfile} is missing`);
-  else if (installedLockHash !== hashFile(lockPath))
-    problems.push(`${lockfile} changed since npm ci`);
 
   const manifest = readJson(path.join(root, "package.json")) ?? {};
   const dependencyFields = [
@@ -544,6 +536,8 @@ function inspectDependencies(root, declaration) {
       problems.push(
         `${packageName(key)} ${present.version} is installed, ${entry.version} is locked`,
       );
+    } else if (!isDeepStrictEqual(present, entry)) {
+      problems.push(`${packageName(key)} metadata differs from ${lockfile}`);
     } else if (!existsSync(path.join(root, key))) {
       problems.push(`${packageName(key)} was removed from node_modules`);
     }
@@ -715,6 +709,7 @@ export function inspectEnvironment({
   nodeVersion = process.versions.node,
   npmVersion,
   env = process.env,
+  requireImpeccable = false,
 } = {}) {
   if (!declaration.platforms.includes(platform))
     return {
@@ -729,8 +724,10 @@ export function inspectEnvironment({
         ),
       ],
       optional: [],
+      uiSkill: [],
       notes: [],
     };
+  const impeccableFindings = inspectImpeccable(root, declaration, platform);
   return {
     platform,
     supported: true,
@@ -744,9 +741,14 @@ export function inspectEnvironment({
       }),
       ...inspectDependencies(root, declaration),
       ...inspectBrowsers(root, declaration, env),
-      ...inspectImpeccable(root, declaration, platform),
+      ...impeccableFindings.filter(
+        (item) => requireImpeccable || item.component === "hooks",
+      ),
     ],
     optional: inspectOptionalSkills(root, declaration),
+    uiSkill: requireImpeccable
+      ? []
+      : impeccableFindings.filter((item) => item.component === "impeccable"),
     notes: sessionNotes(declaration, env),
   };
 }
@@ -781,6 +783,10 @@ export function formatInspection(inspection) {
     lines.push(...inspection.optional.map(line));
     lines.push(`  ${setupCommand} installs the declared optional skills.`);
   }
+  if (inspection.uiSkill?.length)
+    lines.push(
+      `Note: Impeccable differs from the pinned UI design setup; run ./scripts/init.sh --audit before using it.`,
+    );
   lines.push(...inspection.notes.map((note) => `Note: ${note}`));
   return lines.join("\n");
 }

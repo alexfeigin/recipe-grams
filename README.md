@@ -20,15 +20,17 @@ ready to work:
 
 ```bash
 ./scripts/init.sh            # install what is missing, at the declared versions
-./scripts/init.sh --check    # read-only, offline; run before each task
+./scripts/init.sh --check    # read-only, offline core readiness; run before each task
+./scripts/init.sh --audit    # read-only, offline pinned UI skill check
 ./scripts/init.sh --upgrade  # the only way to newer versions: old Node or npm, newer skills
 npm run dev
 ```
 
-Run `--check` at the start of every task and setup only when it reports
-something missing or stale. Setup is idempotent: in a ready checkout it changes
-nothing. It never picks a newer version or upgrades a tool already on the Mac;
-only `--upgrade` does. [dev-environment.json](dev-environment.json) declares the baseline;
+Run `--check` at the start of every task. Impeccable pin differences are noted
+without blocking other work; run `--audit` before using it for UI design. Setup
+reconciles missing core requirements and the pinned UI skill. It does not pick
+new upstream versions or upgrade an installed Node or npm; only `--upgrade`
+does. [dev-environment.json](dev-environment.json) declares the baseline;
 [Development](docs/development.md#development-environment) explains what
 "ready" covers and how each requirement is installed and upgraded.
 Node runs the TypeScript modules used by the checks directly.

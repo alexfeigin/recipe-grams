@@ -1,5 +1,5 @@
 {
-  "description": "Ready-to-work baseline checked by ./scripts/init.sh --check. Setup installs these pins; only --upgrade changes the external skill pins below. See docs/development.md#development-environment.",
+  "description": "Core readiness is checked by ./scripts/init.sh --check; --audit also checks the pinned UI skill. Setup installs the declared pins; only --upgrade changes them. See docs/development.md#development-environment.",
   "platforms": ["darwin-arm64"],
   "system": {
     "commandLineTools": "/Library/Developer/CommandLineTools/usr/bin/git",

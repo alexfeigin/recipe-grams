@@ -13,8 +13,10 @@ import {
 // Invoked by ./scripts/init.sh after it has checked the host and Node.
 const mode = process.argv[2];
 
-if (mode === "check") {
-  const inspection = inspectEnvironment();
+if (mode === "check" || mode === "audit") {
+  const inspection = inspectEnvironment({
+    requireImpeccable: mode === "audit",
+  });
   console.log(formatInspection(inspection));
   process.exitCode = isReady(inspection) ? 0 : 1;
 } else if (mode === "setup" || mode === "upgrade") {
@@ -23,6 +25,6 @@ if (mode === "check") {
     if (!(await run({ tools: defaultTools(signal) }))) process.exitCode = 1;
   });
 } else {
-  console.error("Usage: ./scripts/init.sh [--check | --upgrade]");
+  console.error("Usage: ./scripts/init.sh [--check | --audit | --upgrade]");
   process.exitCode = 2;
 }

@@ -118,11 +118,6 @@ async function readyFixture(t) {
   write(root, "node_modules/.package-lock.json", {
     packages: { "node_modules/astro": { version: "7.2.0" } },
   });
-  write(
-    root,
-    "node_modules/.recipe-grams-lock.sha256",
-    `${sha256(readFileSync(path.join(root, "package-lock.json")))}\n`,
-  );
   write(root, "node_modules/astro/package.json", {});
   write(root, "node_modules/playwright-core/browsers.json", {
     browsers: [
@@ -194,6 +189,7 @@ async function readyFixture(t) {
       nodeVersion: "24.20.0",
       npmVersion: "11.19.1",
       env,
+      requireImpeccable: true,
       ...overrides,
     });
   return { root, route, declaration, env, inspect };
@@ -434,13 +430,15 @@ test("readiness notices lockfile and dependency declaration changes", async (t) 
       "node_modules/fsevents": { version: "2.3.3", optional: true },
     },
   });
-  assert.match(inspect().required[0].detail, /changed since npm ci/);
+  assert.match(inspect().required[0].detail, /metadata differs/);
 
-  write(
-    root,
-    "node_modules/.recipe-grams-lock.sha256",
-    `${sha256(readFileSync(path.join(root, "package-lock.json")))}\n`,
-  );
+  write(root, "package-lock.json", {
+    packages: {
+      "": {},
+      "node_modules/astro": { version: "7.2.0" },
+      "node_modules/fsevents": { version: "2.3.3", optional: true },
+    },
+  });
   write(root, "package.json", {
     engines: { node: ">=24.20.0", npm: ">=11.0.0" },
     dependencies: { astro: "7.2.0" },
@@ -449,6 +447,23 @@ test("readiness notices lockfile and dependency declaration changes", async (t) 
     inspect().required[0].detail,
     /package.json dependencies differ/,
   );
+});
+
+test("ordinary readiness does not require the pinned UI skill", async (t) => {
+  const { root, inspect } = await readyFixture(t);
+  write(root, ".claude/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
+  const ordinary = inspect({ requireImpeccable: false });
+  assert.ok(isReady(ordinary));
+  assert.deepEqual(statuses(ordinary), []);
+  assert.ok(ordinary.uiSkill.length);
+  assert.deepEqual(statuses(inspect()), ["impeccable:wrong version"]);
+
+  write(root, ".claude/settings.json", {
+    hooks: { PostToolUse: [{ command: "impeccable hook" }] },
+  });
+  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
+    "hooks:unexpected",
+  ]);
 });
 
 test("Impeccable contents, version, route, and hooks are each checked", async (t) => {

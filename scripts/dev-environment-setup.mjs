@@ -514,7 +514,13 @@ export async function setupEnvironment({
   cacheDirectory = defaultCacheDirectory(tools.env),
   platform = hostPlatform(),
   inspect = (declaration) =>
-    inspectEnvironment({ root, declaration, platform, env: tools.env }),
+    inspectEnvironment({
+      root,
+      declaration,
+      platform,
+      env: tools.env,
+      requireImpeccable: true,
+    }),
 }) {
   const declaration = readDeclaration(root);
   let before = inspect(declaration);
@@ -547,10 +553,6 @@ export async function setupEnvironment({
       );
     if (has("dependencies")) {
       await tools.run("npm", ["ci"], { cwd: root, label: "npm ci" });
-      await writeFile(
-        path.join(root, "node_modules", ".recipe-grams-lock.sha256"),
-        `${sha256(await readFile(path.join(root, declaration.dependencies.lockfile)))}\n`,
-      );
       // The lockfile may pin a different Playwright browser revision.
       before = inspect(declaration);
     }
@@ -799,7 +801,13 @@ export async function upgradeEnvironment({
   cacheDirectory = defaultCacheDirectory(tools.env),
   platform = hostPlatform(),
   inspect = (declaration) =>
-    inspectEnvironment({ root, declaration, platform, env: tools.env }),
+    inspectEnvironment({
+      root,
+      declaration,
+      platform,
+      env: tools.env,
+      requireImpeccable: true,
+    }),
   setup = () =>
     setupEnvironment({ root, tools, cacheDirectory, platform, inspect }),
 }) {
