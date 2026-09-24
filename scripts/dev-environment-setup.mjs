@@ -343,6 +343,8 @@ function assertManagedSkillName(name) {
     throw new Error(`"${name}" cannot be managed as an external skill.`);
 }
 
+// Installs `names` for every declared agent. The CLI's copy mode writes the
+// same files for each, so one pin covers all copies of a skill.
 async function installSkillsInto(staging, tools, spec, revision, names) {
   names.forEach(assertManagedSkillName);
   await tools.run("git", ["init", "-q"], { cwd: staging });
@@ -356,7 +358,7 @@ async function installSkillsInto(staging, tools, spec, revision, names) {
       "--skill",
       ...names,
       "--agent",
-      spec.agent,
+      ...spec.agents,
       "--copy",
       "--yes",
     ],
@@ -366,7 +368,6 @@ async function installSkillsInto(staging, tools, spec, revision, names) {
       label: `${spec.installer} add`,
     },
   );
-  const directory = agentSkillDirectories[spec.agent];
   let lock = {};
   try {
     lock = JSON.parse(
@@ -377,26 +378,43 @@ async function installSkillsInto(staging, tools, spec, revision, names) {
   }
   const installed = {};
   for (const name of names) {
-    const sha = hashTree(path.join(staging, directory, name));
-    if (sha === null)
+    const hashes = new Set(
+      spec.agents.map((agent) =>
+        hashTree(path.join(staging, agentSkillDirectories[agent], name)),
+      ),
+    );
+    if (hashes.has(null))
       throw new Error(
-        `${spec.source} at ${revision} did not provide the skill "${name}".`,
+        `${spec.source} at ${revision} did not provide the skill "${name}" for every agent.`,
+      );
+    if (hashes.size !== 1)
+      throw new Error(
+        `${spec.installer} installed different copies of "${name}" for ${spec.agents.join(" and ")}.`,
       );
     const skillPath = lock[name]?.skillPath?.replace(/\/SKILL\.md$/, "");
-    installed[name] = { path: skillPath ?? null, sha256: sha };
+    installed[name] = { path: skillPath ?? null, sha256: [...hashes][0] };
   }
-  return { directory, installed };
+  return installed;
 }
 
+function skillEntries(spec, names) {
+  return names.flatMap((name) =>
+    spec.agents.map((agent) => `${agentSkillDirectories[agent]}/${name}`),
+  );
+}
+
+// Validates `names` in staging, then replaces `entries` (every agent's copy of
+// those skills by default) in the checkout.
 export async function installMattpocockSkills({
   root,
   declaration,
   names,
+  entries,
   tools,
 }) {
   const spec = declaration.mattpocockSkills;
   await withStaging("recipe-grams-skills", async (staging) => {
-    const { directory, installed } = await installSkillsInto(
+    const installed = await installSkillsInto(
       staging,
       tools,
       spec,
@@ -413,7 +431,7 @@ export async function installMattpocockSkills({
     await replaceEntries(
       root,
       staging,
-      names.map((name) => `${directory}/${name}`),
+      entries ?? skillEntries(spec, names),
       tools.signal,
     );
   });
@@ -512,16 +530,22 @@ export async function setupEnvironment({
     return false;
   }
 
-  const names = before.optional
-    .filter((item) => ["missing", "stale"].includes(item.status))
-    .flatMap((item) => item.names);
+  const optional = before.optional.filter((item) =>
+    ["missing", "stale"].includes(item.status),
+  );
+  const names = [...new Set(optional.flatMap((item) => item.names))];
+  const entries = optional.flatMap((item) => item.entries);
   if (names.length)
-    await installMattpocockSkills({ root, declaration, names, tools }).catch(
-      (error) => {
-        if (tools.signal?.aborted) throw error;
-        tools.log(`Optional skills were not installed: ${error.message}`);
-      },
-    );
+    await installMattpocockSkills({
+      root,
+      declaration,
+      names,
+      entries,
+      tools,
+    }).catch((error) => {
+      if (tools.signal?.aborted) throw error;
+      tools.log(`Optional skills were not installed: ${error.message}`);
+    });
   return report();
 }
 
@@ -684,7 +708,7 @@ async function upgradeMattpocockSkills({ declaration, latest, tools }) {
   const spec = { ...declaration.mattpocockSkills, installer: latest.installer };
   const names = Object.keys(spec.skills);
   return withStaging("recipe-grams-skills", async (staging) => {
-    const { installed } = await installSkillsInto(
+    const installed = await installSkillsInto(
       staging,
       tools,
       spec,

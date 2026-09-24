@@ -54,7 +54,7 @@
     "installer": "skills@1.7.0",
     "release": "v1.2.3",
     "revision": "6acc160e4e0cd062dbbbd7a1b26ae92855edf07e",
-    "agent": "codex",
+    "agents": ["codex", "claude-code"],
     "skills": {
       "ask-matt": {
         "path": "skills/engineering/ask-matt",

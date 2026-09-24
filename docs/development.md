@@ -10,8 +10,8 @@
 written for an agent working on behalf of someone who does not use a terminal:
 starting from a new Mac, the only human steps are macOS's own password window
 and, rarely, Apple's Install window. **Ready** means the required programs,
-packages, browser cache, and Codex Impeccable skill are present on a supported
-host, regardless of their installed versions. It is a fast, offline presence
+packages, browser cache, and Impeccable skills for Codex and Claude Code are
+present on a supported host, regardless of their installed versions. It is a fast, offline presence
 check. Neither readiness nor the optional pin audit means that `npm run verify`
 has passed or that publication is authorized.
 
@@ -22,14 +22,20 @@ has passed or that publication is authorized.
 | Node and npm            | Both executables are available, at any installed version.                                       | `brew install node` (or `nvm install` where nvm exists) when Node is missing; repair the Node installation if npm is missing. |
 | JavaScript dependencies | Required installed package directories are present in `node_modules`.                           | `npm ci`                                                                                                                      |
 | Chromium                | Completed `chromium` and `chromium-headless-shell` browser caches are present, at any revision. | `npx playwright install chromium`                                                                                             |
-| Impeccable (UI design)  | `.agents/skills/impeccable/SKILL.md` exists, at any version.                                    | The declared release bundle through Impeccable's installer when absent.                                                       |
+| Impeccable (UI design)  | `impeccable` exists in both `.agents/skills` and `.claude/skills`, at any version.              | The declared release bundle through Impeccable's installer when absent.                                                       |
 
 The named Matt Pocock skills are optional: their absence is reported but does
-not fail `--check`. Setup installs missing ones at the declared revision and
-leaves installed copies alone, whatever their version. Homebrew and Apple's
-Command Line Tools are installation helpers only when needed. GitHub login,
-repository permissions, the Git remote's protocol, personal skills, and the
-Pages deployment checkout are outside readiness.
+not fail `--check`. Setup installs missing Codex or Claude Code copies at the
+declared revision and leaves installed copies alone, whatever their version.
+Homebrew and Apple's Command Line Tools are installation helpers only when
+needed. GitHub login, repository permissions, the Git remote's protocol,
+personal skills, and the Pages deployment checkout are outside readiness.
+
+Codex reads project skills from `.agents/skills` and Claude Code from
+`.claude/skills`. The tracked `recipe-grams-*` skills live once in
+`.agents/skills`; each has a relative symlink at `.claude/skills/<name>`, so
+edits apply to both agents. Codex-only metadata stays in the skill's
+`agents/openai.yaml`, which Claude Code ignores. Both agents read AGENTS.md.
 
 ### On a new Mac
 
@@ -113,8 +119,9 @@ Researched September 2026; the pins in dev-environment.json are authoritative.
   as that README documents. Upgrade takes the latest GitHub release (or the
   default branch if there are no releases) and pins its commit. The silent form
   is `npx --yes skills@<installer> add https://github.com/mattpocock/skills/tree/<commit>
---skill <names…> --agent codex --copy --yes` with `DISABLE_TELEMETRY=1`,
-  which writes `.agents/skills/<name>`. Upstream `npx skills update` floats to
+--skill <names…> --agent codex claude-code --copy --yes` with
+  `DISABLE_TELEMETRY=1`, which writes identical `.agents/skills/<name>` and
+  `.claude/skills/<name>` copies under one pin. Upstream `npx skills update` floats to
   the latest revision instead. The CLI's `skills-lock.json` stays in staging.
 - Setup needs the network only for missing items (Apple's Software Update, the
   npm registry, Homebrew, GitHub releases and archives, and Playwright's browser

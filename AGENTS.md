@@ -40,7 +40,8 @@ authorize publication; preserve the user's requested delivery scope and exclusio
 
 ## Workflows
 
-Load every applicable repository skill before acting:
+Load every applicable repository skill before acting (`$name` is the skill of
+that name, whether Codex or Claude Code loads it):
 
 - Any file change: `$recipe-grams-safety` protects and synchronizes the shared checkout.
 - Recipe text, translations, measurements, images, catalog, markers, or index: `$recipe-grams-authoring`.
@@ -53,6 +54,8 @@ handoffs; known task edits do not restart preparation. Apply the safety process
 to newly discovered, unaccounted-for work.
 
 Name tracked repository skills `recipe-grams-*`; other locally installed skills remain private.
+Keep each in `.agents/skills/<name>` and link it for Claude Code with
+`ln -s ../../.agents/skills/<name> .claude/skills/<name>`; never copy it.
 
 ## Context by task
 

@@ -23,8 +23,27 @@ export const declarationFile = "dev-environment.json";
 export const setupCommand = "./scripts/init.sh";
 export const upgradeCommand = "./scripts/init.sh --upgrade";
 
-// Project skill directory for each `skills` CLI agent this project installs for.
-export const agentSkillDirectories = { codex: ".agents/skills" };
+// Project skill directory for each agent this project supports, keyed by the
+// `skills` CLI agent name. Tracked recipe-grams-* skills live in .agents/skills
+// and are symlinked into .claude/skills.
+export const agentSkillDirectories = {
+  codex: ".agents/skills",
+  "claude-code": ".claude/skills",
+};
+
+// Lists entries by skill directory, e.g. ".claude/skills: tdd, triage".
+function describeEntries(entries) {
+  return Object.values(agentSkillDirectories)
+    .map((directory) => [
+      directory,
+      entries
+        .filter((entry) => entry.startsWith(`${directory}/`))
+        .map((entry) => entry.slice(directory.length + 1)),
+    ])
+    .filter(([, names]) => names.length)
+    .map(([directory, names]) => `${directory}: ${names.join(", ")}`)
+    .join("; ");
+}
 
 // Harness files where an Impeccable hook manifest would run the design detector
 // after ordinary edits. Setup installs with --no-hooks.
@@ -559,38 +578,49 @@ function inspectImpeccable(root, declaration, platform) {
   return findings;
 }
 
+// Ordinary readiness needs an Impeccable skill for each supported agent.
 function inspectAvailableImpeccable(root) {
-  return existsSync(
-    path.join(root, ".agents", "skills", "impeccable", "SKILL.md"),
-  )
-    ? []
-    : [
+  const missing = Object.values(agentSkillDirectories)
+    .map((directory) => `${directory}/impeccable`)
+    .filter((entry) => !existsSync(path.join(root, entry, "SKILL.md")));
+  return missing.length
+    ? [
         finding(
           "impeccable",
           "missing",
           "Impeccable",
-          "the Codex skill is missing; setup installs it",
+          `${missing.join(", ")} missing; setup installs it`,
         ),
-      ];
+      ]
+    : [];
 }
 
-// Missing named skills; an audit also reports installed copies that differ
-// from their pins, which --upgrade's final setup replaces.
+// Missing named skills for each agent; an audit also reports installed copies
+// that differ from their pins, which --upgrade's final setup replaces.
 function inspectOptionalSkills(root, declaration, audit) {
   const spec = declaration.mattpocockSkills;
-  const directory = agentSkillDirectories[spec.agent];
   const groups = { missing: [], stale: [] };
-  for (const [name, pin] of Object.entries(spec.skills)) {
-    const skill = path.join(root, directory, name);
-    if (!existsSync(path.join(skill, "SKILL.md"))) groups.missing.push(name);
-    else if (audit && hashTree(skill) !== pin?.sha256) groups.stale.push(name);
-  }
+  for (const [name, pin] of Object.entries(spec.skills))
+    for (const agent of spec.agents) {
+      const entry = `${agentSkillDirectories[agent]}/${name}`;
+      const skill = path.join(root, entry);
+      if (!existsSync(path.join(skill, "SKILL.md"))) groups.missing.push(entry);
+      else if (audit && hashTree(skill) !== pin?.sha256)
+        groups.stale.push(entry);
+    }
   return Object.entries(groups)
-    .filter(([, names]) => names.length)
-    .map(([status, names]) =>
-      finding("skills", status, "Matt Pocock skills", names.join(", "), {
-        names,
-      }),
+    .filter(([, entries]) => entries.length)
+    .map(([status, entries]) =>
+      finding(
+        "skills",
+        status,
+        "Matt Pocock skills",
+        describeEntries(entries),
+        {
+          names: [...new Set(entries.map((entry) => path.basename(entry)))],
+          entries,
+        },
+      ),
     );
 }
 

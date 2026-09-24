@@ -51,7 +51,11 @@ server/src/main/resources/static/public/onboarding/
 # Track repo-specific Codex skills; keep installed/shared skills local.
 !.agents/skills/recipe-grams-*/
 !.agents/skills/recipe-grams-*/**
-.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+# Claude Code reads the tracked repo skills through relative symlinks.
+!.claude/skills/recipe-grams-*
 .gemini/
 .opencode/
 skills-lock.json

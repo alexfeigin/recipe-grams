@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  readlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { mkdtemp, rename, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -9,6 +17,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
   AdaptationError,
+  agentSkillDirectories,
   applyProjectRoute,
   contextAnchor,
   filterContext,
@@ -85,6 +94,13 @@ function write(root, relative, content, mode) {
   if (mode) chmodSync(file, mode);
 }
 
+// The same skill for Codex and Claude Code, as the skills CLI's copy mode
+// writes it.
+function writeSkill(root, name, content) {
+  for (const directory of Object.values(agentSkillDirectories))
+    write(root, `${directory}/${name}/SKILL.md`, content);
+}
+
 function git(root, ...args) {
   const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
@@ -129,7 +145,7 @@ async function readyFixture(t) {
   write(root, `${skill}/SKILL.md`, applyProjectRoute(upstreamSkill(), route));
   write(root, `${skill}/scripts/impeccable`, "#!/bin/sh\n", 0o755);
   write(root, ".agents/skills/impeccable/SKILL.md", upstreamSkill());
-  write(root, ".agents/skills/tdd/SKILL.md", "# TDD\n");
+  writeSkill(root, "tdd", "# TDD\n");
   write(root, "machine/clt/git", "", 0o755);
   write(root, "machine/homebrew/bin/brew", "", 0o755);
   write(root, "machine/homebrew/bin/gh", "#!/bin/sh\n", 0o755);
@@ -162,7 +178,7 @@ async function readyFixture(t) {
       installer: "skills@1.7.0",
       release: "v1.2.3",
       revision: "6acc160",
-      agent: "codex",
+      agents: ["codex", "claude-code"],
       skills: {
         tdd: { sha256: hashTree(path.join(root, ".agents/skills/tdd")) },
       },
@@ -504,6 +520,28 @@ test("optional skills never make the baseline fail", async (t) => {
   assert.deepEqual(statuses(audited, "optional"), ["skills:stale"]);
   await rm(path.join(root, ".agents/skills/tdd"), { recursive: true });
   assert.deepEqual(inspect().optional[0].names, ["tdd"]);
+  assert.deepEqual(inspect().optional[0].entries, [".agents/skills/tdd"]);
+});
+
+test("ordinary readiness needs Impeccable for Codex and Claude Code", async (t) => {
+  const { root, inspect } = await readyFixture(t);
+  await rm(path.join(root, ".claude/skills/impeccable"), { recursive: true });
+  const inspection = inspect({ audit: false });
+  assert.deepEqual(statuses(inspection), ["impeccable:missing"]);
+  assert.match(inspection.required[0].detail, /\.claude\/skills\/impeccable/);
+});
+
+test("repository skills are shared with Claude Code through symlinks", () => {
+  const codex = path.join(checkoutRoot, ".agents/skills");
+  const names = readdirSync(codex).filter((name) =>
+    name.startsWith("recipe-grams-"),
+  );
+  assert.ok(names.length > 0);
+  for (const name of names) {
+    const link = path.join(checkoutRoot, ".claude/skills", name);
+    assert.ok(lstatSync(link).isSymbolicLink(), `${name} is not linked`);
+    assert.equal(readlinkSync(link), `../../.agents/skills/${name}`);
+  }
 });
 
 test("setup in a ready environment runs no installer", async (t) => {
@@ -637,6 +675,31 @@ test("setup fills in a missing Impeccable copy and keeps installed ones", async 
     readFileSync(path.join(root, codex, "SKILL.md"), "utf8"),
     /recipe-grams:project-route:begin/,
   );
+});
+
+test("setup adds missing Claude Code copies of optional skills only", async (t) => {
+  const { root, env } = await readyFixture(t);
+  write(root, ".agents/skills/tdd/SKILL.md", "# Any installed version\n");
+  const codexCopy = hashTree(path.join(root, ".agents/skills/tdd"));
+  await rm(path.join(root, ".claude/skills/tdd"), { recursive: true });
+  const tools = fakeTools({
+    env,
+    run: async (command, args, { cwd }) => {
+      if (command === "npx") writeSkill(cwd, "tdd", "# TDD\n");
+    },
+  });
+  assert.equal(
+    await setupEnvironment({ root, tools, platform: "darwin-arm64" }),
+    true,
+  );
+  assert.ok(
+    tools.calls.some((call) => / --agent codex claude-code --copy /.test(call)),
+  );
+  assert.equal(
+    readFileSync(path.join(root, ".claude/skills/tdd/SKILL.md"), "utf8"),
+    "# TDD\n",
+  );
+  assert.equal(hashTree(path.join(root, ".agents/skills/tdd")), codexCopy);
 });
 
 test("staged replacement restores earlier entries when a later copy fails", async (t) => {
@@ -787,7 +850,7 @@ test("upgrade moves installed optional skills to the new revision", async (t) =>
     env,
     responses: upstreamResponses({ revision: "new-revision" }),
     run: async (command, args, { cwd }) => {
-      if (command === "npx") write(cwd, ".agents/skills/tdd/SKILL.md", next);
+      if (command === "npx") writeSkill(cwd, "tdd", next);
     },
   });
   assert.equal(
@@ -799,10 +862,11 @@ test("upgrade moves installed optional skills to the new revision", async (t) =>
     }),
     true,
   );
-  assert.equal(
-    readFileSync(path.join(root, ".agents/skills/tdd/SKILL.md"), "utf8"),
-    next,
-  );
+  for (const directory of Object.values(agentSkillDirectories))
+    assert.equal(
+      readFileSync(path.join(root, directory, "tdd/SKILL.md"), "utf8"),
+      next,
+    );
   const recorded = JSON.parse(
     readFileSync(path.join(root, "dev-environment.json"), "utf8"),
   );
@@ -817,8 +881,7 @@ test("an upgrade restores its pins when the final setup fails", async (t) => {
     env,
     responses: upstreamResponses({ revision: "new-revision" }),
     run: async (command, args, { cwd }) => {
-      if (command === "npx")
-        write(cwd, ".agents/skills/tdd/SKILL.md", "# TDD\n");
+      if (command === "npx") writeSkill(cwd, "tdd", "# TDD\n");
     },
   });
   assert.equal(
@@ -862,9 +925,7 @@ test("presence checks ignore GitHub permissions and existing versions", async (t
   assert.deepEqual(statuses(inspect({ audit: false })), []);
 
   await rm(path.join(root, "machine/homebrew/bin/gh"));
-  assert.deepEqual(statuses(inspect({ audit: false })), [
-    "system:missing",
-  ]);
+  assert.deepEqual(statuses(inspect({ audit: false })), ["system:missing"]);
 
   await rm(path.join(root, "machine/clt"), { recursive: true });
   assert.deepEqual(statuses(inspect({ audit: false })), [
