@@ -19,8 +19,6 @@ const usage =
 const skillDirectories = [
   ".claude/skills/impeccable",
   ".agents/skills/impeccable",
-  ".gemini/skills/impeccable",
-  ".opencode/skills/impeccable",
 ];
 
 function parse(argv) {

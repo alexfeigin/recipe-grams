@@ -103,10 +103,9 @@ Researched September 2026; the pins in dev-environment.json are authoritative.
   `universal.zip.sig.json` record. The `impeccable` npm package only installs
   it; its engine binary comes from `engine-v*` releases with a SHA-256 sidecar.
   The silent form is `npx --yes impeccable@<installer> install -y
---providers=claude,codex,gemini,opencode --scope=project --no-hooks`, which
-  writes `.claude`, `.agents` (Codex), `.gemini`, and `.opencode` copies plus
-  Claude agents and an OpenCode command. `--no-hooks` keeps the design detector
-  from running after routine edits.
+--providers=claude,codex --scope=project --no-hooks`, which writes the
+  `.claude` and `.agents` (Codex) copies plus Claude agents. `--no-hooks`
+  keeps the design detector from running after routine edits.
 - The installer has no version flag: on its own it verifies the latest
   release's signature and installs it, as does upstream `npx impeccable update`.
   Setup points `IMPECCABLE_BUNDLE_PATH` at the pinned release zip instead. The

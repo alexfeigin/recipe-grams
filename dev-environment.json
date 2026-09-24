@@ -32,7 +32,7 @@
       "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.3.1/universal.zip",
       "sha256": "1deea4cdfb1608df6d9e08ef359629e7cc866a22ab7c2195a835627b887f190b"
     },
-    "providers": ["claude", "codex", "gemini", "opencode"],
+    "providers": ["claude", "codex"],
     "adaptation": "scripts/impeccable-project-route.md",
     "files": {
       "darwin-arm64": {
@@ -41,10 +41,7 @@
         ".claude/agents/impeccable-documenter.md": "bca49de3d2b79f22923cc32353ef0ffb882221439497f11e33d7798e82e5ed63",
         ".claude/agents/impeccable-finish-reviewer.md": "c9d324ca3053d8c36b3c1521e7044747a59a8876cfcecec2cd4566def46a32f9",
         ".claude/agents/impeccable-manual-edit-applier.md": "634b3281cc67d711ab250078f096b511d4d7a6df660fdec0c71bd0e4edf2ab4b",
-        ".claude/skills/impeccable": "0d82701bb4f266e3fba4f32fdfa21d7a9f22ceb8dfc6db2148ceffc5eed0a263",
-        ".gemini/skills/impeccable": "58f8881bdc229816df4fa4cf95bacd3fa6743a79f931169a0ab304098435bd95",
-        ".opencode/commands/impeccable.md": "4b19b12a1489f42c86c821ae7420ea064330a0def37a2ae1d5fd418ac7abd364",
-        ".opencode/skills/impeccable": "74215e1d7162e281530e1d0f4e3c0febe56d36ac1ae4783b0c063f449cf5f3b4"
+        ".claude/skills/impeccable": "0d82701bb4f266e3fba4f32fdfa21d7a9f22ceb8dfc6db2148ceffc5eed0a263"
       }
     }
   },
