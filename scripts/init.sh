@@ -6,14 +6,13 @@
 set -euo pipefail
 
 usage="Usage: ./scripts/init.sh [--check | --audit | --upgrade]
-  (no option)  install missing or stale requirements at the versions this
-               repository declares, then audit readiness
+  (no option)  install missing requirements, then check readiness
   --check      read-only, offline readiness check; run it before each task
-  --audit      read-only, offline check of the pinned UI design skill too
-  --upgrade    also upgrade what is installed but too old (Node, npm), move
+  --audit      optional offline comparison with the pinned UI design skill
+  --upgrade    upgrade installed tools that do not meet engines, move
                managed external skills to their newest upstream releases, and
                record the resolved versions in dev-environment.json
-Only --upgrade picks newer versions or upgrades tools already on this Mac."
+Normal setup accepts any installed version and never probes GitHub access."
 
 mode=setup
 case "${1-}" in
@@ -69,6 +68,14 @@ caller_path="$PATH"
 has_command_line_tools() { [ -x "$clt_git" ]; }
 has_homebrew() { [ -x "$homebrew_prefix/bin/brew" ]; }
 use_homebrew() { PATH="$homebrew_prefix/bin:$homebrew_prefix/sbin:$PATH"; }
+has_git() {
+  has_command_line_tools || {
+    local selected
+    selected="$(command -v git || true)"
+    [ -n "$selected" ] && [ "$selected" != /usr/bin/git ]
+  }
+}
+node_present() { node -p process.versions.node >/dev/null 2>&1; }
 
 # Succeeds when version $1 is at least version $2 (both x.y.z).
 version_at_least() {
@@ -92,20 +99,11 @@ node_ready() {
 # Check mode without a usable Node: report what setup would install.
 report_bootstrap_gaps() {
   echo "Recipe-Grams environment: NOT READY (darwin-arm64)."
-  has_command_line_tools ||
-    echo "  missing       Command Line Tools: Apple's developer tools, which provide git, are not installed"
-  has_homebrew ||
-    echo "  missing       Homebrew: $homebrew_prefix/bin/brew is not installed"
-  if command -v node >/dev/null 2>&1; then
-    echo "  wrong version Node $(node -p process.versions.node 2>/dev/null || echo unknown): package.json engines require >=$minimum_node"
-  else
-    echo "  missing       Node: package.json engines require >=$minimum_node"
-  fi
-  if command -v node >/dev/null 2>&1; then
-    echo "Setup does not upgrade tools already on this Mac: ./scripts/init.sh --upgrade upgrades Node and reconciles the rest."
-  else
-    echo "Run ./scripts/init.sh to reconcile it."
-  fi
+  has_git || echo "  missing       Git: no usable git executable was found"
+  command -v gh >/dev/null 2>&1 || echo "  missing       GitHub CLI: gh is not on PATH"
+  node_present || echo "  missing       Node: node is not on PATH"
+  command -v npm >/dev/null 2>&1 || echo "  missing       npm: npm is not on PATH"
+  echo "Run ./scripts/init.sh to install what is missing."
 }
 
 # Runs a shell command as root through macOS's own password window.
@@ -154,15 +152,18 @@ install_command_line_tools_with_apple_window() {
 
 # Installs Apple's Command Line Tools and Homebrew behind one password window.
 install_system_tools() {
-  local pkg="" what command output minimum macos
-  if ! has_homebrew; then
+  local pkg="" what command output minimum macos requested_clt=""
+  if ! has_command_line_tools && { [ "$need_homebrew" = true ] || ! has_git; }; then
+    requested_clt="$clt_git"
+  fi
+  if [ "$need_homebrew" = true ] && ! has_homebrew; then
     minimum="$(declared system.homebrew.minimumMacOS)"
     macos="$(sw_vers -productVersion)"
     [ "${macos%%.*}" -ge "$minimum" ] ||
       fail "Homebrew's installer needs macOS $minimum or newer, and this Mac has macOS $macos. Update macOS in System Settings > General > Software Update, then run setup again."
     pkg="$(download_homebrew_installer)"
   fi
-  if has_command_line_tools; then
+  if [ -z "$requested_clt" ]; then
     what="Homebrew"
   elif [ -n "$pkg" ]; then
     what="Apple's Command Line Tools and Homebrew"
@@ -170,7 +171,7 @@ install_system_tools() {
     what="Apple's Command Line Tools"
   fi
   echo "Installing $what. macOS will show a password window; this can take 10 to 20 minutes."
-  command="/bin/bash $(printf %q "$root/scripts/install-system-tools.sh") $(printf %q "$clt_git") $(printf %q "$pkg")"
+  command="/bin/bash $(printf %q "$root/scripts/install-system-tools.sh") $(printf %q "$requested_clt") $(printf %q "$pkg")"
   if ! output="$(run_as_administrator "$command" "Recipe-Grams setup wants to install $what. Enter the password you use to log in to this Mac.")"; then
     case "$output" in
     *"(-128)"*)
@@ -178,7 +179,7 @@ install_system_tools() {
       ;;
     *"did not offer the Command Line Tools"*)
       install_command_line_tools_with_apple_window
-      has_homebrew || install_system_tools
+      if [ "$need_homebrew" = true ] && ! has_homebrew; then install_system_tools; fi
       return
       ;;
     *)
@@ -186,8 +187,11 @@ install_system_tools() {
       ;;
     esac
   fi
-  has_command_line_tools || fail "The Command Line Tools are still missing after installation."
-  has_homebrew || fail "Homebrew is still missing after installation."
+  has_git || fail "Git is still missing after installation."
+  if [ "$need_homebrew" = true ]; then
+    has_command_line_tools || fail "The Command Line Tools are still missing after installation."
+    has_homebrew || fail "Homebrew is still missing after installation."
+  fi
 }
 
 # Setup does not upgrade tools already on this Mac: Homebrew must not update
@@ -206,12 +210,9 @@ refuse_homebrew_upgrades() {
     fail "Installing $1 with Homebrew would also upgrade these installed Homebrew packages:$affected. Setup does not upgrade tools already on this Mac; ./scripts/init.sh --upgrade allows it."
 }
 
-# Setup installs a missing Node; replacing one that is too old is an upgrade.
+# Setup installs a missing Node; only upgrade replaces an old one.
 provide_node() {
   local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
-  if [ "$mode" = setup ] && command -v node >/dev/null 2>&1; then
-    fail "Node $(node -p process.versions.node 2>/dev/null || echo unknown) is installed, but this project needs $minimum_node or newer. Setup does not upgrade tools already on this Mac; ./scripts/init.sh --upgrade upgrades Node."
-  fi
   if [ -s "$nvm_dir/nvm.sh" ]; then
     echo "Installing Node $(cat .nvmrc) with nvm (from .nvmrc)..."
     set +u
@@ -233,23 +234,47 @@ provide_node() {
 }
 
 if [ "$mode" = check ] || [ "$mode" = audit ]; then
-  if ! node_ready && [ -x "$homebrew_prefix/bin/node" ]; then
+  if ! node_present && [ -x "$homebrew_prefix/bin/node" ]; then
     # Installed, but this session started before Homebrew joined the PATH.
     use_homebrew
   fi
-  if ! node_ready; then
+  if ! node_present; then
     report_bootstrap_gaps
     exit 1
   fi
 else
-  if ! has_command_line_tools || ! has_homebrew; then
+  need_homebrew=false
+  if ! has_homebrew && {
+    ! command -v gh >/dev/null 2>&1 ||
+      { ! node_present && [ ! -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; } ||
+      ! command -v npm >/dev/null 2>&1
+  }; then
+    need_homebrew=true
+  fi
+  if ! has_git || [ "$need_homebrew" = true ]; then
     install_system_tools
   fi
-  use_homebrew
+  if has_homebrew; then use_homebrew; fi
   [ "$mode" = upgrade ] || export HOMEBREW_NO_AUTO_UPDATE=1
-  if ! node_ready; then
+  if ! node_present || { [ "$mode" = upgrade ] && ! node_ready; }; then
     provide_node
-    node_ready || fail "Node $minimum_node or newer is still not the selected 'node'; select it and rerun."
+    node_present || fail "Node is still not available on PATH after installation."
+  fi
+  if ! command -v npm >/dev/null 2>&1; then
+    if has_homebrew && brew list node >/dev/null 2>&1; then
+      [ "$mode" = upgrade ] || refuse_homebrew_upgrades node
+      NONINTERACTIVE=1 brew reinstall node
+    elif has_homebrew; then
+      [ "$mode" = upgrade ] || refuse_homebrew_upgrades node
+      NONINTERACTIVE=1 brew install node
+    else
+      fail "npm is missing. Install it with the existing Node distribution, then run setup again."
+    fi
+    command -v npm >/dev/null 2>&1 || fail "npm is still missing after installing Node."
+  fi
+  if ! command -v gh >/dev/null 2>&1; then
+    [ "$mode" = upgrade ] || refuse_homebrew_upgrades gh
+    NONINTERACTIVE=1 brew install gh
   fi
 fi
 

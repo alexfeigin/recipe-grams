@@ -9,28 +9,27 @@ measurements for reproducible cooking. Get a kitchen scale and start cooking.
 ## Work locally
 
 You do not need a terminal: open this folder with a coding agent and ask for
-what you want, such as a new recipe with a photo. The agent prepares a new Apple
-Silicon Mac itself: Apple's developer tools, Homebrew, Node, and the project's
-skills. macOS asks for your password once. The one thing to arrange beforehand
-is GitHub access: an SSH key on this Mac, added to a GitHub account that can
-push to this repository.
+what you want, such as a new recipe with a photo. If something is missing on a
+new Apple Silicon Mac, the agent installs it. macOS may ask for your password
+when Apple's developer tools or Homebrew are needed. GitHub authentication is
+handled when a later GitHub action needs it.
 
 Behind that, one command prepares a clean clone and then confirms that it is
 ready to work:
 
 ```bash
-./scripts/init.sh            # install what is missing, at the declared versions
-./scripts/init.sh --check    # read-only, offline core readiness; run before each task
-./scripts/init.sh --audit    # read-only, offline pinned UI skill check
-./scripts/init.sh --upgrade  # the only way to newer versions: old Node or npm, newer skills
+./scripts/init.sh            # install missing requirements; keep installed versions
+./scripts/init.sh --check    # fast, offline presence check before each task
+./scripts/init.sh --audit    # optional comparison with pinned Impeccable files
+./scripts/init.sh --upgrade  # explicitly update managed versions
 npm run dev
 ```
 
-Run `--check` at the start of every task. Impeccable pin differences are noted
-without blocking other work; run `--audit` before using it for UI design. Setup
-reconciles missing core requirements and the pinned UI skill. It does not pick
-new upstream versions or upgrade an installed Node or npm; only `--upgrade`
-does. [dev-environment.json](dev-environment.json) declares the baseline;
+Run `--check` at the start of every task. Setup accepts any installed version
+of the required tools and skills, installs only missing pieces, and exits
+quickly when everything is present. It does not test push permissions or
+change the Git remote. Only `--upgrade` updates installed versions.
+[dev-environment.json](dev-environment.json) declares the first-install pins;
 [Development](docs/development.md#development-environment) explains what
 "ready" covers and how each requirement is installed and upgraded.
 Node runs the TypeScript modules used by the checks directly.

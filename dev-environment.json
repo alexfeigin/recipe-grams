@@ -1,7 +1,8 @@
 {
-  "description": "Core readiness is checked by ./scripts/init.sh --check; --audit also checks the pinned UI skill. Setup installs the declared pins; only --upgrade changes them. See docs/development.md#development-environment.",
+  "description": "--check and setup accept any installed version and report only missing requirements. --audit compares the pinned UI skill; --upgrade changes versions. See docs/development.md#development-environment.",
   "platforms": ["darwin-arm64"],
   "system": {
+    "commands": ["git", "gh"],
     "commandLineTools": "/Library/Developer/CommandLineTools/usr/bin/git",
     "homebrew": {
       "prefix": "/opt/homebrew",
@@ -11,13 +12,8 @@
     }
   },
   "runtime": {
-    "readiness": "package.json engines.node and engines.npm",
-    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used; only --upgrade replaces an installed Node or npm"
-  },
-  "github": {
-    "remote": "origin",
-    "access": "ssh",
-    "requirement": "An SSH key on this Mac, added to a GitHub account that can push to origin"
+    "readiness": "Node and npm executables are present; installed versions are accepted",
+    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used; --upgrade may replace installed Node or npm"
   },
   "dependencies": {
     "lockfile": "package-lock.json",
@@ -28,7 +24,7 @@
     "install": "npx playwright install chromium"
   },
   "impeccable": {
-    "role": "required for UI design work",
+    "role": "required when absent; any installed version is accepted by setup and --check",
     "source": "https://github.com/pbakaus/impeccable",
     "installer": "impeccable@4.1.0",
     "version": "4.3.1",
@@ -53,7 +49,7 @@
     }
   },
   "mattpocockSkills": {
-    "role": "optional; no tracked instruction requires them",
+    "role": "optional; any installed version is accepted, and setup installs missing named skills",
     "source": "https://github.com/mattpocock/skills",
     "installer": "skills@1.7.0",
     "release": "v1.2.3",
@@ -203,7 +199,7 @@
     }
   },
   "unmanaged": [
-    "GitHub credentials, the gh CLI, and the Pages deployment checkout used for releases",
+    "GitHub credentials and push permissions, and the Pages deployment checkout used for releases",
     "Personal skills installed outside this declaration"
   ]
 }

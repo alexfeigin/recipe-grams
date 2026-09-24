@@ -10,7 +10,7 @@ set -euo pipefail
 clt_git="$1"
 homebrew_pkg="${2-}"
 
-if [ ! -x "$clt_git" ]; then
+if [ -n "$clt_git" ] && [ ! -x "$clt_git" ]; then
   # Software Update lists the Command Line Tools only while this file exists.
   placeholder=/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
   touch "$placeholder"

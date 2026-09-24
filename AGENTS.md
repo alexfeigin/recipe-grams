@@ -5,28 +5,22 @@ recipe sources and their existing paths.
 
 ## Working agreement
 
-Before a task, run the offline `./scripts/init.sh --check`. When the core
-[environment](docs/development.md#development-environment) is not ready, prepare
-it yourself, then continue the original request. The person may not use a
-terminal: never ask them to run
-commands. First tell them in plain words what will be installed, that macOS may
-show its password window for Apple's developer tools and Homebrew, and that a
-first setup can take about 20 minutes. Then run `./scripts/init.sh` as a
+Before a task, run the offline `./scripts/init.sh --check`. It accepts any
+installed version and reports missing requirements. When something is missing,
+prepare the [environment](docs/development.md#development-environment) yourself,
+then continue the original request. The person may not use a terminal: never
+ask them to run commands. First tell them what will be installed, that macOS
+may show its password window for Apple's developer tools and Homebrew, and that
+a first setup can take about 20 minutes. Then run `./scripts/init.sh` as a
 long-running command and wait for it.
 
-Before using Impeccable for UI design work, run `./scripts/init.sh --audit`.
-If its pinned installation or project route is incomplete, run setup before
-using that skill. An Impeccable version difference alone does not stop other
-tasks.
-
-- If setup stops on GitHub access, relay its explanation in plain words and stop:
-  an SSH key added to a GitHub account that can push here is a minimum requirement.
+- Check GitHub authentication and push permissions only when a requested GitHub
+  action needs them; setup does not test or change repository access.
 - If it notes that this session's PATH lacks Homebrew, prefix later commands
   with the `eval "$(/opt/homebrew/bin/brew shellenv)"` it names.
-- Setup restores the declared skill pins but does not upgrade an installed Node
-  or npm. When Node or npm is too old, or the user wants newer external skills,
-  explain what `./scripts/init.sh --upgrade` would change and run it only once
-  they agree.
+- Setup installs missing pieces and accepts what is already installed. Run
+  `./scripts/init.sh --upgrade` only when the person explicitly wants newer
+  versions, after explaining what it would change.
 
 A ready environment is not verification or release authorization.
 

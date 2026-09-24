@@ -9,77 +9,71 @@
 [dev-environment.json](../dev-environment.json) is the baseline it reads. It is
 written for an agent working on behalf of someone who does not use a terminal:
 starting from a new Mac, the only human steps are macOS's own password window
-and, rarely, Apple's Install window. **Ready** means the core baseline is
-present on a supported host. `--audit` also checks the pinned Impeccable skill
-before UI design work. Neither result means that `npm run verify` has passed or
-that publication is authorized.
+and, rarely, Apple's Install window. **Ready** means the required programs,
+packages, browser cache, and Codex Impeccable skill are present on a supported
+host, regardless of their installed versions. It is a fast, offline presence
+check. Neither readiness nor the optional pin audit means that `npm run verify`
+has passed or that publication is authorized.
 
-| Requirement             | Ready when                                                                                                                                                              | Setup installs with                                                                                                                              |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Host                    | Apple Silicon macOS (`darwin-arm64`). Other hosts fail before anything is checked or installed.                                                                         | —                                                                                                                                                |
-| Command Line Tools      | Apple's developer tools, which provide git, are installed.                                                                                                              | Software Update, as Homebrew's own installer does it, inside the password window; Apple's Install window if Software Update does not offer them. |
-| Homebrew                | `/opt/homebrew/bin/brew` exists. It also keeps the Mac's tools current with `brew upgrade`.                                                                             | Homebrew's notarized `Homebrew.pkg` (macOS 15 or newer), after checking its Developer ID team, in the same password window.                      |
-| GitHub access           | `origin` is a GitHub SSH remote and `~/.ssh/known_hosts` lists github.com. Setup confirms push access when it needs to configure either item.                           | GitHub's published host keys; an HTTPS `origin` is switched to SSH. The SSH key itself is a minimum requirement setup cannot create.             |
-| Node and npm            | The selected versions satisfy `engines` in package.json. `.nvmrc` is only used where nvm already is.                                                                    | `brew install node` (or `nvm install` where nvm exists) when Node is missing. An old Node or npm is only replaced by `--upgrade`.                |
-| JavaScript dependencies | The lockfile dependency declarations match package.json, and installed package entries match package-lock.json.                                                         | `npm ci`                                                                                                                                         |
-| Chromium                | Playwright's `chromium` and `chromium-headless-shell` for the installed `playwright-core` revision are complete in its browser cache.                                   | `npx playwright install chromium`                                                                                                                |
-| Impeccable (UI design)  | `--audit` checks every declared file against its pinned hash, the current [project route](#impeccable-project-route) in each SKILL.md, and absence of Impeccable hooks. | The pinned release bundle through Impeccable's installer.                                                                                        |
+| Requirement             | Ready when                                                                                      | Setup installs with                                                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Host                    | Apple Silicon macOS (`darwin-arm64`). Other hosts fail before anything is installed.            | —                                                                                                                             |
+| Git and GitHub CLI      | Usable `git` and `gh` executables are available.                                                | Apple's Command Line Tools for Git when needed; `brew install gh` when `gh` is missing.                                       |
+| Node and npm            | Both executables are available, at any installed version.                                       | `brew install node` (or `nvm install` where nvm exists) when Node is missing; repair the Node installation if npm is missing. |
+| JavaScript dependencies | Required installed package directories are present in `node_modules`.                           | `npm ci`                                                                                                                      |
+| Chromium                | Completed `chromium` and `chromium-headless-shell` browser caches are present, at any revision. | `npx playwright install chromium`                                                                                             |
+| Impeccable (UI design)  | `.agents/skills/impeccable/SKILL.md` exists, at any version.                                    | The declared release bundle through Impeccable's installer when absent.                                                       |
 
-The Matt Pocock skills in the declaration are optional: no tracked instruction
-requires them (AGENTS.md calls `$domain-modeling` optional). Setup installs their
-pinned revision, and the check lists missing or stale ones without failing.
-Personal skills, the `gh` CLI, and the Pages deployment checkout are outside the
-baseline.
+The named Matt Pocock skills are optional: their absence is reported but does
+not fail `--check`. Setup installs missing ones at the declared revision and
+leaves installed copies alone, whatever their version. Homebrew and Apple's
+Command Line Tools are installation helpers only when needed. GitHub login,
+repository permissions, the Git remote's protocol, personal skills, and the
+Pages deployment checkout are outside readiness.
 
 ### On a new Mac
 
-Setup first installs what everything else needs, in this order:
+Setup installs only what is missing, in dependency order:
 
-1. It downloads the latest `Homebrew.pkg` and refuses it unless `pkgutil`
-   reports an Apple-notarized Developer ID Installer signature from the team in
-   dev-environment.json.
-2. It opens one macOS password window (`osascript` with administrator
-   privileges) that runs [scripts/install-system-tools.sh](../scripts/install-system-tools.sh):
-   the Command Line Tools through Software Update, then the Homebrew package.
-   Homebrew's package requires the Command Line Tools, so they come first. If the
-   window is closed, nothing is installed and setup says so.
-3. It installs Node with Homebrew, then continues with GitHub access and the
-   rest of the table.
+1. If Homebrew is needed and missing, it downloads the latest `Homebrew.pkg` and
+   refuses it unless `pkgutil` reports an Apple-notarized Developer ID Installer
+   signature from the team in dev-environment.json.
+2. If Git is missing, it installs the Command Line Tools through Software
+   Update. If Homebrew is needed to install another missing tool, it installs
+   the Command Line Tools first if absent, then the package. These steps run in
+   a macOS password window through
+   [scripts/install-system-tools.sh](../scripts/install-system-tools.sh). Apple's
+   Install window is the fallback when Software Update does not offer the tools.
+3. It installs missing Node, npm, and `gh` as needed, then the remaining items
+   in the table. If every item is present, it exits without installing or
+   contacting a remote service.
 
 Homebrew's package adds `/opt/homebrew/bin` to the PATH of new sessions. An
 agent session that started earlier may not see it; the check then notes the
 `eval "$(/opt/homebrew/bin/brew shellenv)"` prefix to use.
 
-When the GitHub remote or host key needs configuration, setup confirms access
-without pushing: it asks GitHub's `git-receive-pack` for the repository over
-SSH, which GitHub only answers for accounts that may push. Other local repairs
-do not require a fresh access probe.
-When that fails, setup stops and explains the minimum requirement: an SSH key on
-this Mac, added to a GitHub account with push access.
+Setup does not contact GitHub to test credentials or push permissions, edit the
+remote, or configure SSH host keys. The GitHub operation that actually needs
+access reports any authentication or permission failure at that time.
 
 ### Check, setup, and upgrade
 
-- `--check` is read-only, offline, and well under a second. It checks core
-  readiness before every task and notes pinned Impeccable drift without making
-  ordinary work fail. It never builds, runs verification, publishes, or touches
-  Git. Missing or stale core requirements produce a nonzero exit status.
-- `--audit` is the same offline check with the pinned Impeccable installation
-  and project route required. Run it before UI design work that uses that skill.
-- Setup (no option) installs missing or stale core requirements and the pinned
-  Impeccable skill at the versions the repository declares
-  (dev-environment.json, package-lock.json), then runs the strict audit. It
-  does not upgrade an installed Node or npm: an old Node or npm, or a
-  Homebrew install that would upgrade installed Homebrew packages, stops setup
-  with a pointer to `--upgrade`. Homebrew runs with `HOMEBREW_NO_AUTO_UPDATE`,
-  so it does not update itself either. Homebrew itself is installed from its
-  latest release only when it is missing.
+- `--check` is read-only, offline, and well under a second. It checks presence
+  before every task. It never builds, runs verification, publishes, or contacts
+  GitHub. Only missing required items produce a nonzero exit status.
+- `--audit` is an optional offline comparison of the installed Impeccable files
+  and project route against the declared pin. Its drift report does not affect
+  ordinary setup or `--check`.
+- Setup (no option) installs missing requirements, then checks presence again.
+  Existing versions are accepted. Homebrew runs with `HOMEBREW_NO_AUTO_UPDATE`
+  and an install that would upgrade an installed Homebrew dependency is refused
+  with a pointer to `--upgrade`.
   Installers run in a temporary staging project; a checkout copy is replaced
   only after the staged files match the declaration. Replacements are copied
   beside their targets, and a failed swap restores the previous entries.
-  Downloaded Impeccable
-  bundles are cached in `~/Library/Caches/recipe-grams/` (`RECIPE_GRAMS_CACHE`
-  overrides it). When a step fails, setup says so and the strict audit keeps
-  reporting what remains.
+  Downloaded Impeccable bundles are cached in
+  `~/Library/Caches/recipe-grams/` (`RECIPE_GRAMS_CACHE` overrides it).
+  When a step fails, setup reports what remains missing.
 - `--upgrade` is the only mode that moves versions forward. It upgrades an
   installed Node (`brew upgrade node`, or `nvm install` from `.nvmrc`) or npm
   (`npm install --global npm@<major>`) that no longer satisfies `engines`,
@@ -118,10 +112,9 @@ Researched September 2026; the pins in dev-environment.json are authoritative.
 --skill <names…> --agent codex --copy --yes` with `DISABLE_TELEMETRY=1`,
   which writes `.agents/skills/<name>`. Upstream `npx skills update` floats to
   the latest revision instead. The CLI's `skills-lock.json` stays in staging.
-- Setup needs the network only for missing or stale items (Apple's Software Update, the
+- Setup needs the network only for missing items (Apple's Software Update, the
   npm registry, Homebrew, GitHub releases and archives, and Playwright's browser
-  CDN), and reaches GitHub over SSH when its remote or host key needs repair.
-  Upgrade also queries
+  CDN). Upgrade also queries
   `api.github.com` and `registry.npmjs.org`. Those APIs need no login; set
   `GH_TOKEN` or `GITHUB_TOKEN` if the unauthenticated GitHub API limit of 60
   requests an hour runs out. Installing Homebrew asks for an administrator
@@ -145,8 +138,8 @@ context step through `node scripts/impeccable-context.mjs`:
 
 Upgrade fails when the Setup text the route replaces has moved or the new loader
 emits an unreviewed directive; classify it in `scripts/dev-environment.mjs` and
-retry. After editing the route file, the check reports the installed copies as
-stale until setup reapplies it.
+retry. After editing the route file, `--audit` reports installed copies as
+stale; ordinary setup keeps the installed version.
 
 ## Select verification
 

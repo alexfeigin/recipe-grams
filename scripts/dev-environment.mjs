@@ -1,6 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  accessSync,
+  constants,
   existsSync,
   lstatSync,
   readFileSync,
@@ -11,7 +13,6 @@ import {
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { isDeepStrictEqual } from "node:util";
 
 // Offline readiness inspection for ./scripts/init.sh. Everything here reads the
 // checkout, its declaration, and local caches; installing lives in
@@ -328,122 +329,48 @@ export function systemPaths(declaration, env = process.env) {
       env.RECIPE_GRAMS_CLT_GIT || declaration.system.commandLineTools,
     homebrew:
       env.RECIPE_GRAMS_HOMEBREW_PREFIX || declaration.system.homebrew.prefix,
-    home: env.HOME || os.homedir(),
   };
 }
 
 function inspectSystem(declaration, env) {
   const paths = systemPaths(declaration, env);
   const findings = [];
-  if (!existsSync(paths.commandLineTools))
+  const git = executableOnPath("git", env.PATH);
+  if (!isExecutable(paths.commandLineTools) && (!git || git === "/usr/bin/git"))
     findings.push(
       finding(
         "system",
         "missing",
-        "Command Line Tools",
-        "Apple's developer tools, which provide git, are not installed",
+        "Git",
+        "install Apple's Command Line Tools or another Git executable",
       ),
     );
-  if (!existsSync(path.join(paths.homebrew, "bin", "brew")))
+  if (!executableOnPath("gh", env.PATH))
     findings.push(
       finding(
         "system",
         "missing",
-        "Homebrew",
-        `${paths.homebrew}/bin/brew is not installed`,
+        "GitHub CLI",
+        "gh is not on PATH; setup installs it with Homebrew",
       ),
     );
   return findings;
 }
 
-// Accepts git@github.com:owner/repo(.git), ssh://git@github.com/owner/repo,
-// and https://github.com/owner/repo(.git).
-export function parseGitHubRemote(url) {
-  const match =
-    /^(?:git@github\.com:|ssh:\/\/git@github\.com\/|(https):\/\/(?:[^@/]+@)?github\.com\/)([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(
-      url.trim(),
-    );
-  if (!match) return null;
-  return {
-    ssh: !match[1],
-    repository: `${match[2]}/${match[3]}`,
-    sshUrl: `git@github.com:${match[2]}/${match[3]}.git`,
-  };
-}
-
-export function knownHostsFile(home) {
-  return path.join(home, ".ssh", "known_hosts");
-}
-
-export function knowsGitHub(home) {
-  const file = knownHostsFile(home);
-  if (!existsSync(file)) return false;
-  return (
-    spawnSync("ssh-keygen", ["-F", "github.com", "-f", file], {
-      stdio: "ignore",
-    }).status === 0
-  );
-}
-
-export function originUrl(root, remote) {
-  const result = spawnSync("git", ["-C", root, "remote", "get-url", remote], {
-    encoding: "utf8",
-  });
-  return result.status === 0 ? result.stdout.trim() : null;
-}
-
-// Offline view of GitHub access; setup confirms it with GitHub itself.
-function inspectGitHub(root, declaration, env) {
-  const paths = systemPaths(declaration, env);
-  // Without the Command Line Tools, /usr/bin/git opens Apple's install dialog.
-  if (!existsSync(paths.commandLineTools)) return [];
-  const { remote } = declaration.github;
-  const url = originUrl(root, remote);
-  const findings = [];
-  const parsed = url && parseGitHubRemote(url);
-  if (!url)
-    findings.push(
-      finding(
-        "github",
-        "missing",
-        "GitHub",
-        `this checkout has no ${remote} remote`,
-      ),
-    );
-  else if (!parsed)
-    findings.push(
-      finding(
-        "github",
-        "unexpected",
-        "GitHub",
-        `${remote} is ${url}, not a GitHub repository`,
-      ),
-    );
-  else if (!parsed.ssh)
-    findings.push(
-      finding(
-        "github",
-        "stale",
-        "GitHub",
-        `${remote} uses HTTPS; setup switches it to SSH after confirming access`,
-      ),
-    );
-  if (!knowsGitHub(paths.home))
-    findings.push(
-      finding(
-        "github",
-        "missing",
-        "GitHub host key",
-        `${knownHostsFile(paths.home)} does not list github.com; setup adds GitHub's published keys`,
-      ),
-    );
-  return findings;
+function isExecutable(file) {
+  try {
+    accessSync(file, constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function executableOnPath(name, searchPath = "") {
   return searchPath
     .split(path.delimiter)
-    .some((directory) => directory && existsSync(path.join(directory, name)));
+    .map((directory) => directory && path.join(directory, name))
+    .find((file) => file && isExecutable(file));
 }
 
 // init.sh passes the caller's PATH; setup may have extended its own.
@@ -456,32 +383,12 @@ function sessionNotes(declaration, env) {
   ];
 }
 
-function inspectRuntime(root, { nodeVersion, npmVersion }) {
-  const engines = readJson(path.join(root, "package.json"))?.engines ?? {};
-  const findings = [];
-  if (!satisfiesRange(nodeVersion, engines.node))
-    findings.push(
-      finding(
-        "node",
-        "wrong version",
-        `Node ${nodeVersion}`,
-        `package.json engines require ${engines.node}; ${setupCommand} installs Node with Homebrew`,
-      ),
-    );
-  if (!npmVersion)
-    findings.push(
-      finding("npm", "missing", "npm", `engines require ${engines.npm}`),
-    );
-  else if (!satisfiesRange(npmVersion, engines.npm))
-    findings.push(
-      finding(
-        "npm",
-        "wrong version",
-        `npm ${npmVersion}`,
-        `package.json engines require ${engines.npm}`,
-      ),
-    );
-  return findings;
+function inspectRuntime({ npmVersion, env }) {
+  return (
+    npmVersion === undefined ? executableOnPath("npm", env.PATH) : npmVersion
+  )
+    ? []
+    : [finding("npm", "missing", "npm", "npm is not available on PATH")];
 }
 
 function packageName(key) {
@@ -490,61 +397,27 @@ function packageName(key) {
 
 function inspectDependencies(root, declaration) {
   const lockfile = declaration.dependencies.lockfile;
-  const lockPath = path.join(root, lockfile);
-  const locked = readJson(lockPath)?.packages ?? {};
-  const installed = readJson(
-    path.join(root, "node_modules", ".package-lock.json"),
-  )?.packages;
-  if (!installed)
+  const locked = readJson(path.join(root, lockfile))?.packages ?? {};
+  if (!existsSync(path.join(root, "node_modules")))
     return [
       finding(
         "dependencies",
         "missing",
         "JavaScript dependencies",
-        `node_modules was not installed from ${lockfile}`,
+        "node_modules is missing",
       ),
     ];
 
   const problems = [];
-  if (!existsSync(lockPath)) problems.push(`${lockfile} is missing`);
-
   const manifest = readJson(path.join(root, "package.json")) ?? {};
-  const dependencyFields = [
-    "dependencies",
-    "devDependencies",
-    "optionalDependencies",
-    "peerDependencies",
-  ];
-  const sortedEntries = (value) =>
-    JSON.stringify(Object.entries(value ?? {}).sort());
-  if (
-    dependencyFields.some(
-      (field) =>
-        sortedEntries(manifest[field]) !== sortedEntries(locked[""]?.[field]),
-    )
-  )
-    problems.push(`package.json dependencies differ from ${lockfile}`);
+  for (const field of ["dependencies", "devDependencies"])
+    for (const name of Object.keys(manifest[field] ?? {}))
+      if (!existsSync(path.join(root, "node_modules", name)))
+        problems.push(`${name} is missing`);
   for (const [key, entry] of Object.entries(locked)) {
-    if (!key) continue;
-    const present = installed[key];
-    if (!present) {
-      if (!entry.optional) problems.push(`${packageName(key)} is missing`);
-    } else if (
-      (present.version ?? present.resolved) !==
-      (entry.version ?? entry.resolved)
-    ) {
-      problems.push(
-        `${packageName(key)} ${present.version} is installed, ${entry.version} is locked`,
-      );
-    } else if (!isDeepStrictEqual(present, entry)) {
-      problems.push(`${packageName(key)} metadata differs from ${lockfile}`);
-    } else if (!existsSync(path.join(root, key))) {
-      problems.push(`${packageName(key)} was removed from node_modules`);
-    }
+    if (key && !entry.optional && !existsSync(path.join(root, key)))
+      problems.push(`${packageName(key)} is missing`);
   }
-  for (const key of Object.keys(installed))
-    if (!Object.hasOwn(locked, key))
-      problems.push(`${packageName(key)} is not in ${lockfile}`);
 
   if (!problems.length) return [];
   const shown = problems.slice(0, 3).join("; ");
@@ -552,9 +425,9 @@ function inspectDependencies(root, declaration) {
   return [
     finding(
       "dependencies",
-      "stale",
+      "missing",
       "JavaScript dependencies",
-      `node_modules differs from ${lockfile}: ${shown}${more}`,
+      `${shown}${more}; setup installs the missing packages`,
     ),
   ];
 }
@@ -587,6 +460,12 @@ function inspectBrowsers(root, declaration, env) {
       ),
     ];
   const cache = playwrightBrowsersPath(root, env);
+  let installed = [];
+  try {
+    installed = readdirSync(cache);
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
   const findings = [];
   for (const name of declaration.browsers.playwright) {
     const browser = registry.browsers.find((entry) => entry.name === name);
@@ -601,14 +480,20 @@ function inspectBrowsers(root, declaration, env) {
       );
       continue;
     }
-    const directory = `${name.replaceAll("-", "_")}-${browser.revision}`;
-    if (!existsSync(path.join(cache, directory, "INSTALLATION_COMPLETE")))
+    const prefix = `${name.replaceAll("-", "_")}-`;
+    if (
+      !installed.some(
+        (directory) =>
+          directory.startsWith(prefix) &&
+          existsSync(path.join(cache, directory, "INSTALLATION_COMPLETE")),
+      )
+    )
       findings.push(
         finding(
           "browsers",
           "missing",
-          `${browser.title ?? name} ${browser.browserVersion}`,
-          `Playwright revision ${browser.revision} is not installed in ${cache}`,
+          browser.title ?? name,
+          `no installed ${name} browser was found in ${cache}`,
         ),
       );
   }
@@ -674,39 +559,40 @@ function inspectImpeccable(root, declaration, platform) {
   return findings;
 }
 
+function inspectAvailableImpeccable(root) {
+  return existsSync(
+    path.join(root, ".agents", "skills", "impeccable", "SKILL.md"),
+  )
+    ? []
+    : [
+        finding(
+          "impeccable",
+          "missing",
+          "Impeccable",
+          "the Codex skill is missing; setup installs it",
+        ),
+      ];
+}
+
 function inspectOptionalSkills(root, declaration) {
   const spec = declaration.mattpocockSkills;
   const directory = agentSkillDirectories[spec.agent];
-  const groups = new Map();
-  for (const [name, pin] of Object.entries(spec.skills)) {
-    const status = !pin?.sha256
-      ? "undeclared"
-      : (() => {
-          const hash = hashTree(path.join(root, directory, name));
-          if (hash === null) return "missing";
-          return hash === pin.sha256 ? null : "stale";
-        })();
-    if (status) groups.set(status, [...(groups.get(status) ?? []), name]);
-  }
-  const release = spec.release ?? "unpinned";
-  return [...groups].map(([status, names]) =>
-    finding(
-      "skills",
-      status,
-      `mattpocock/skills ${release}`,
-      names.join(", "),
-      {
-        names,
-      },
-    ),
+  const names = Object.keys(spec.skills).filter(
+    (name) => !existsSync(path.join(root, directory, name, "SKILL.md")),
   );
+  return names.length
+    ? [
+        finding("skills", "missing", "Matt Pocock skills", names.join(", "), {
+          names,
+        }),
+      ]
+    : [];
 }
 
 export function inspectEnvironment({
   root = checkoutRoot,
   declaration = readDeclaration(root),
   platform = hostPlatform(),
-  nodeVersion = process.versions.node,
   npmVersion,
   env = process.env,
   requireImpeccable = false,
@@ -724,31 +610,24 @@ export function inspectEnvironment({
         ),
       ],
       optional: [],
-      uiSkill: [],
       notes: [],
     };
-  const impeccableFindings = inspectImpeccable(root, declaration, platform);
   return {
     platform,
     supported: true,
     required: [
       ...inspectSystem(declaration, env),
-      ...inspectGitHub(root, declaration, env),
-      ...inspectRuntime(root, {
-        nodeVersion,
-        npmVersion:
-          npmVersion === undefined ? detectNpmVersion(env) : npmVersion,
+      ...inspectRuntime({
+        npmVersion,
+        env,
       }),
       ...inspectDependencies(root, declaration),
       ...inspectBrowsers(root, declaration, env),
-      ...impeccableFindings.filter(
-        (item) => requireImpeccable || item.component === "hooks",
-      ),
+      ...(requireImpeccable
+        ? inspectImpeccable(root, declaration, platform)
+        : inspectAvailableImpeccable(root)),
     ],
     optional: inspectOptionalSkills(root, declaration),
-    uiSkill: requireImpeccable
-      ? []
-      : impeccableFindings.filter((item) => item.component === "impeccable"),
     notes: sessionNotes(declaration, env),
   };
 }
@@ -766,16 +645,10 @@ export function formatInspection(inspection) {
   } else {
     lines.push(`Recipe-Grams environment: NOT READY (${inspection.platform}).`);
     lines.push(...inspection.required.map(line));
-    const outdated = inspection.required.filter(
-      ({ component, status }) =>
-        ["node", "npm"].includes(component) && status === "wrong version",
-    );
     lines.push(
       !inspection.supported
         ? "Nothing was checked further on this host."
-        : outdated.length
-          ? `Setup does not upgrade tools already on this Mac: ${upgradeCommand} upgrades ${outdated.map((item) => item.subject).join(" and ")} and reconciles the rest.`
-          : `Run ${setupCommand} to reconcile it.`,
+        : `Run ${setupCommand} to install what is missing.`,
     );
   }
   if (inspection.optional.length) {
@@ -783,10 +656,6 @@ export function formatInspection(inspection) {
     lines.push(...inspection.optional.map(line));
     lines.push(`  ${setupCommand} installs the declared optional skills.`);
   }
-  if (inspection.uiSkill?.length)
-    lines.push(
-      `Note: Impeccable differs from the pinned UI design setup; run ./scripts/init.sh --audit before using it.`,
-    );
   lines.push(...inspection.notes.map((note) => `Note: ${note}`));
   return lines.join("\n");
 }

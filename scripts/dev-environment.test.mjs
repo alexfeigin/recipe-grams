@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { chmodSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rename, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -17,13 +17,10 @@ import {
   inspectImpeccableEntry,
   isReady,
   maintenanceRoute,
-  parseGitHubRemote,
   removeProjectRoute,
   satisfiesRange,
 } from "./dev-environment.mjs";
 import {
-  ensureGitHubAccess,
-  explainGitHubFailure,
   formatDeclaration,
   installMattpocockSkills,
   replaceEntries,
@@ -36,9 +33,6 @@ const projectRoute = readFileSync(
   path.join(checkoutRoot, "scripts", "impeccable-project-route.md"),
   "utf8",
 );
-// GitHub's published Ed25519 host key (https://api.github.com/meta).
-const githubHostKey =
-  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
 const authorityDirectives = [
   "AUTONOMY_DIRECTIVE_CHECK",
   "SUBAGENT_AUTHORIZATION",
@@ -134,10 +128,11 @@ async function readyFixture(t) {
   const skill = ".claude/skills/impeccable";
   write(root, `${skill}/SKILL.md`, applyProjectRoute(upstreamSkill(), route));
   write(root, `${skill}/scripts/impeccable`, "#!/bin/sh\n", 0o755);
+  write(root, ".agents/skills/impeccable/SKILL.md", upstreamSkill());
   write(root, ".agents/skills/tdd/SKILL.md", "# TDD\n");
   write(root, "machine/clt/git", "", 0o755);
   write(root, "machine/homebrew/bin/brew", "", 0o755);
-  write(root, "machine/home/.ssh/known_hosts", `github.com ${githubHostKey}\n`);
+  write(root, "machine/homebrew/bin/gh", "#!/bin/sh\n", 0o755);
   git(root, "init", "-q");
   git(root, "remote", "add", "origin", "git@github.com:owner/recipes.git");
 
@@ -147,7 +142,6 @@ async function readyFixture(t) {
       commandLineTools: "/Library/Developer/CommandLineTools/usr/bin/git",
       homebrew: { prefix: "/opt/homebrew" },
     },
-    github: { remote: "origin", access: "ssh" },
     dependencies: { lockfile: "package-lock.json", install: "npm ci" },
     browsers: { playwright: ["chromium"] },
     impeccable: {
@@ -180,7 +174,7 @@ async function readyFixture(t) {
     RECIPE_GRAMS_CLT_GIT: path.join(root, "machine/clt/git"),
     RECIPE_GRAMS_HOMEBREW_PREFIX: path.join(root, "machine/homebrew"),
     HOME: path.join(root, "machine/home"),
-    PATH: path.dirname(process.execPath),
+    PATH: `${path.join(root, "machine/homebrew/bin")}:${path.dirname(process.execPath)}`,
   };
   const inspect = (overrides = {}) =>
     inspectEnvironment({
@@ -391,13 +385,9 @@ test("a present baseline is ready and the check changes nothing", async (t) => {
 
 test("runtime, dependency, and browser problems are specific", async (t) => {
   const { root, inspect } = await readyFixture(t);
-  assert.deepEqual(statuses(inspect({ nodeVersion: "24.9.1" })), [
-    "node:wrong version",
-  ]);
+  assert.deepEqual(statuses(inspect({ nodeVersion: "1.0.0" })), []);
   assert.deepEqual(statuses(inspect({ npmVersion: null })), ["npm:missing"]);
-  assert.deepEqual(statuses(inspect({ npmVersion: "10.9.0" })), [
-    "npm:wrong version",
-  ]);
+  assert.deepEqual(statuses(inspect({ npmVersion: "1.0.0" })), []);
   assert.deepEqual(statuses(inspect({ platform: "linux-x64" })), [
     "platform:unsupported",
   ]);
@@ -405,23 +395,21 @@ test("runtime, dependency, and browser problems are specific", async (t) => {
   write(root, "package-lock.json", {
     packages: { "": {}, "node_modules/astro": { version: "7.3.0" } },
   });
-  const stale = inspect();
-  assert.deepEqual(statuses(stale), ["dependencies:stale"]);
-  assert.match(
-    stale.required[0].detail,
-    /astro 7\.2\.0 is installed, 7\.3\.0 is locked/,
-  );
+  assert.deepEqual(statuses(inspect()), []);
 
   await rm(path.join(root, "node_modules", ".package-lock.json"), {
     force: true,
   });
+  assert.deepEqual(statuses(inspect()), []);
+
+  await rm(path.join(root, "node_modules/astro"), { recursive: true });
   assert.deepEqual(statuses(inspect()), ["dependencies:missing"]);
 
   await rm(path.join(root, "browsers"), { recursive: true });
   assert.ok(statuses(inspect()).includes("browsers:missing"));
 });
 
-test("readiness notices lockfile and dependency declaration changes", async (t) => {
+test("readiness notices missing packages but accepts version metadata changes", async (t) => {
   const { root, inspect } = await readyFixture(t);
   write(root, "package-lock.json", {
     packages: {
@@ -430,7 +418,7 @@ test("readiness notices lockfile and dependency declaration changes", async (t) 
       "node_modules/fsevents": { version: "2.3.3", optional: true },
     },
   });
-  assert.match(inspect().required[0].detail, /metadata differs/);
+  assert.deepEqual(statuses(inspect()), []);
 
   write(root, "package-lock.json", {
     packages: {
@@ -441,29 +429,33 @@ test("readiness notices lockfile and dependency declaration changes", async (t) 
   });
   write(root, "package.json", {
     engines: { node: ">=24.20.0", npm: ">=11.0.0" },
-    dependencies: { astro: "7.2.0" },
+    dependencies: { astro: "99.0.0", missing: "1.0.0" },
   });
-  assert.match(
-    inspect().required[0].detail,
-    /package.json dependencies differ/,
-  );
+  assert.match(inspect().required[0].detail, /missing is missing/);
 });
 
-test("ordinary readiness does not require the pinned UI skill", async (t) => {
+test("an installed browser is accepted regardless of revision", async (t) => {
   const { root, inspect } = await readyFixture(t);
+  await rename(
+    path.join(root, "browsers/chromium-1234"),
+    path.join(root, "browsers/chromium-5678"),
+  );
+  assert.deepEqual(statuses(inspect()), []);
+});
+
+test("ordinary readiness accepts any Impeccable version", async (t) => {
+  const { root, inspect } = await readyFixture(t);
+  write(root, ".agents/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
   write(root, ".claude/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
   const ordinary = inspect({ requireImpeccable: false });
   assert.ok(isReady(ordinary));
   assert.deepEqual(statuses(ordinary), []);
-  assert.ok(ordinary.uiSkill.length);
   assert.deepEqual(statuses(inspect()), ["impeccable:wrong version"]);
 
   write(root, ".claude/settings.json", {
     hooks: { PostToolUse: [{ command: "impeccable hook" }] },
   });
-  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
-    "hooks:unexpected",
-  ]);
+  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), []);
 });
 
 test("Impeccable contents, version, route, and hooks are each checked", async (t) => {
@@ -508,7 +500,7 @@ test("optional skills never make the baseline fail", async (t) => {
   write(root, ".agents/skills/tdd/SKILL.md", "# Edited\n");
   const inspection = inspect();
   assert.ok(isReady(inspection));
-  assert.deepEqual(statuses(inspection, "optional"), ["skills:stale"]);
+  assert.deepEqual(statuses(inspection, "optional"), []);
   await rm(path.join(root, ".agents/skills/tdd"), { recursive: true });
   assert.deepEqual(inspect().optional[0].names, ["tdd"]);
 });
@@ -526,9 +518,29 @@ test("setup in a ready environment runs no installer", async (t) => {
   assert.deepEqual(tools.calls, []);
 });
 
-test("setup reconciles only stale requirements and reports what remains", async (t) => {
+test("setup accepts existing skill versions and does not contact GitHub", async (t) => {
+  const { root, env } = await readyFixture(t);
+  write(root, ".agents/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
+  write(root, ".claude/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
+  write(root, ".agents/skills/tdd/SKILL.md", "# Any installed version\n");
+  git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
+  const tools = fakeTools({ env });
+  tools.capture = () => {
+    throw new Error("setup must not probe GitHub");
+  };
+  tools.fetch = () => {
+    throw new Error("setup must not download when everything is present");
+  };
+  assert.equal(
+    await setupEnvironment({ root, tools, platform: "darwin-arm64" }),
+    true,
+  );
+  assert.deepEqual(tools.calls, []);
+});
+
+test("setup attempts missing packages and reports what remains", async (t) => {
   const { root, env, inspect } = await readyFixture(t);
-  await rm(path.join(root, "node_modules", ".package-lock.json"));
+  await rm(path.join(root, "node_modules", "astro"), { recursive: true });
   const tools = fakeTools({ env });
   const ready = await setupEnvironment({
     root,
@@ -541,7 +553,7 @@ test("setup reconciles only stale requirements and reports what remains", async 
   assert.match(tools.logs.at(-1), /NOT READY[\s\S]*dependencies/i);
 });
 
-test("a local repair does not require a new GitHub access probe", async (t) => {
+test("a local repair does not probe GitHub permissions", async (t) => {
   const { root, env, inspect } = await readyFixture(t);
   const marker = path.join(
     root,
@@ -589,10 +601,9 @@ test("staged replacement restores earlier entries when a later copy fails", asyn
   );
 });
 
-test("setup reports an old npm; only upgrade replaces it", async (t) => {
+test("setup accepts an old npm; only upgrade replaces it", async (t) => {
   const { root, env, inspect } = await readyFixture(t);
-  let npmVersion = "10.9.0";
-  const oldNpm = () => inspect({ npmVersion });
+  const oldNpm = () => inspect({ npmVersion: "10.9.0" });
   const setupTools = fakeTools({ env });
   const ready = await setupEnvironment({
     root,
@@ -600,26 +611,26 @@ test("setup reports an old npm; only upgrade replaces it", async (t) => {
     platform: "darwin-arm64",
     inspect: oldNpm,
   });
-  assert.equal(ready, false);
+  assert.equal(ready, true);
   assert.deepEqual(setupTools.calls, []);
-  assert.match(
-    setupTools.logs.join("\n"),
-    /Setup does not upgrade tools already on this Mac; \.\/scripts\/init\.sh --upgrade upgrades npm/,
+
+  write(
+    root,
+    "machine/old-bin/npm",
+    '#!/bin/sh\n[ "$1" = --version ] && echo 10.9.0\n',
+    0o755,
   );
 
   const upgradeTools = fakeTools({
-    env,
+    env: { ...env, PATH: `${path.join(root, "machine/old-bin")}:${env.PATH}` },
     responses: upstreamResponses(),
-    run: async (command) => {
-      if (command === "npm") npmVersion = "11.19.1";
-    },
   });
   assert.equal(
     await upgradeEnvironment({
       root,
       tools: upgradeTools,
       platform: "darwin-arm64",
-      inspect: oldNpm,
+      inspect: () => inspect(),
     }),
     true,
   );
@@ -758,118 +769,29 @@ test("the declaration is written the way Prettier formats JSON", () => {
   );
 });
 
-test("a new Mac's missing tools and GitHub setup are reported", async (t) => {
+test("presence checks ignore GitHub permissions and existing versions", async (t) => {
   const { root, env, inspect } = await readyFixture(t);
-  await rm(path.join(root, "machine/homebrew"), { recursive: true });
-  assert.deepEqual(statuses(inspect()), ["system:missing"]);
-
   git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
-  await rm(path.join(root, "machine/home/.ssh"), { recursive: true });
-  assert.deepEqual(statuses(inspect()), [
+  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), []);
+
+  await rm(path.join(root, "machine/homebrew/bin/gh"));
+  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
     "system:missing",
-    "github:stale",
-    "github:missing",
   ]);
 
-  // Without git, the check must not touch /usr/bin/git's install dialog.
   await rm(path.join(root, "machine/clt"), { recursive: true });
-  assert.deepEqual(statuses(inspect()), ["system:missing", "system:missing"]);
+  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
+    "system:missing",
+    "system:missing",
+  ]);
 
-  const unreachable = inspect({ env: { ...env, PATH: "/usr/bin:/bin" } });
-  assert.match(
-    unreachable.notes[0],
-    /PATH does not include Homebrew yet[\s\S]*brew shellenv/,
-  );
-});
-
-test("GitHub remotes are recognized in SSH and HTTPS forms", () => {
-  for (const url of [
-    "git@github.com:owner/recipes.git",
-    "ssh://git@github.com/owner/recipes",
-  ])
-    assert.equal(parseGitHubRemote(url).ssh, true, url);
-  assert.deepEqual(parseGitHubRemote("https://github.com/owner/recipes.git/"), {
-    ssh: false,
-    repository: "owner/recipes",
-    sshUrl: "git@github.com:owner/recipes.git",
+  const withoutNodeOnPath = inspect({
+    env: { ...env, PATH: "/usr/bin:/bin" },
+    requireImpeccable: false,
   });
-  assert.equal(parseGitHubRemote("https://gitlab.com/owner/recipes"), null);
-  assert.equal(parseGitHubRemote("git@github.com:owner/rec'ipes.git"), null);
-});
-
-test("GitHub failures explain the minimum requirement plainly", () => {
   assert.match(
-    explainGitHubFailure(
-      "git@github.com: Permission denied (publickey).",
-      "o/r",
-    ),
-    /minimum requirement[\s\S]*SSH key[\s\S]*github\.com\/settings\/keys/,
-  );
-  assert.match(
-    explainGitHubFailure("ERROR: Permission to o/r.git denied to cook.", "o/r"),
-    /account cook cannot save changes to o\/r[\s\S]*collaborator/,
-  );
-  assert.match(
-    explainGitHubFailure("ERROR: Repository not found.", "o/r"),
-    /cannot see o\/r/,
-  );
-  assert.match(
-    explainGitHubFailure("ssh: Could not resolve hostname github.com", "o/r"),
-    /internet connection/,
-  );
-});
-
-test("setup confirms push access, trusts GitHub's keys, and uses SSH", async (t) => {
-  const { root, env, declaration } = await readyFixture(t);
-  git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
-  await rm(path.join(root, "machine/home/.ssh"), { recursive: true });
-  const probes = [];
-  const tools = {
-    ...fakeTools({
-      env,
-      responses: {
-        "https://api.github.com/meta": { ssh_keys: [githubHostKey] },
-      },
-      run: async (command, args) => spawnSync(command, args),
-    }),
-    capture: (command, args, options) => {
-      probes.push({ command, args, options });
-      return { status: 0, stdout: "refs", stderr: "" };
-    },
-  };
-  await ensureGitHubAccess({ root, declaration, tools });
-  assert.equal(probes.length, 1);
-  assert.equal(probes[0].command, "ssh");
-  assert.ok(probes[0].args.includes("BatchMode=yes"));
-  assert.equal(probes[0].args.at(-1), "git-receive-pack 'owner/recipes.git'");
-  assert.equal(probes[0].options.input, "");
-  assert.equal(
-    git(root, "remote", "get-url", "origin"),
-    "git@github.com:owner/recipes.git",
-  );
-  assert.equal(
-    readFileSync(path.join(root, "machine/home/.ssh/known_hosts"), "utf8"),
-    `github.com ${githubHostKey}\n`,
-  );
-});
-
-test("setup stops when this Mac cannot push to GitHub", async (t) => {
-  const { root, env, declaration } = await readyFixture(t);
-  const tools = {
-    ...fakeTools({ env }),
-    capture: () => ({
-      status: 255,
-      stdout: "",
-      stderr: "git@github.com: Permission denied (publickey).\n",
-    }),
-  };
-  await assert.rejects(
-    ensureGitHubAccess({ root, declaration, tools }),
-    /^Error: GitHub access: This Mac cannot sign in to GitHub[\s\S]*minimum requirement/,
-  );
-  assert.equal(
-    git(root, "remote", "get-url", "origin"),
-    "git@github.com:owner/recipes.git",
+    withoutNodeOnPath.notes[0],
+    /PATH does not include Homebrew yet[\s\S]*brew shellenv/,
   );
 });
 
@@ -913,9 +835,16 @@ case "$1" in
 list) [ -x "$node" ] ;;
 outdated) printf '%s\n' \${STUB_OUTDATED-} ;;
 deps) printf '%s\n' icu4c libuv ;;
-install | upgrade)
-  printf '#!/bin/bash\n[ "$1" = -p ] && echo 26.0.0 && exit\necho "node $*" >> "$STUB_LOG"\n' > "$node"
-  chmod +x "$node" ;;
+install | upgrade | reinstall)
+  if [ "$2" = gh ]; then
+    printf '#!/bin/bash\n' > "$(dirname "$0")/gh"
+    chmod +x "$(dirname "$0")/gh"
+  else
+    printf '#!/bin/bash\n[ "$1" = -p ] && echo 26.0.0 && exit\necho "node $*" >> "$STUB_LOG"\n' > "$node"
+    chmod +x "$node"
+    printf '#!/bin/bash\n[ "$1" = --version ] && echo 11.0.0\n' > "$(dirname "$0")/npm"
+    chmod +x "$(dirname "$0")/npm"
+  fi ;;
 esac`,
 };
 
@@ -927,6 +856,8 @@ async function brandNewMac(t, extraEnv = {}, { installedNode } = {}) {
     // A Mac that already has git, Homebrew, and Homebrew's (old) Node.
     write(machine, "clt/git", "#!/bin/bash\n", 0o755);
     write(machine, "homebrew/bin/brew", `${stubs["brew.stub"]}\n`, 0o755);
+    write(machine, "homebrew/bin/gh", "#!/bin/bash\n", 0o755);
+    write(machine, "homebrew/bin/npm", "#!/bin/bash\n", 0o755);
     write(
       machine,
       "homebrew/bin/node",
@@ -959,7 +890,7 @@ async function brandNewMac(t, extraEnv = {}, { installedNode } = {}) {
   return { init };
 }
 
-test("setup on a bare Mac installs git, Homebrew, and Node behind one password window", async (t) => {
+test("setup on a bare Mac installs Git, Homebrew, Node, and gh", async (t) => {
   const { init } = await brandNewMac(t);
   const setup = init();
   assert.equal(setup.status, 0, setup.stderr);
@@ -975,6 +906,8 @@ test("setup on a bare Mac installs git, Homebrew, and Node behind one password w
     "xcode-select --switch",
     "installer -pkg",
     "brew list",
+    "brew outdated",
+    "brew install",
     "brew outdated",
     "brew install",
     "node scripts/init-environment.mjs",
@@ -996,9 +929,10 @@ test("the bare-Mac check reports what setup would install and installs nothing",
   const { init } = await brandNewMac(t);
   const check = init("--check");
   assert.equal(check.status, 1);
-  assert.match(check.stdout, /missing\s+Command Line Tools/);
-  assert.match(check.stdout, /missing\s+Homebrew/);
+  assert.match(check.stdout, /missing\s+Git:/);
+  assert.match(check.stdout, /missing\s+GitHub CLI:/);
   assert.match(check.stdout, /missing\s+Node/);
+  assert.match(check.stdout, /missing\s+npm/);
   assert.deepEqual(check.calls, []);
 });
 
@@ -1032,24 +966,19 @@ test("without an unattended Command Line Tools update, Apple's window is used", 
   assert.match(setup.stdout, /click Install/);
 });
 
-test("setup never upgrades an installed Node; --upgrade does", async (t) => {
+test("setup accepts an old Node; --upgrade can replace it", async (t) => {
   const { init } = await brandNewMac(t, {}, { installedNode: "20.0.0" });
   const setup = init();
-  assert.equal(setup.status, 1);
-  assert.match(
-    setup.stderr,
-    /Node 20\.0\.0 is installed, but this project needs [\d.]+ or newer\. Setup does not upgrade tools already on this Mac; \.\/scripts\/init\.sh --upgrade upgrades Node\./,
-  );
-  assert.deepEqual(setup.calls, []);
+  assert.equal(setup.status, 0, setup.stderr);
+  assert.deepEqual(setup.calls, ["node scripts/init-environment.mjs setup"]);
 
   const check = init("--check");
-  assert.equal(check.status, 1);
-  assert.match(check.stdout, /wrong version Node 20\.0\.0/);
-  assert.match(check.stdout, /--upgrade upgrades Node/);
+  assert.equal(check.status, 0, check.stderr);
+  assert.equal(check.calls.at(-1), "node scripts/init-environment.mjs check");
 
   const upgrade = init("--upgrade");
   assert.equal(upgrade.status, 0, upgrade.stderr);
-  assert.deepEqual(upgrade.calls, [
+  assert.deepEqual(upgrade.calls.slice(-3), [
     "brew list node no-auto-update=",
     "brew upgrade node no-auto-update=",
     "node scripts/init-environment.mjs upgrade",
