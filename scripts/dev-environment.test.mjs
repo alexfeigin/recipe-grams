@@ -183,7 +183,7 @@ async function readyFixture(t) {
       nodeVersion: "24.20.0",
       npmVersion: "11.19.1",
       env,
-      requireImpeccable: true,
+      audit: true,
       ...overrides,
     });
   return { root, route, declaration, env, inspect };
@@ -447,7 +447,7 @@ test("ordinary readiness accepts any Impeccable version", async (t) => {
   const { root, inspect } = await readyFixture(t);
   write(root, ".agents/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
   write(root, ".claude/skills/impeccable/SKILL.md", upstreamSkill("4.0.4"));
-  const ordinary = inspect({ requireImpeccable: false });
+  const ordinary = inspect({ audit: false });
   assert.ok(isReady(ordinary));
   assert.deepEqual(statuses(ordinary), []);
   assert.deepEqual(statuses(inspect()), ["impeccable:wrong version"]);
@@ -455,7 +455,7 @@ test("ordinary readiness accepts any Impeccable version", async (t) => {
   write(root, ".claude/settings.json", {
     hooks: { PostToolUse: [{ command: "impeccable hook" }] },
   });
-  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), []);
+  assert.deepEqual(statuses(inspect({ audit: false })), []);
 });
 
 test("Impeccable contents, version, route, and hooks are each checked", async (t) => {
@@ -498,9 +498,10 @@ test("Impeccable contents, version, route, and hooks are each checked", async (t
 test("optional skills never make the baseline fail", async (t) => {
   const { root, inspect } = await readyFixture(t);
   write(root, ".agents/skills/tdd/SKILL.md", "# Edited\n");
-  const inspection = inspect();
-  assert.ok(isReady(inspection));
-  assert.deepEqual(statuses(inspection, "optional"), []);
+  assert.deepEqual(statuses(inspect({ audit: false }), "optional"), []);
+  const audited = inspect();
+  assert.ok(isReady(audited));
+  assert.deepEqual(statuses(audited, "optional"), ["skills:stale"]);
   await rm(path.join(root, ".agents/skills/tdd"), { recursive: true });
   assert.deepEqual(inspect().optional[0].names, ["tdd"]);
 });
@@ -579,6 +580,63 @@ test("a local repair does not probe GitHub permissions", async (t) => {
     true,
   );
   assert.deepEqual(tools.calls, ["playwright install chromium"]);
+});
+
+test("setup fills in a missing Impeccable copy and keeps installed ones", async (t) => {
+  const { root, declaration, env } = await readyFixture(t);
+  const codex = ".agents/skills/impeccable";
+  const claude = ".claude/skills/impeccable";
+  const cacheDirectory = await sandbox(t);
+  const digest = sha256("bundle");
+  write(
+    cacheDirectory,
+    `impeccable/universal-9.9.9-${digest.slice(0, 12)}.zip`,
+    "bundle",
+  );
+  write(
+    root,
+    "dev-environment.json",
+    formatDeclaration({
+      ...declaration,
+      impeccable: {
+        ...declaration.impeccable,
+        bundle: { ...declaration.impeccable.bundle, sha256: digest },
+        files: {
+          "darwin-arm64": {
+            [codex]: hashTree(path.join(root, codex)),
+            [claude]: declaration.impeccable.files["darwin-arm64"][claude],
+          },
+        },
+      },
+    }),
+  );
+  write(root, `${claude}/SKILL.md`, upstreamSkill("4.0.4"));
+  const installed = hashTree(path.join(root, claude));
+  await rm(path.join(root, codex), { recursive: true });
+
+  const tools = fakeTools({
+    env,
+    run: async (command, args, { cwd }) => {
+      if (command !== "npx") return;
+      write(cwd, `${codex}/SKILL.md`, upstreamSkill());
+      write(cwd, `${claude}/SKILL.md`, upstreamSkill());
+      write(cwd, `${claude}/scripts/impeccable`, "#!/bin/sh\n", 0o755);
+    },
+  });
+  assert.equal(
+    await setupEnvironment({
+      root,
+      tools,
+      cacheDirectory,
+      platform: "darwin-arm64",
+    }),
+    true,
+  );
+  assert.equal(hashTree(path.join(root, claude)), installed);
+  assert.match(
+    readFileSync(path.join(root, codex, "SKILL.md"), "utf8"),
+    /recipe-grams:project-route:begin/,
+  );
 });
 
 test("staged replacement restores earlier entries when a later copy fails", async (t) => {
@@ -722,6 +780,35 @@ test("a failed upgrade leaves the declaration and installation unchanged", async
   }
 });
 
+test("upgrade moves installed optional skills to the new revision", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  const next = "# TDD, next release\n";
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    run: async (command, args, { cwd }) => {
+      if (command === "npx") write(cwd, ".agents/skills/tdd/SKILL.md", next);
+    },
+  });
+  assert.equal(
+    await upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: () => inspect(),
+    }),
+    true,
+  );
+  assert.equal(
+    readFileSync(path.join(root, ".agents/skills/tdd/SKILL.md"), "utf8"),
+    next,
+  );
+  const recorded = JSON.parse(
+    readFileSync(path.join(root, "dev-environment.json"), "utf8"),
+  );
+  assert.equal(recorded.mattpocockSkills.revision, "new-revision");
+});
+
 test("an upgrade restores its pins when the final setup fails", async (t) => {
   const { root, env } = await readyFixture(t);
   const file = path.join(root, "dev-environment.json");
@@ -772,22 +859,22 @@ test("the declaration is written the way Prettier formats JSON", () => {
 test("presence checks ignore GitHub permissions and existing versions", async (t) => {
   const { root, env, inspect } = await readyFixture(t);
   git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
-  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), []);
+  assert.deepEqual(statuses(inspect({ audit: false })), []);
 
   await rm(path.join(root, "machine/homebrew/bin/gh"));
-  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
+  assert.deepEqual(statuses(inspect({ audit: false })), [
     "system:missing",
   ]);
 
   await rm(path.join(root, "machine/clt"), { recursive: true });
-  assert.deepEqual(statuses(inspect({ requireImpeccable: false })), [
+  assert.deepEqual(statuses(inspect({ audit: false })), [
     "system:missing",
     "system:missing",
   ]);
 
   const withoutNodeOnPath = inspect({
     env: { ...env, PATH: "/usr/bin:/bin" },
-    requireImpeccable: false,
+    audit: false,
   });
   assert.match(
     withoutNodeOnPath.notes[0],

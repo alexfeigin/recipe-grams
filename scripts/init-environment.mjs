@@ -15,7 +15,7 @@ const mode = process.argv[2];
 
 if (mode === "check" || mode === "audit") {
   const inspection = inspectEnvironment({
-    requireImpeccable: mode === "audit",
+    audit: mode === "audit",
   });
   console.log(formatInspection(inspection));
   process.exitCode = isReady(inspection) ? 0 : 1;

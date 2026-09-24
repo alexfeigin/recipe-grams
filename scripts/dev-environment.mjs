@@ -574,19 +574,24 @@ function inspectAvailableImpeccable(root) {
       ];
 }
 
-function inspectOptionalSkills(root, declaration) {
+// Missing named skills; an audit also reports installed copies that differ
+// from their pins, which --upgrade's final setup replaces.
+function inspectOptionalSkills(root, declaration, audit) {
   const spec = declaration.mattpocockSkills;
   const directory = agentSkillDirectories[spec.agent];
-  const names = Object.keys(spec.skills).filter(
-    (name) => !existsSync(path.join(root, directory, name, "SKILL.md")),
-  );
-  return names.length
-    ? [
-        finding("skills", "missing", "Matt Pocock skills", names.join(", "), {
-          names,
-        }),
-      ]
-    : [];
+  const groups = { missing: [], stale: [] };
+  for (const [name, pin] of Object.entries(spec.skills)) {
+    const skill = path.join(root, directory, name);
+    if (!existsSync(path.join(skill, "SKILL.md"))) groups.missing.push(name);
+    else if (audit && hashTree(skill) !== pin?.sha256) groups.stale.push(name);
+  }
+  return Object.entries(groups)
+    .filter(([, names]) => names.length)
+    .map(([status, names]) =>
+      finding("skills", status, "Matt Pocock skills", names.join(", "), {
+        names,
+      }),
+    );
 }
 
 export function inspectEnvironment({
@@ -595,7 +600,7 @@ export function inspectEnvironment({
   platform = hostPlatform(),
   npmVersion,
   env = process.env,
-  requireImpeccable = false,
+  audit = false,
 } = {}) {
   if (!declaration.platforms.includes(platform))
     return {
@@ -623,11 +628,11 @@ export function inspectEnvironment({
       }),
       ...inspectDependencies(root, declaration),
       ...inspectBrowsers(root, declaration, env),
-      ...(requireImpeccable
+      ...(audit
         ? inspectImpeccable(root, declaration, platform)
         : inspectAvailableImpeccable(root)),
     ],
-    optional: inspectOptionalSkills(root, declaration),
+    optional: inspectOptionalSkills(root, declaration, audit),
     notes: sessionNotes(declaration, env),
   };
 }
@@ -654,7 +659,9 @@ export function formatInspection(inspection) {
   if (inspection.optional.length) {
     lines.push("Optional skills (not required for readiness):");
     lines.push(...inspection.optional.map(line));
-    lines.push(`  ${setupCommand} installs the declared optional skills.`);
+    lines.push(
+      `  ${setupCommand} installs missing ones; ${upgradeCommand} also replaces changed ones.`,
+    );
   }
   lines.push(...inspection.notes.map((note) => `Note: ${note}`));
   return lines.join("\n");

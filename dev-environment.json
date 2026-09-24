@@ -1,5 +1,5 @@
 {
-  "description": "--check and setup accept any installed version and report only missing requirements. --audit compares the pinned UI skill; --upgrade changes versions. See docs/development.md#development-environment.",
+  "description": "--check and setup accept any installed version and report only missing requirements. --audit compares the pinned managed skills; --upgrade changes versions. See docs/development.md#development-environment.",
   "platforms": ["darwin-arm64"],
   "system": {
     "commands": ["git", "gh"],

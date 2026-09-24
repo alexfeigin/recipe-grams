@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import {
   cp,
   lstat,
@@ -166,8 +167,10 @@ export async function replaceEntries(root, staging, entries, signal) {
         installed: false,
       };
       prepared.push(item);
+      // Keep relative symlinks relative; the staging directory is deleted.
       await cp(path.join(staging, entry), item.replacement, {
         recursive: true,
+        verbatimSymlinks: true,
       });
       signal?.throwIfAborted();
       item.hadPrevious = await entryExists(target);
@@ -301,12 +304,15 @@ async function adaptStagedImpeccable(staging, entries, route) {
   return files;
 }
 
+// Validates the whole pinned install in staging, then replaces `entries`
+// (every declared entry by default) in the checkout.
 export async function installImpeccable({
   root,
   declaration,
   platform,
   tools,
   cacheDirectory,
+  entries: replaced,
 }) {
   const spec = declaration.impeccable;
   const expected = spec.files[platform];
@@ -320,7 +326,12 @@ export async function installImpeccable({
       throw new Error(
         `Impeccable ${spec.version} from the pinned bundle does not match ${declarationFile} (${differences}); the checkout was not changed.`,
       );
-    await replaceEntries(root, staging, Object.keys(expected), tools.signal);
+    await replaceEntries(
+      root,
+      staging,
+      replaced ?? Object.keys(expected),
+      tools.signal,
+    );
   });
   tools.log(`Installed Impeccable ${spec.version} with the project route.`);
 }
@@ -415,17 +426,33 @@ function minimumMajor(range) {
   return /(\d+)\.\d+\.\d+/.exec(range)?.[1];
 }
 
+// Declared entries with nothing installed; a skill directory counts as
+// installed when it has a SKILL.md.
+function absentEntries(root, entries) {
+  return entries.filter((entry) => {
+    const target = path.join(root, entry);
+    return !existsSync(
+      /\/skills\/[^/]+$/.test(entry) ? path.join(target, "SKILL.md") : target,
+    );
+  });
+}
+
+// Ordinary setup installs what is missing and keeps installed copies. With
+// `audit`, as in --upgrade's final setup, it also replaces managed skills that
+// differ from their pins.
 export async function setupEnvironment({
   root = checkoutRoot,
   tools,
   cacheDirectory = defaultCacheDirectory(tools.env),
   platform = hostPlatform(),
+  audit = false,
   inspect = (declaration) =>
     inspectEnvironment({
       root,
       declaration,
       platform,
       env: tools.env,
+      audit,
     }),
 }) {
   const declaration = readDeclaration(root);
@@ -467,14 +494,17 @@ export async function setupEnvironment({
       throw new Error(
         `${declarationFile} does not pin Impeccable for ${platform}; run ./scripts/init.sh --upgrade to resolve and record a version.`,
       );
-    if (has("impeccable"))
+    if (has("impeccable")) {
+      const entries = Object.keys(declaration.impeccable.files[platform]);
       await installImpeccable({
         root,
         declaration,
         platform,
         tools,
         cacheDirectory,
+        entries: audit ? entries : absentEntries(root, entries),
       });
+    }
   } catch (error) {
     if (tools.signal?.aborted) throw error;
     tools.log(`Setup stopped: ${error.message}`);
@@ -483,7 +513,7 @@ export async function setupEnvironment({
   }
 
   const names = before.optional
-    .filter((item) => item.status === "missing")
+    .filter((item) => ["missing", "stale"].includes(item.status))
     .flatMap((item) => item.names);
   if (names.length)
     await installMattpocockSkills({ root, declaration, names, tools }).catch(
@@ -707,10 +737,17 @@ export async function upgradeEnvironment({
       declaration,
       platform,
       env: tools.env,
-      requireImpeccable: true,
+      audit: true,
     }),
   setup = () =>
-    setupEnvironment({ root, tools, cacheDirectory, platform, inspect }),
+    setupEnvironment({
+      root,
+      tools,
+      cacheDirectory,
+      platform,
+      inspect,
+      audit: true,
+    }),
 }) {
   const declaration = readDeclaration(root);
   if (!declaration.platforms.includes(platform))
@@ -743,7 +780,7 @@ export async function upgradeEnvironment({
 
   if (impeccableCurrent && skillsCurrent) {
     tools.log(
-      `Already at the newest upstream versions: ${summary}. Nothing was downloaded or reinstalled.`,
+      `Already at the newest upstream versions: ${summary}. ${declarationFile} is unchanged; setup replaces only installed copies that differ from these pins.`,
     );
     return setup();
   }

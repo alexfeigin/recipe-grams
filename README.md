@@ -20,7 +20,7 @@ ready to work:
 ```bash
 ./scripts/init.sh            # install missing requirements; keep installed versions
 ./scripts/init.sh --check    # fast, offline presence check before each task
-./scripts/init.sh --audit    # optional comparison with pinned Impeccable files
+./scripts/init.sh --audit    # optional comparison with pinned skill files
 ./scripts/init.sh --upgrade  # explicitly update managed versions
 npm run dev
 ```

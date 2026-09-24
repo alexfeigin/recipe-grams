@@ -62,10 +62,12 @@ access reports any authentication or permission failure at that time.
   before every task. It never builds, runs verification, publishes, or contacts
   GitHub. Only missing required items produce a nonzero exit status.
 - `--audit` is an optional offline comparison of the installed Impeccable files
-  and project route against the declared pin. Its drift report does not affect
-  ordinary setup or `--check`.
+  and project route, and of the named Matt Pocock skills, against the declared
+  pins. Its drift report does not affect ordinary setup or `--check`.
 - Setup (no option) installs missing requirements, then checks presence again.
-  Existing versions are accepted. Homebrew runs with `HOMEBREW_NO_AUTO_UPDATE`
+  Existing versions are accepted: when one Impeccable copy is missing, setup
+  validates the whole pinned install in staging but adds only the absent
+  entries. Homebrew runs with `HOMEBREW_NO_AUTO_UPDATE`
   and an install that would upgrade an installed Homebrew dependency is refused
   with a pointer to `--upgrade`.
   Installers run in a temporary staging project; a checkout copy is replaced
@@ -78,8 +80,10 @@ access reports any authentication or permission failure at that time.
   installed Node (`brew upgrade node`, or `nvm install` from `.nvmrc`) or npm
   (`npm install --global npm@<major>`) that no longer satisfies `engines`,
   resolves the newest upstream skill releases, proves them in staging, records
-  them in dev-environment.json in one write, and then runs setup. When no skill
-  is newer it says so, reinstalls nothing, and runs setup. If staging or final
+  them in dev-environment.json in one write, and then runs setup against those
+  pins, replacing installed Impeccable and Matt Pocock copies that differ from
+  them. When no skill is newer it leaves the declaration unchanged and
+  reinstalls only copies that differ from the pins. If staging or final
   setup fails, the declaration retains or returns to its previous pins; run
   `./scripts/init.sh --upgrade` again after resolving the failure. Commit a
   successful updated declaration like any other change.

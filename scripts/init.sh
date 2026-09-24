@@ -8,7 +8,7 @@ set -euo pipefail
 usage="Usage: ./scripts/init.sh [--check | --audit | --upgrade]
   (no option)  install missing requirements, then check readiness
   --check      read-only, offline readiness check; run it before each task
-  --audit      optional offline comparison with the pinned UI design skill
+  --audit      optional offline comparison with the pinned managed skills
   --upgrade    upgrade installed tools that do not meet engines, move
                managed external skills to their newest upstream releases, and
                record the resolved versions in dev-environment.json
