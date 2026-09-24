@@ -3,13 +3,13 @@ import { spawn } from "node:child_process";
 export function runCommand(
   command,
   args,
-  { cwd, env, signal, label = command } = {},
+  { cwd, env, signal, label = command, stdin = "inherit" } = {},
 ) {
   signal?.throwIfAborted();
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd,
-      stdio: "inherit",
+      stdio: [stdin, "inherit", "inherit"],
       env: { ...process.env, ...env },
       detached: process.platform !== "win32",
     });
