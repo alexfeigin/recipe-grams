@@ -489,7 +489,8 @@ function packageName(key) {
 
 function inspectDependencies(root, declaration) {
   const lockfile = declaration.dependencies.lockfile;
-  const locked = readJson(path.join(root, lockfile))?.packages ?? {};
+  const lockPath = path.join(root, lockfile);
+  const locked = readJson(lockPath)?.packages ?? {};
   const installed = readJson(
     path.join(root, "node_modules", ".package-lock.json"),
   )?.packages;
@@ -504,6 +505,33 @@ function inspectDependencies(root, declaration) {
     ];
 
   const problems = [];
+  const stamp = path.join(root, "node_modules", ".recipe-grams-lock.sha256");
+  let installedLockHash = null;
+  try {
+    installedLockHash = readFileSync(stamp, "utf8").trim();
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  if (!existsSync(lockPath)) problems.push(`${lockfile} is missing`);
+  else if (installedLockHash !== hashFile(lockPath))
+    problems.push(`${lockfile} changed since npm ci`);
+
+  const manifest = readJson(path.join(root, "package.json")) ?? {};
+  const dependencyFields = [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ];
+  const sortedEntries = (value) =>
+    JSON.stringify(Object.entries(value ?? {}).sort());
+  if (
+    dependencyFields.some(
+      (field) =>
+        sortedEntries(manifest[field]) !== sortedEntries(locked[""]?.[field]),
+    )
+  )
+    problems.push(`package.json dependencies differ from ${lockfile}`);
   for (const [key, entry] of Object.entries(locked)) {
     if (!key) continue;
     const present = installed[key];

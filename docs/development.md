@@ -18,9 +18,9 @@ personal skills exist, or that publication is authorized.
 | Host                    | Apple Silicon macOS (`darwin-arm64`). Other hosts fail before anything is checked or installed.                                                                       | —                                                                                                                                                |
 | Command Line Tools      | Apple's developer tools, which provide git, are installed.                                                                                                            | Software Update, as Homebrew's own installer does it, inside the password window; Apple's Install window if Software Update does not offer them. |
 | Homebrew                | `/opt/homebrew/bin/brew` exists. It also keeps the Mac's tools current with `brew upgrade`.                                                                           | Homebrew's notarized `Homebrew.pkg` (macOS 15 or newer), after checking its Developer ID team, in the same password window.                      |
-| GitHub access           | `origin` is a GitHub SSH remote and `~/.ssh/known_hosts` lists github.com. Setup also confirms push access with GitHub.                                               | GitHub's published host keys; an HTTPS `origin` is switched to SSH. The SSH key itself is a minimum requirement setup cannot create.             |
+| GitHub access           | `origin` is a GitHub SSH remote and `~/.ssh/known_hosts` lists github.com. Setup confirms push access when it needs to configure either item.                         | GitHub's published host keys; an HTTPS `origin` is switched to SSH. The SSH key itself is a minimum requirement setup cannot create.             |
 | Node and npm            | The selected versions satisfy `engines` in package.json. `.nvmrc` is only used where nvm already is.                                                                  | `brew install node` (or `nvm install` where nvm exists) when Node is missing. An old Node or npm is only replaced by `--upgrade`.                |
-| JavaScript dependencies | `node_modules/.package-lock.json` matches package-lock.json and the packages are present.                                                                             | `npm ci`                                                                                                                                         |
+| JavaScript dependencies | The lockfile hash recorded after `npm ci` matches package-lock.json, its dependency declarations match package.json, and the installed packages match the lockfile.   | `npm ci`                                                                                                                                         |
 | Chromium                | Playwright's `chromium` and `chromium-headless-shell` for the installed `playwright-core` revision are complete in its browser cache.                                 | `npx playwright install chromium`                                                                                                                |
 | Impeccable (UI design)  | Every declared file matches its pinned hash, each SKILL.md copy carries the current [project route](#impeccable-project-route), and no Impeccable hook is registered. | The pinned release bundle through Impeccable's installer.                                                                                        |
 
@@ -49,8 +49,10 @@ Homebrew's package adds `/opt/homebrew/bin` to the PATH of new sessions. An
 agent session that started earlier may not see it; the check then notes the
 `eval "$(/opt/homebrew/bin/brew shellenv)"` prefix to use.
 
-GitHub access is confirmed without pushing: setup asks GitHub's `git-receive-pack`
-for the repository over SSH, which GitHub only answers for accounts that may push.
+When the GitHub remote or host key needs configuration, setup confirms access
+without pushing: it asks GitHub's `git-receive-pack` for the repository over
+SSH, which GitHub only answers for accounts that may push. Other local repairs
+do not require a fresh access probe.
 When that fails, setup stops and explains the minimum requirement: an SSH key on
 this Mac, added to a GitHub account with push access.
 
@@ -68,7 +70,9 @@ this Mac, added to a GitHub account with push access.
   so it does not update itself either. Homebrew itself is installed from its
   latest release only when it is missing.
   Installers run in a temporary staging project; a checkout copy is replaced
-  only after the staged files match the declaration. Downloaded Impeccable
+  only after the staged files match the declaration. Replacements are copied
+  beside their targets, and a failed swap restores the previous entries.
+  Downloaded Impeccable
   bundles are cached in `~/Library/Caches/recipe-grams/` (`RECIPE_GRAMS_CACHE`
   overrides it). When a step fails, setup says so and the check keeps
   reporting what remains.
@@ -77,11 +81,10 @@ this Mac, added to a GitHub account with push access.
   (`npm install --global npm@<major>`) that no longer satisfies `engines`,
   resolves the newest upstream skill releases, proves them in staging, records
   them in dev-environment.json in one write, and then runs setup. When no skill
-  is newer it says so, reinstalls nothing, and runs setup. A failure or interruption
-  before recording leaves the declaration and installed skills unchanged. If
-  setup fails after recording, rerun `./scripts/init.sh`, or run
-  `git checkout -- dev-environment.json` and then `./scripts/init.sh` to return
-  to the previous pins. Commit the updated declaration like any other change.
+  is newer it says so, reinstalls nothing, and runs setup. If staging or final
+  setup fails, the declaration retains or returns to its previous pins; run
+  `./scripts/init.sh --upgrade` again after resolving the failure. Commit a
+  successful updated declaration like any other change.
 
 ### External skill sources
 
@@ -111,9 +114,10 @@ Researched September 2026; the pins in dev-environment.json are authoritative.
 --skill <names…> --agent codex --copy --yes` with `DISABLE_TELEMETRY=1`,
   which writes `.agents/skills/<name>`. Upstream `npx skills update` floats to
   the latest revision instead. The CLI's `skills-lock.json` stays in staging.
-- Setup needs the network only for missing items (Apple's Software Update, the
+- Setup needs the network only for missing or stale items (Apple's Software Update, the
   npm registry, Homebrew, GitHub releases and archives, and Playwright's browser
-  CDN), and reaches GitHub over SSH to confirm push access. Upgrade also queries
+  CDN), and reaches GitHub over SSH when its remote or host key needs repair.
+  Upgrade also queries
   `api.github.com` and `registry.npmjs.org`. Those APIs need no login; set
   `GH_TOKEN` or `GITHUB_TOKEN` if the unauthenticated GitHub API limit of 60
   requests an hour runs out. Installing Homebrew asks for an administrator

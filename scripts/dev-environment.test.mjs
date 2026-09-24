@@ -26,6 +26,7 @@ import {
   explainGitHubFailure,
   formatDeclaration,
   installMattpocockSkills,
+  replaceEntries,
   setupEnvironment,
   upgradeEnvironment,
 } from "./dev-environment-setup.mjs";
@@ -117,6 +118,11 @@ async function readyFixture(t) {
   write(root, "node_modules/.package-lock.json", {
     packages: { "node_modules/astro": { version: "7.2.0" } },
   });
+  write(
+    root,
+    "node_modules/.recipe-grams-lock.sha256",
+    `${sha256(readFileSync(path.join(root, "package-lock.json")))}\n`,
+  );
   write(root, "node_modules/astro/package.json", {});
   write(root, "node_modules/playwright-core/browsers.json", {
     browsers: [
@@ -419,6 +425,32 @@ test("runtime, dependency, and browser problems are specific", async (t) => {
   assert.ok(statuses(inspect()).includes("browsers:missing"));
 });
 
+test("readiness notices lockfile and dependency declaration changes", async (t) => {
+  const { root, inspect } = await readyFixture(t);
+  write(root, "package-lock.json", {
+    packages: {
+      "": {},
+      "node_modules/astro": { version: "7.2.0", integrity: "changed" },
+      "node_modules/fsevents": { version: "2.3.3", optional: true },
+    },
+  });
+  assert.match(inspect().required[0].detail, /changed since npm ci/);
+
+  write(
+    root,
+    "node_modules/.recipe-grams-lock.sha256",
+    `${sha256(readFileSync(path.join(root, "package-lock.json")))}\n`,
+  );
+  write(root, "package.json", {
+    engines: { node: ">=24.20.0", npm: ">=11.0.0" },
+    dependencies: { astro: "7.2.0" },
+  });
+  assert.match(
+    inspect().required[0].detail,
+    /package.json dependencies differ/,
+  );
+});
+
 test("Impeccable contents, version, route, and hooks are each checked", async (t) => {
   const { root, route, declaration, inspect } = await readyFixture(t);
   const skill = path.join(root, ".claude/skills/impeccable/SKILL.md");
@@ -492,6 +524,54 @@ test("setup reconciles only stale requirements and reports what remains", async 
   assert.equal(ready, false);
   assert.deepEqual(tools.calls, ["npm ci"]);
   assert.match(tools.logs.at(-1), /NOT READY[\s\S]*dependencies/i);
+});
+
+test("a local repair does not require a new GitHub access probe", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  const marker = path.join(
+    root,
+    "browsers/chromium-1234/INSTALLATION_COMPLETE",
+  );
+  await rm(marker);
+  const tools = fakeTools({
+    env,
+    run: async (command) => {
+      if (command.endsWith("playwright")) writeFileSync(marker, "");
+    },
+  });
+  tools.capture = () => {
+    throw new Error("GitHub should not be probed");
+  };
+  assert.equal(
+    await setupEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: () => inspect(),
+    }),
+    true,
+  );
+  assert.deepEqual(tools.calls, ["playwright install chromium"]);
+});
+
+test("staged replacement restores earlier entries when a later copy fails", async (t) => {
+  const root = await sandbox(t);
+  const staging = await sandbox(t);
+  write(root, "skills/first/SKILL.md", "original");
+  write(root, "skills/second/SKILL.md", "original");
+  write(staging, "skills/first/SKILL.md", "replacement");
+  await assert.rejects(
+    replaceEntries(root, staging, ["skills/first", "skills/second"]),
+    /ENOENT/,
+  );
+  assert.equal(
+    readFileSync(path.join(root, "skills/first/SKILL.md"), "utf8"),
+    "original",
+  );
+  assert.equal(
+    readFileSync(path.join(root, "skills/second/SKILL.md"), "utf8"),
+    "original",
+  );
 });
 
 test("setup reports an old npm; only upgrade replaces it", async (t) => {
@@ -614,6 +694,31 @@ test("a failed upgrade leaves the declaration and installation unchanged", async
     assert.equal(readFileSync(declarationFile, "utf8"), before);
     assert.equal(hashTree(path.join(root, ".claude")), installed);
   }
+});
+
+test("an upgrade restores its pins when the final setup fails", async (t) => {
+  const { root, env } = await readyFixture(t);
+  const file = path.join(root, "dev-environment.json");
+  const before = readFileSync(file, "utf8");
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    run: async (command, args, { cwd }) => {
+      if (command === "npx")
+        write(cwd, ".agents/skills/tdd/SKILL.md", "# TDD\n");
+    },
+  });
+  assert.equal(
+    await upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      setup: async () => false,
+    }),
+    false,
+  );
+  assert.equal(readFileSync(file, "utf8"), before);
+  assert.match(tools.logs.at(-1), /restored to its previous pins/);
 });
 
 test("the declaration is written the way Prettier formats JSON", () => {

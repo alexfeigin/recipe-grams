@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import {
   appendFile,
   cp,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
@@ -140,12 +141,69 @@ async function stagedEntries(staging) {
   return [...entries].sort();
 }
 
-async function replaceEntries(root, staging, entries) {
-  for (const entry of entries) {
-    const target = path.join(root, entry);
-    await rm(target, { recursive: true, force: true });
-    await mkdir(path.dirname(target), { recursive: true });
-    await cp(path.join(staging, entry), target, { recursive: true });
+async function entryExists(file) {
+  try {
+    await lstat(file);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+export async function replaceEntries(root, staging, entries, signal) {
+  const prepared = [];
+  let rollbackFailed = false;
+  try {
+    for (const entry of entries) {
+      signal?.throwIfAborted();
+      const target = path.join(root, entry);
+      await mkdir(path.dirname(target), { recursive: true });
+      const temporary = await mkdtemp(
+        path.join(path.dirname(target), ".recipe-grams-install-"),
+      );
+      const item = {
+        target,
+        temporary,
+        replacement: path.join(temporary, "replacement"),
+        previous: path.join(temporary, "previous"),
+        hadPrevious: false,
+        installed: false,
+      };
+      prepared.push(item);
+      await cp(path.join(staging, entry), item.replacement, {
+        recursive: true,
+      });
+      signal?.throwIfAborted();
+      item.hadPrevious = await entryExists(target);
+      if (item.hadPrevious) await rename(target, item.previous);
+      await rename(item.replacement, target);
+      item.installed = true;
+      signal?.throwIfAborted();
+    }
+  } catch (error) {
+    const rollbackErrors = [];
+    for (const item of prepared.reverse()) {
+      try {
+        if (item.installed)
+          await rm(item.target, { recursive: true, force: true });
+        if (item.hadPrevious && (await entryExists(item.previous)))
+          await rename(item.previous, item.target);
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError);
+      }
+    }
+    rollbackFailed = rollbackErrors.length > 0;
+    if (rollbackFailed)
+      throw new AggregateError(
+        [error, ...rollbackErrors],
+        "Installing the staged skills failed, and restoring the previous copies also failed. Backups remain in .recipe-grams-install-* directories.",
+      );
+    throw error;
+  } finally {
+    if (!rollbackFailed)
+      for (const item of prepared)
+        await rm(item.temporary, { recursive: true, force: true });
   }
 }
 
@@ -267,7 +325,7 @@ export async function installImpeccable({
       throw new Error(
         `Impeccable ${spec.version} from the pinned bundle does not match ${declarationFile} (${differences}); the checkout was not changed.`,
       );
-    await replaceEntries(root, staging, Object.keys(expected));
+    await replaceEntries(root, staging, Object.keys(expected), tools.signal);
   });
   tools.log(`Installed Impeccable ${spec.version} with the project route.`);
 }
@@ -350,6 +408,7 @@ export async function installMattpocockSkills({
       root,
       staging,
       names.map((name) => `${directory}/${name}`),
+      tools.signal,
     );
   });
   tools.log(`Installed ${names.length} mattpocock/skills (${spec.release}).`);
@@ -477,8 +536,7 @@ export async function setupEnvironment({
       throw new Error(
         "Apple's Command Line Tools or Homebrew are missing; run ./scripts/init.sh, which installs them first.",
       );
-    if (before.required.length)
-      await ensureGitHubAccess({ root, declaration, tools });
+    if (has("github")) await ensureGitHubAccess({ root, declaration, tools });
     if (has("npm"))
       throw new Error(
         `npm does not satisfy package.json engines. Setup does not upgrade tools already on this Mac; ${upgradeCommand} upgrades npm.`,
@@ -489,6 +547,10 @@ export async function setupEnvironment({
       );
     if (has("dependencies")) {
       await tools.run("npm", ["ci"], { cwd: root, label: "npm ci" });
+      await writeFile(
+        path.join(root, "node_modules", ".recipe-grams-lock.sha256"),
+        `${sha256(await readFile(path.join(root, declaration.dependencies.lockfile)))}\n`,
+      );
       // The lockfile may pin a different Playwright browser revision.
       before = inspect(declaration);
     }
@@ -797,13 +859,21 @@ export async function upgradeEnvironment({
     );
   }
 
-  await writeAtomically(
-    path.join(root, declarationFile),
-    formatDeclaration(next),
-  );
+  const declarationPath = path.join(root, declarationFile);
+  const previousDeclaration = await readFile(declarationPath);
+  tools.signal?.throwIfAborted();
+  await writeAtomically(declarationPath, formatDeclaration(next));
   tools.log(`Recorded ${summary} in ${declarationFile}.`);
 
-  const ready = await setup();
+  let ready;
+  try {
+    tools.signal?.throwIfAborted();
+    ready = await setup();
+    tools.signal?.throwIfAborted();
+  } catch (error) {
+    await writeAtomically(declarationPath, previousDeclaration);
+    throw error;
+  }
   if (ready) {
     const kept = new Set(Object.keys(next.impeccable.files[platform]));
     const obsolete = Object.keys(impeccable.files?.[platform] ?? {}).filter(
@@ -812,10 +882,10 @@ export async function upgradeEnvironment({
     for (const entry of obsolete)
       await rm(path.join(root, entry), { recursive: true, force: true });
   } else {
+    await writeAtomically(declarationPath, previousDeclaration);
     tools.log(
-      `${declarationFile} records the new versions, but the environment is not ready. ` +
-        `Retry with ${setupCommand}, or restore the previous pins with ` +
-        `\`git checkout -- ${declarationFile}\` and run ${setupCommand}.`,
+      `The environment is not ready, so ${declarationFile} was restored to its previous pins. ` +
+        `Retry with ${upgradeCommand} after resolving the setup failure.`,
     );
   }
   return ready;
