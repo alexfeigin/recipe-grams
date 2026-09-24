@@ -19,7 +19,7 @@ personal skills exist, or that publication is authorized.
 | Command Line Tools      | Apple's developer tools, which provide git, are installed.                                                                                                            | Software Update, as Homebrew's own installer does it, inside the password window; Apple's Install window if Software Update does not offer them. |
 | Homebrew                | `/opt/homebrew/bin/brew` exists. It also keeps the Mac's tools current with `brew upgrade`.                                                                           | Homebrew's notarized `Homebrew.pkg` (macOS 15 or newer), after checking its Developer ID team, in the same password window.                      |
 | GitHub access           | `origin` is a GitHub SSH remote and `~/.ssh/known_hosts` lists github.com. Setup also confirms push access with GitHub.                                               | GitHub's published host keys; an HTTPS `origin` is switched to SSH. The SSH key itself is a minimum requirement setup cannot create.             |
-| Node and npm            | The selected versions satisfy `engines` in package.json. `.nvmrc` is only used where nvm already is.                                                                  | `brew install node` (or `nvm install` where nvm exists); `npm install --global npm@<major>` for old npm.                                         |
+| Node and npm            | The selected versions satisfy `engines` in package.json. `.nvmrc` is only used where nvm already is.                                                                  | `brew install node` (or `nvm install` where nvm exists) when Node is missing. An old Node or npm is only replaced by `--upgrade`.                |
 | JavaScript dependencies | `node_modules/.package-lock.json` matches package-lock.json and the packages are present.                                                                             | `npm ci`                                                                                                                                         |
 | Chromium                | Playwright's `chromium` and `chromium-headless-shell` for the installed `playwright-core` revision are complete in its browser cache.                                 | `npx playwright install chromium`                                                                                                                |
 | Impeccable (UI design)  | Every declared file matches its pinned hash, each SKILL.md copy carries the current [project route](#impeccable-project-route), and no Impeccable hook is registered. | The pinned release bundle through Impeccable's installer.                                                                                        |
@@ -60,15 +60,24 @@ this Mac, added to a GitHub account with push access.
   runs verification, publishes, or touches Git. It exits 0 when ready, or 1
   after marking each item missing, wrong version, stale, undeclared, or
   unexpected.
-- Setup (no option) installs only what the check reports, then checks again.
+- Setup (no option) installs only what the check reports, at the versions the
+  repository declares (dev-environment.json, package-lock.json), then checks
+  again. It never upgrades a tool already on the Mac: an old Node or npm, or a
+  Homebrew install that would upgrade installed Homebrew packages, stops setup
+  with a pointer to `--upgrade`. Homebrew runs with `HOMEBREW_NO_AUTO_UPDATE`,
+  so it does not update itself either. Homebrew itself is installed from its
+  latest release only when it is missing.
   Installers run in a temporary staging project; a checkout copy is replaced
   only after the staged files match the declaration. Downloaded Impeccable
   bundles are cached in `~/Library/Caches/recipe-grams/` (`RECIPE_GRAMS_CACHE`
   overrides it). When a step fails, setup says so and the check keeps
   reporting what remains.
-- `--upgrade` resolves the newest upstream releases, proves them in staging,
-  records them in dev-environment.json in one write, and then runs setup. When
-  nothing is newer it says so and reinstalls nothing. A failure or interruption
+- `--upgrade` is the only mode that moves versions forward. It upgrades an
+  installed Node (`brew upgrade node`, or `nvm install` from `.nvmrc`) or npm
+  (`npm install --global npm@<major>`) that no longer satisfies `engines`,
+  resolves the newest upstream skill releases, proves them in staging, records
+  them in dev-environment.json in one write, and then runs setup. When no skill
+  is newer it says so, reinstalls nothing, and runs setup. A failure or interruption
   before recording leaves the declaration and installed skills unchanged. If
   setup fails after recording, rerun `./scripts/init.sh`, or run
   `git checkout -- dev-environment.json` and then `./scripts/init.sh` to return

@@ -12,7 +12,7 @@
   },
   "runtime": {
     "readiness": "package.json engines.node and engines.npm",
-    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used"
+    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used; only --upgrade replaces an installed Node or npm"
   },
   "github": {
     "remote": "origin",

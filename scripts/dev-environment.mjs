@@ -736,10 +736,16 @@ export function formatInspection(inspection) {
   } else {
     lines.push(`Recipe-Grams environment: NOT READY (${inspection.platform}).`);
     lines.push(...inspection.required.map(line));
+    const outdated = inspection.required.filter(
+      ({ component, status }) =>
+        ["node", "npm"].includes(component) && status === "wrong version",
+    );
     lines.push(
-      inspection.supported
-        ? `Run ${setupCommand} to reconcile it.`
-        : "Nothing was checked further on this host.",
+      !inspection.supported
+        ? "Nothing was checked further on this host."
+        : outdated.length
+          ? `Setup does not upgrade tools already on this Mac: ${upgradeCommand} upgrades ${outdated.map((item) => item.subject).join(" and ")} and reconciles the rest.`
+          : `Run ${setupCommand} to reconcile it.`,
     );
   }
   if (inspection.optional.length) {

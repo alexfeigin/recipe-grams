@@ -494,6 +494,43 @@ test("setup reconciles only stale requirements and reports what remains", async 
   assert.match(tools.logs.at(-1), /NOT READY[\s\S]*dependencies/i);
 });
 
+test("setup reports an old npm; only upgrade replaces it", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  let npmVersion = "10.9.0";
+  const oldNpm = () => inspect({ npmVersion });
+  const setupTools = fakeTools({ env });
+  const ready = await setupEnvironment({
+    root,
+    tools: setupTools,
+    platform: "darwin-arm64",
+    inspect: oldNpm,
+  });
+  assert.equal(ready, false);
+  assert.deepEqual(setupTools.calls, []);
+  assert.match(
+    setupTools.logs.join("\n"),
+    /Setup does not upgrade tools already on this Mac; \.\/scripts\/init\.sh --upgrade upgrades npm/,
+  );
+
+  const upgradeTools = fakeTools({
+    env,
+    responses: upstreamResponses(),
+    run: async (command) => {
+      if (command === "npm") npmVersion = "11.19.1";
+    },
+  });
+  assert.equal(
+    await upgradeEnvironment({
+      root,
+      tools: upgradeTools,
+      platform: "darwin-arm64",
+      inspect: oldNpm,
+    }),
+    true,
+  );
+  assert.deepEqual(upgradeTools.calls, ["npm install --global npm@11"]);
+});
+
 test("managed skill names never reach repository skills", async (t) => {
   const { root, declaration } = await readyFixture(t);
   await assert.rejects(
@@ -508,10 +545,16 @@ test("managed skill names never reach repository skills", async (t) => {
 });
 
 test("upgrade with nothing newer downloads and reinstalls nothing", async (t) => {
-  const { root, env } = await readyFixture(t);
+  const { root, env, inspect } = await readyFixture(t);
   const before = readFileSync(path.join(root, "dev-environment.json"), "utf8");
   const tools = fakeTools({ env, responses: upstreamResponses() });
-  await upgradeEnvironment({ root, tools, platform: "darwin-arm64" });
+  const ready = await upgradeEnvironment({
+    root,
+    tools,
+    platform: "darwin-arm64",
+    inspect: () => inspect(),
+  });
+  assert.equal(ready, true);
   assert.deepEqual(tools.calls, []);
   assert.match(
     tools.logs[0],
@@ -741,20 +784,36 @@ if [ "$1" = --install ]; then mkdir -p "$(dirname "$RECIPE_GRAMS_CLT_GIT")"; tou
   installer: `#!/bin/bash
 echo "installer $*" >> "$STUB_LOG"
 mkdir -p "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin"
-cat > "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew" <<'BREW'
-#!/bin/bash
-echo "brew $*" >> "$STUB_LOG"
-[ "$1" = list ] && exit 1
-printf '#!/bin/bash\\n[ "$1" = -p ] && echo 26.0.0 && exit\\necho "node $*" >> "$STUB_LOG"\\n' > "$(dirname "$0")/node"
-chmod +x "$(dirname "$0")/node"
-BREW
-chmod +x "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew"`,
+cp "$(dirname "$0")/brew.stub" "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew"`,
+  // Installed as $RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew by the installer stub.
+  "brew.stub": `#!/bin/bash
+echo "brew $* no-auto-update=\${HOMEBREW_NO_AUTO_UPDATE-}" >> "$STUB_LOG"
+node="$(dirname "$0")/node"
+case "$1" in
+list) [ -x "$node" ] ;;
+outdated) printf '%s\n' \${STUB_OUTDATED-} ;;
+deps) printf '%s\n' icu4c libuv ;;
+install | upgrade)
+  printf '#!/bin/bash\n[ "$1" = -p ] && echo 26.0.0 && exit\necho "node $*" >> "$STUB_LOG"\n' > "$node"
+  chmod +x "$node" ;;
+esac`,
 };
 
-async function brandNewMac(t, extraEnv = {}) {
+async function brandNewMac(t, extraEnv = {}, { installedNode } = {}) {
   const machine = await sandbox(t);
   for (const [name, body] of Object.entries(stubs))
     write(machine, `stubs/${name}`, `${body}\n`, 0o755);
+  if (installedNode) {
+    // A Mac that already has git, Homebrew, and Homebrew's (old) Node.
+    write(machine, "clt/git", "#!/bin/bash\n", 0o755);
+    write(machine, "homebrew/bin/brew", `${stubs["brew.stub"]}\n`, 0o755);
+    write(
+      machine,
+      "homebrew/bin/node",
+      `#!/bin/bash\n[ "$1" = -p ] && echo ${installedNode} && exit\necho "node $*" >> "$STUB_LOG"\n`,
+      0o755,
+    );
+  }
   const log = path.join(machine, "log");
   writeFileSync(log, "");
   const env = {
@@ -796,9 +855,15 @@ test("setup on a bare Mac installs git, Homebrew, and Node behind one password w
     "xcode-select --switch",
     "installer -pkg",
     "brew list",
+    "brew outdated",
     "brew install",
     "node scripts/init-environment.mjs",
   ]);
+  assert.ok(
+    setup.calls
+      .filter((call) => call.startsWith("brew"))
+      .every((call) => call.endsWith("no-auto-update=1")),
+  );
   assert.match(
     setup.calls[2],
     /install Apple's Command Line Tools and Homebrew/,
@@ -845,4 +910,39 @@ test("without an unattended Command Line Tools update, Apple's window is used", 
   assert.match(prompts[1], /wants to install Homebrew\./);
   assert.ok(setup.calls.includes("xcode-select --install"));
   assert.match(setup.stdout, /click Install/);
+});
+
+test("setup never upgrades an installed Node; --upgrade does", async (t) => {
+  const { init } = await brandNewMac(t, {}, { installedNode: "20.0.0" });
+  const setup = init();
+  assert.equal(setup.status, 1);
+  assert.match(
+    setup.stderr,
+    /Node 20\.0\.0 is installed, but this project needs [\d.]+ or newer\. Setup does not upgrade tools already on this Mac; \.\/scripts\/init\.sh --upgrade upgrades Node\./,
+  );
+  assert.deepEqual(setup.calls, []);
+
+  const check = init("--check");
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, /wrong version Node 20\.0\.0/);
+  assert.match(check.stdout, /--upgrade upgrades Node/);
+
+  const upgrade = init("--upgrade");
+  assert.equal(upgrade.status, 0, upgrade.stderr);
+  assert.deepEqual(upgrade.calls, [
+    "brew list node no-auto-update=",
+    "brew upgrade node no-auto-update=",
+    "node scripts/init-environment.mjs upgrade",
+  ]);
+});
+
+test("setup refuses a Homebrew install that would upgrade installed packages", async (t) => {
+  const { init } = await brandNewMac(t, { STUB_OUTDATED: "icu4c openssl@3" });
+  const setup = init();
+  assert.equal(setup.status, 1);
+  assert.match(
+    setup.stderr,
+    /Installing node with Homebrew would also upgrade these installed Homebrew packages: icu4c\. .*--upgrade allows it/,
+  );
+  assert.ok(!setup.calls.some((call) => call.startsWith("brew install")));
 });

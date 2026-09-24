@@ -19,15 +19,16 @@ Behind that, one command prepares a clean clone and then confirms that it is
 ready to work:
 
 ```bash
-./scripts/init.sh            # install missing or stale requirements, then check
+./scripts/init.sh            # install what is missing, at the declared versions
 ./scripts/init.sh --check    # read-only, offline; run before each task
-./scripts/init.sh --upgrade  # only to move external skills to newer releases
+./scripts/init.sh --upgrade  # the only way to newer versions: old Node or npm, newer skills
 npm run dev
 ```
 
 Run `--check` at the start of every task and setup only when it reports
 something missing or stale. Setup is idempotent: in a ready checkout it changes
-nothing. [dev-environment.json](dev-environment.json) declares the baseline;
+nothing. It never picks a newer version or upgrades a tool already on the Mac;
+only `--upgrade` does. [dev-environment.json](dev-environment.json) declares the baseline;
 [Development](docs/development.md#development-environment) explains what
 "ready" covers and how each requirement is installed and upgraded.
 Node runs the TypeScript modules used by the checks directly.

@@ -38,9 +38,12 @@ import {
   setupCommand,
   skillVersion,
   systemPaths,
+  upgradeCommand,
 } from "./dev-environment.mjs";
 
-// Setup installs the pins in dev-environment.json; upgrade resolves newer
+// Setup installs the pins in dev-environment.json and package-lock.json and
+// never upgrades tools already on the Mac (Node, npm); only upgrade picks newer
+// versions. Upgrade resolves newer
 // upstream releases, proves them in staging, and only then records them.
 // Installers always run in a temporary staging project, so a failed download
 // or install never leaves a partial tree in the checkout.
@@ -476,19 +479,13 @@ export async function setupEnvironment({
       );
     if (before.required.length)
       await ensureGitHubAccess({ root, declaration, tools });
-    if (has("npm")) {
-      const engines = JSON.parse(
-        await readFile(path.join(root, "package.json"), "utf8"),
-      ).engines;
-      await tools.run(
-        "npm",
-        ["install", "--global", `npm@${minimumMajor(engines.npm)}`],
-        { cwd: root, label: "npm self-update" },
+    if (has("npm"))
+      throw new Error(
+        `npm does not satisfy package.json engines. Setup does not upgrade tools already on this Mac; ${upgradeCommand} upgrades npm.`,
       );
-    }
     if (has("node"))
       throw new Error(
-        `The selected Node does not satisfy package.json engines. ${setupCommand} installs Node with Homebrew (or nvm where it is used); select it and rerun.`,
+        `The selected Node does not satisfy package.json engines. Setup does not upgrade tools already on this Mac; ${upgradeCommand} upgrades Node.`,
       );
     if (has("dependencies")) {
       await tools.run("npm", ["ci"], { cwd: root, label: "npm ci" });
@@ -723,18 +720,35 @@ export function formatDeclaration(declaration) {
   )}\n`;
 }
 
+async function upgradeNpm({ root, tools }) {
+  const engines = JSON.parse(
+    await readFile(path.join(root, "package.json"), "utf8"),
+  ).engines;
+  await tools.run(
+    "npm",
+    ["install", "--global", `npm@${minimumMajor(engines.npm)}`],
+    { cwd: root, label: "npm upgrade" },
+  );
+}
+
 export async function upgradeEnvironment({
   root = checkoutRoot,
   tools,
   cacheDirectory = defaultCacheDirectory(tools.env),
   platform = hostPlatform(),
-  setup = () => setupEnvironment({ root, tools, cacheDirectory, platform }),
+  inspect = (declaration) =>
+    inspectEnvironment({ root, declaration, platform, env: tools.env }),
+  setup = () =>
+    setupEnvironment({ root, tools, cacheDirectory, platform, inspect }),
 }) {
   const declaration = readDeclaration(root);
   if (!declaration.platforms.includes(platform))
     throw new Error(
       `${platform} is not a supported host (${declaration.platforms.join(", ")}); nothing was changed.`,
     );
+  // init.sh has already upgraded an old Node; npm is upgraded here.
+  if (inspect(declaration).required.some((item) => item.component === "npm"))
+    await upgradeNpm({ root, tools });
 
   const latest = await resolveLatest(tools, declaration);
   const impeccable = declaration.impeccable;
@@ -756,14 +770,7 @@ export async function upgradeEnvironment({
     tools.log(
       `Already at the newest upstream versions: ${summary}. Nothing was downloaded or reinstalled.`,
     );
-    const inspection = inspectEnvironment({
-      root,
-      declaration,
-      platform,
-      env: tools.env,
-    });
-    tools.log(formatInspection(inspection));
-    return isReady(inspection);
+    return setup();
   }
 
   tools.log(`Upgrading to ${summary}.`);

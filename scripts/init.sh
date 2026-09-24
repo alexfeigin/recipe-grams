@@ -6,10 +6,13 @@
 set -euo pipefail
 
 usage="Usage: ./scripts/init.sh [--check | --upgrade]
-  (no option)  install missing or stale requirements, then check readiness
+  (no option)  install missing or stale requirements at the versions this
+               repository declares, then check readiness
   --check      read-only, offline readiness check; run it before each task
-  --upgrade    move managed external skills to their newest upstream releases
-               and record the resolved versions in dev-environment.json"
+  --upgrade    also upgrade what is installed but too old (Node, npm), move
+               managed external skills to their newest upstream releases, and
+               record the resolved versions in dev-environment.json
+Only --upgrade picks newer versions or upgrades tools already on this Mac."
 
 mode=setup
 case "${1-}" in
@@ -96,7 +99,11 @@ report_bootstrap_gaps() {
   else
     echo "  missing       Node: package.json engines require >=$minimum_node"
   fi
-  echo "Run ./scripts/init.sh to reconcile it."
+  if command -v node >/dev/null 2>&1; then
+    echo "Setup does not upgrade tools already on this Mac: ./scripts/init.sh --upgrade upgrades Node and reconciles the rest."
+  else
+    echo "Run ./scripts/init.sh to reconcile it."
+  fi
 }
 
 # Runs a shell command as root through macOS's own password window.
@@ -181,8 +188,28 @@ install_system_tools() {
   has_homebrew || fail "Homebrew is still missing after installation."
 }
 
-bootstrap_node() {
+# Setup does not upgrade tools already on this Mac: Homebrew must not update
+# itself, and an install that would also upgrade installed Homebrew packages is
+# refused. --upgrade lifts both.
+refuse_homebrew_upgrades() {
+  local outdated dependency affected=""
+  outdated="$(brew outdated --formula --quiet 2>/dev/null || true)"
+  [ -n "$outdated" ] || return 0
+  for dependency in $(brew deps --formula "$1" 2>/dev/null || true); do
+    if grep -qFx "$dependency" <<<"$outdated"; then
+      affected="$affected $dependency"
+    fi
+  done
+  [ -z "$affected" ] ||
+    fail "Installing $1 with Homebrew would also upgrade these installed Homebrew packages:$affected. Setup does not upgrade tools already on this Mac; ./scripts/init.sh --upgrade allows it."
+}
+
+# Setup installs a missing Node; replacing one that is too old is an upgrade.
+provide_node() {
   local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+  if [ "$mode" = setup ] && command -v node >/dev/null 2>&1; then
+    fail "Node $(node -p process.versions.node 2>/dev/null || echo unknown) is installed, but this project needs $minimum_node or newer. Setup does not upgrade tools already on this Mac; ./scripts/init.sh --upgrade upgrades Node."
+  fi
   if [ -s "$nvm_dir/nvm.sh" ]; then
     echo "Installing Node $(cat .nvmrc) with nvm (from .nvmrc)..."
     set +u
@@ -192,9 +219,12 @@ bootstrap_node() {
     nvm use >/dev/null
     set -u
   elif brew list node >/dev/null 2>&1; then
+    [ "$mode" = upgrade ] ||
+      fail "Homebrew's Node is installed but not linked, so it is not selected. Run brew link node, then run setup again."
     echo "Upgrading Node with Homebrew..."
     NONINTERACTIVE=1 brew upgrade node
   else
+    [ "$mode" = upgrade ] || refuse_homebrew_upgrades node
     echo "Installing Node with Homebrew..."
     NONINTERACTIVE=1 brew install node
   fi
@@ -214,8 +244,9 @@ else
     install_system_tools
   fi
   use_homebrew
+  [ "$mode" = upgrade ] || export HOMEBREW_NO_AUTO_UPDATE=1
   if ! node_ready; then
-    bootstrap_node
+    provide_node
     node_ready || fail "Node $minimum_node or newer is still not the selected 'node'; select it and rerun."
   fi
 fi

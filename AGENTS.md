@@ -17,7 +17,9 @@ long-running command and wait for it.
   an SSH key added to a GitHub account that can push here is a minimum requirement.
 - If it notes that this session's PATH lacks Homebrew, prefix later commands
   with the `eval "$(/opt/homebrew/bin/brew shellenv)"` it names.
-- Use `--upgrade` only when the user wants newer external skills.
+- Setup never upgrades what is already installed. When it says an installed tool
+  is too old, or the user wants newer external skills, tell them in plain words
+  what `./scripts/init.sh --upgrade` would change and run it only once they agree.
 
 A ready environment is not verification or release authorization.
 
