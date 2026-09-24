@@ -680,10 +680,16 @@ export function formatInspection(inspection) {
   } else {
     lines.push(`Recipe-Grams environment: NOT READY (${inspection.platform}).`);
     lines.push(...inspection.required.map(line));
+    // Ordinary setup keeps installed versions; only --upgrade replaces them.
+    const pinned = inspection.required.some(({ status }) =>
+      ["wrong version", "stale", "undeclared"].includes(status),
+    );
     lines.push(
       !inspection.supported
         ? "Nothing was checked further on this host."
-        : `Run ${setupCommand} to install what is missing.`,
+        : pinned
+          ? `Run ${upgradeCommand} to install the pinned versions.`
+          : `Run ${setupCommand} to install what is missing.`,
     );
   }
   if (inspection.optional.length) {

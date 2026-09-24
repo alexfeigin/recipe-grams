@@ -21,6 +21,7 @@ import {
   applyProjectRoute,
   contextAnchor,
   filterContext,
+  formatInspection,
   hashTree,
   inspectEnvironment,
   inspectImpeccableEntry,
@@ -486,6 +487,10 @@ test("Impeccable contents, version, route, and hooks are each checked", async (t
 
   writeFileSync(skill, applyProjectRoute(upstreamSkill("9.9.8"), route));
   assert.deepEqual(statuses(inspect()), ["impeccable:wrong version"]);
+  assert.match(
+    formatInspection(inspect()),
+    /Run \.\/scripts\/init\.sh --upgrade/,
+  );
 
   writeFileSync(skill, upstreamSkill());
   assert.match(inspect().required[0].detail, /project route missing/);
