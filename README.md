@@ -8,8 +8,15 @@ measurements for reproducible cooking. Get a kitchen scale and start cooking.
 
 ## Work locally
 
-On Apple Silicon macOS, one command prepares a clean clone and then confirms
-that it is ready to work:
+You do not need a terminal: open this folder with a coding agent and ask for
+what you want, such as a new recipe with a photo. The agent prepares a new Apple
+Silicon Mac itself: Apple's developer tools, Homebrew, Node, and the project's
+skills. macOS asks for your password once. The one thing to arrange beforehand
+is GitHub access: an SSH key on this Mac, added to a GitHub account that can
+push to this repository.
+
+Behind that, one command prepares a clean clone and then confirms that it is
+ready to work:
 
 ```bash
 ./scripts/init.sh            # install missing or stale requirements, then check

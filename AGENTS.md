@@ -5,9 +5,20 @@ recipe sources and their existing paths.
 
 ## Working agreement
 
-Before a task, run `./scripts/init.sh --check`. Run `./scripts/init.sh` only when
-it reports something missing or stale, and `--upgrade` only when the user wants
-newer external skills ([environment](docs/development.md#development-environment)).
+Before a task, run `./scripts/init.sh --check`. When it is not ready, prepare the
+[environment](docs/development.md#development-environment) yourself, then continue
+the original request. The person may not use a terminal: never ask them to run
+commands. First tell them in plain words what will be installed, that macOS may
+show its password window for Apple's developer tools and Homebrew, and that a
+first setup can take about 20 minutes. Then run `./scripts/init.sh` as a
+long-running command and wait for it.
+
+- If setup stops on GitHub access, relay its explanation in plain words and stop:
+  an SSH key added to a GitHub account that can push here is a minimum requirement.
+- If it notes that this session's PATH lacks Homebrew, prefix later commands
+  with the `eval "$(/opt/homebrew/bin/brew shellenv)"` it names.
+- Use `--upgrade` only when the user wants newer external skills.
+
 A ready environment is not verification or release authorization.
 
 Establish the requested outcome, source owner, and relevant existing checks using

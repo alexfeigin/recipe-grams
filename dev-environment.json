@@ -1,9 +1,23 @@
 {
   "description": "Ready-to-work baseline checked by ./scripts/init.sh --check. Setup installs these pins; only --upgrade changes the external skill pins below. See docs/development.md#development-environment.",
   "platforms": ["darwin-arm64"],
+  "system": {
+    "commandLineTools": "/Library/Developer/CommandLineTools/usr/bin/git",
+    "homebrew": {
+      "prefix": "/opt/homebrew",
+      "installer": "https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg",
+      "signerTeamId": "927JGANW46",
+      "minimumMacOS": "15"
+    }
+  },
   "runtime": {
     "readiness": "package.json engines.node and engines.npm",
-    "setupNodeVersion": ".nvmrc"
+    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used"
+  },
+  "github": {
+    "remote": "origin",
+    "access": "ssh",
+    "requirement": "An SSH key on this Mac, added to a GitHub account that can push to origin"
   },
   "dependencies": {
     "lockfile": "package-lock.json",

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Recipe-Grams development environment: one entry point for checking, setting
-# up, and upgrading the baseline declared in dev-environment.json.
+# up, and upgrading the baseline declared in dev-environment.json. Agents run it
+# on the user's behalf; the only human step is macOS's own password window.
 # See docs/development.md#development-environment.
 set -euo pipefail
 
@@ -32,6 +33,11 @@ fi
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$root"
 
+fail() {
+  printf '%s\n' "$*" >&2
+  exit 1
+}
+
 # Setup only supports Apple Silicon macOS today; add other hosts here.
 system="$(uname -s)"
 machine="$(uname -m)"
@@ -44,7 +50,20 @@ if [ "$system" != Darwin ] || [ "$machine" != arm64 ]; then
   exit 1
 fi
 
+declared() {
+  plutil -extract "$1" raw -o - dev-environment.json
+}
+
+# The overrides exist for scripts/dev-environment.test.mjs.
+homebrew_prefix="${RECIPE_GRAMS_HOMEBREW_PREFIX:-$(declared system.homebrew.prefix)}"
+clt_git="${RECIPE_GRAMS_CLT_GIT:-$(declared system.commandLineTools)}"
+cache_dir="${RECIPE_GRAMS_CACHE:-$HOME/Library/Caches/recipe-grams}"
 minimum_node="$(sed -n 's/^ *"node": *">=\([0-9][0-9.]*\)".*/\1/p' package.json)"
+caller_path="$PATH"
+
+has_command_line_tools() { [ -x "$clt_git" ]; }
+has_homebrew() { [ -x "$homebrew_prefix/bin/brew" ]; }
+use_homebrew() { PATH="$homebrew_prefix/bin:$homebrew_prefix/sbin:$PATH"; }
 
 # Succeeds when version $1 is at least version $2 (both x.y.z).
 version_at_least() {
@@ -65,6 +84,103 @@ node_ready() {
   version_at_least "$version" "$minimum_node"
 }
 
+# Check mode without a usable Node: report what setup would install.
+report_bootstrap_gaps() {
+  echo "Recipe-Grams environment: NOT READY (darwin-arm64)."
+  has_command_line_tools ||
+    echo "  missing       Command Line Tools: Apple's developer tools, which provide git, are not installed"
+  has_homebrew ||
+    echo "  missing       Homebrew: $homebrew_prefix/bin/brew is not installed"
+  if command -v node >/dev/null 2>&1; then
+    echo "  wrong version Node $(node -p process.versions.node 2>/dev/null || echo unknown): package.json engines require >=$minimum_node"
+  else
+    echo "  missing       Node: package.json engines require >=$minimum_node"
+  fi
+  echo "Run ./scripts/init.sh to reconcile it."
+}
+
+# Runs a shell command as root through macOS's own password window.
+run_as_administrator() {
+  osascript \
+    -e 'on run argv' \
+    -e 'do shell script (item 1 of argv) with prompt (item 2 of argv) with administrator privileges' \
+    -e 'end run' \
+    "$1" "$2" 2>&1
+}
+
+download_homebrew_installer() {
+  local url team pkg signature
+  url="$(declared system.homebrew.installer)"
+  team="$(declared system.homebrew.signerTeamId)"
+  pkg="$cache_dir/homebrew/Homebrew.pkg"
+  mkdir -p "$cache_dir/homebrew"
+  echo "Downloading Homebrew's installer from $url ..." >&2
+  curl -fsSL --retry 2 -o "$pkg.part" "$url" ||
+    fail "Could not download Homebrew's installer. Check the internet connection and run setup again."
+  signature="$(pkgutil --check-signature "$pkg.part" 2>&1 || true)"
+  if ! grep -qF "Status: signed by a developer certificate issued by Apple for distribution" <<<"$signature" ||
+    ! grep -qF "Notarization: trusted by the Apple notary service" <<<"$signature" ||
+    ! grep -qF "Developer ID Installer:" <<<"$signature" ||
+    ! grep -qF "($team)" <<<"$signature"; then
+    rm -f "$pkg.part"
+    fail "Homebrew's installer is not signed and notarized by the expected developer ($team), so nothing was installed."
+  fi
+  mv "$pkg.part" "$pkg"
+  printf '%s\n' "$pkg"
+}
+
+# Apple's own "Install" window, for when Software Update cannot install the
+# Command Line Tools unattended.
+install_command_line_tools_with_apple_window() {
+  echo "Opening Apple's installer for the Command Line Tools. In its window, click Install and accept the license; it can take 10 to 20 minutes."
+  xcode-select --install >/dev/null 2>&1 || true
+  local waited=0
+  until has_command_line_tools; do
+    [ "$waited" -lt 3600 ] ||
+      fail "The Command Line Tools were not installed within an hour. Finish Apple's installer window, then run setup again."
+    sleep 15
+    waited=$((waited + 15))
+  done
+}
+
+# Installs Apple's Command Line Tools and Homebrew behind one password window.
+install_system_tools() {
+  local pkg="" what command output minimum macos
+  if ! has_homebrew; then
+    minimum="$(declared system.homebrew.minimumMacOS)"
+    macos="$(sw_vers -productVersion)"
+    [ "${macos%%.*}" -ge "$minimum" ] ||
+      fail "Homebrew's installer needs macOS $minimum or newer, and this Mac has macOS $macos. Update macOS in System Settings > General > Software Update, then run setup again."
+    pkg="$(download_homebrew_installer)"
+  fi
+  if has_command_line_tools; then
+    what="Homebrew"
+  elif [ -n "$pkg" ]; then
+    what="Apple's Command Line Tools and Homebrew"
+  else
+    what="Apple's Command Line Tools"
+  fi
+  echo "Installing $what. macOS will show a password window; this can take 10 to 20 minutes."
+  command="/bin/bash $(printf %q "$root/scripts/install-system-tools.sh") $(printf %q "$clt_git") $(printf %q "$pkg")"
+  if ! output="$(run_as_administrator "$command" "Recipe-Grams setup wants to install $what. Enter the password you use to log in to this Mac.")"; then
+    case "$output" in
+    *"(-128)"*)
+      fail "The password window was closed, so $what was not installed. Run setup again when you are ready to approve it."
+      ;;
+    *"did not offer the Command Line Tools"*)
+      install_command_line_tools_with_apple_window
+      has_homebrew || install_system_tools
+      return
+      ;;
+    *)
+      fail "Installing $what did not finish. A person signed in at this Mac has to approve the password window. Details: $output"
+      ;;
+    esac
+  fi
+  has_command_line_tools || fail "The Command Line Tools are still missing after installation."
+  has_homebrew || fail "Homebrew is still missing after installation."
+}
+
 bootstrap_node() {
   local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
   if [ -s "$nvm_dir/nvm.sh" ]; then
@@ -75,43 +191,33 @@ bootstrap_node() {
     nvm install
     nvm use >/dev/null
     set -u
-    echo "Run 'nvm use' in your own shell to select this Node version."
-  elif command -v brew >/dev/null 2>&1; then
-    if brew list node >/dev/null 2>&1; then
-      echo "Upgrading Homebrew's Node..."
-      brew upgrade node
-    else
-      echo "Installing Node with Homebrew..."
-      brew install node
-    fi
+  elif brew list node >/dev/null 2>&1; then
+    echo "Upgrading Node with Homebrew..."
+    NONINTERACTIVE=1 brew upgrade node
   else
-    cat >&2 <<EOF
-Node $minimum_node or newer is required, and neither nvm nor Homebrew is available.
-Install one of them, then rerun ./scripts/init.sh:
-  - nvm: https://github.com/nvm-sh/nvm#installing-and-updating (per-user, no password)
-  - Homebrew: https://brew.sh (asks for your administrator password)
-Or install Node $(cat .nvmrc) from https://nodejs.org/.
-EOF
-    exit 1
+    echo "Installing Node with Homebrew..."
+    NONINTERACTIVE=1 brew install node
   fi
 }
 
-if ! node_ready; then
-  if [ "$mode" = check ]; then
-    echo "Recipe-Grams environment: NOT READY (darwin-arm64)."
-    if command -v node >/dev/null 2>&1; then
-      echo "  wrong version Node $(node -p process.versions.node 2>/dev/null || echo unknown): package.json engines require >=$minimum_node"
-    else
-      echo "  missing       Node: package.json engines require >=$minimum_node"
-    fi
-    echo "Run ./scripts/init.sh to reconcile it."
+if [ "$mode" = check ]; then
+  if ! node_ready && [ -x "$homebrew_prefix/bin/node" ]; then
+    # Installed, but this session started before Homebrew joined the PATH.
+    use_homebrew
+  fi
+  if ! node_ready; then
+    report_bootstrap_gaps
     exit 1
   fi
-  bootstrap_node
+else
+  if ! has_command_line_tools || ! has_homebrew; then
+    install_system_tools
+  fi
+  use_homebrew
   if ! node_ready; then
-    echo "Node $minimum_node or newer is still not the selected 'node'; select it and rerun." >&2
-    exit 1
+    bootstrap_node
+    node_ready || fail "Node $minimum_node or newer is still not the selected 'node'; select it and rerun."
   fi
 fi
 
-exec node scripts/init-environment.mjs "$mode"
+RECIPE_GRAMS_CALLER_PATH="$caller_path" exec node scripts/init-environment.mjs "$mode"

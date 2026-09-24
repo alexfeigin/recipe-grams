@@ -17,10 +17,13 @@ import {
   inspectImpeccableEntry,
   isReady,
   maintenanceRoute,
+  parseGitHubRemote,
   removeProjectRoute,
   satisfiesRange,
 } from "./dev-environment.mjs";
 import {
+  ensureGitHubAccess,
+  explainGitHubFailure,
   formatDeclaration,
   installMattpocockSkills,
   setupEnvironment,
@@ -32,6 +35,9 @@ const projectRoute = readFileSync(
   path.join(checkoutRoot, "scripts", "impeccable-project-route.md"),
   "utf8",
 );
+// GitHub's published Ed25519 host key (https://api.github.com/meta).
+const githubHostKey =
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
 const authorityDirectives = [
   "AUTONOMY_DIRECTIVE_CHECK",
   "SUBAGENT_AUTHORIZATION",
@@ -84,6 +90,12 @@ function write(root, relative, content, mode) {
   if (mode) chmodSync(file, mode);
 }
 
+function git(root, ...args) {
+  const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  return result.stdout.trim();
+}
+
 function sha256(content) {
   return createHash("sha256").update(content).digest("hex");
 }
@@ -122,9 +134,19 @@ async function readyFixture(t) {
   write(root, `${skill}/SKILL.md`, applyProjectRoute(upstreamSkill(), route));
   write(root, `${skill}/scripts/impeccable`, "#!/bin/sh\n", 0o755);
   write(root, ".agents/skills/tdd/SKILL.md", "# TDD\n");
+  write(root, "machine/clt/git", "", 0o755);
+  write(root, "machine/homebrew/bin/brew", "", 0o755);
+  write(root, "machine/home/.ssh/known_hosts", `github.com ${githubHostKey}\n`);
+  git(root, "init", "-q");
+  git(root, "remote", "add", "origin", "git@github.com:owner/recipes.git");
 
   const declaration = {
     platforms: ["darwin-arm64"],
+    system: {
+      commandLineTools: "/Library/Developer/CommandLineTools/usr/bin/git",
+      homebrew: { prefix: "/opt/homebrew" },
+    },
+    github: { remote: "origin", access: "ssh" },
     dependencies: { lockfile: "package-lock.json", install: "npm ci" },
     browsers: { playwright: ["chromium"] },
     impeccable: {
@@ -152,7 +174,13 @@ async function readyFixture(t) {
     },
   };
   write(root, "dev-environment.json", formatDeclaration(declaration));
-  const env = { PLAYWRIGHT_BROWSERS_PATH: path.join(root, "browsers") };
+  const env = {
+    PLAYWRIGHT_BROWSERS_PATH: path.join(root, "browsers"),
+    RECIPE_GRAMS_CLT_GIT: path.join(root, "machine/clt/git"),
+    RECIPE_GRAMS_HOMEBREW_PREFIX: path.join(root, "machine/homebrew"),
+    HOME: path.join(root, "machine/home"),
+    PATH: path.dirname(process.execPath),
+  };
   const inspect = (overrides = {}) =>
     inspectEnvironment({
       root,
@@ -565,4 +593,256 @@ test("the declaration is written the way Prettier formats JSON", () => {
       "",
     ].join("\n"),
   );
+});
+
+test("a new Mac's missing tools and GitHub setup are reported", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  await rm(path.join(root, "machine/homebrew"), { recursive: true });
+  assert.deepEqual(statuses(inspect()), ["system:missing"]);
+
+  git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
+  await rm(path.join(root, "machine/home/.ssh"), { recursive: true });
+  assert.deepEqual(statuses(inspect()), [
+    "system:missing",
+    "github:stale",
+    "github:missing",
+  ]);
+
+  // Without git, the check must not touch /usr/bin/git's install dialog.
+  await rm(path.join(root, "machine/clt"), { recursive: true });
+  assert.deepEqual(statuses(inspect()), ["system:missing", "system:missing"]);
+
+  const unreachable = inspect({ env: { ...env, PATH: "/usr/bin:/bin" } });
+  assert.match(
+    unreachable.notes[0],
+    /PATH does not include Homebrew yet[\s\S]*brew shellenv/,
+  );
+});
+
+test("GitHub remotes are recognized in SSH and HTTPS forms", () => {
+  for (const url of [
+    "git@github.com:owner/recipes.git",
+    "ssh://git@github.com/owner/recipes",
+  ])
+    assert.equal(parseGitHubRemote(url).ssh, true, url);
+  assert.deepEqual(parseGitHubRemote("https://github.com/owner/recipes.git/"), {
+    ssh: false,
+    repository: "owner/recipes",
+    sshUrl: "git@github.com:owner/recipes.git",
+  });
+  assert.equal(parseGitHubRemote("https://gitlab.com/owner/recipes"), null);
+  assert.equal(parseGitHubRemote("git@github.com:owner/rec'ipes.git"), null);
+});
+
+test("GitHub failures explain the minimum requirement plainly", () => {
+  assert.match(
+    explainGitHubFailure(
+      "git@github.com: Permission denied (publickey).",
+      "o/r",
+    ),
+    /minimum requirement[\s\S]*SSH key[\s\S]*github\.com\/settings\/keys/,
+  );
+  assert.match(
+    explainGitHubFailure("ERROR: Permission to o/r.git denied to cook.", "o/r"),
+    /account cook cannot save changes to o\/r[\s\S]*collaborator/,
+  );
+  assert.match(
+    explainGitHubFailure("ERROR: Repository not found.", "o/r"),
+    /cannot see o\/r/,
+  );
+  assert.match(
+    explainGitHubFailure("ssh: Could not resolve hostname github.com", "o/r"),
+    /internet connection/,
+  );
+});
+
+test("setup confirms push access, trusts GitHub's keys, and uses SSH", async (t) => {
+  const { root, env, declaration } = await readyFixture(t);
+  git(root, "remote", "set-url", "origin", "https://github.com/owner/recipes");
+  await rm(path.join(root, "machine/home/.ssh"), { recursive: true });
+  const probes = [];
+  const tools = {
+    ...fakeTools({
+      env,
+      responses: {
+        "https://api.github.com/meta": { ssh_keys: [githubHostKey] },
+      },
+      run: async (command, args) => spawnSync(command, args),
+    }),
+    capture: (command, args, options) => {
+      probes.push({ command, args, options });
+      return { status: 0, stdout: "refs", stderr: "" };
+    },
+  };
+  await ensureGitHubAccess({ root, declaration, tools });
+  assert.equal(probes.length, 1);
+  assert.equal(probes[0].command, "ssh");
+  assert.ok(probes[0].args.includes("BatchMode=yes"));
+  assert.equal(probes[0].args.at(-1), "git-receive-pack 'owner/recipes.git'");
+  assert.equal(probes[0].options.input, "");
+  assert.equal(
+    git(root, "remote", "get-url", "origin"),
+    "git@github.com:owner/recipes.git",
+  );
+  assert.equal(
+    readFileSync(path.join(root, "machine/home/.ssh/known_hosts"), "utf8"),
+    `github.com ${githubHostKey}\n`,
+  );
+});
+
+test("setup stops when this Mac cannot push to GitHub", async (t) => {
+  const { root, env, declaration } = await readyFixture(t);
+  const tools = {
+    ...fakeTools({ env }),
+    capture: () => ({
+      status: 255,
+      stdout: "",
+      stderr: "git@github.com: Permission denied (publickey).\n",
+    }),
+  };
+  await assert.rejects(
+    ensureGitHubAccess({ root, declaration, tools }),
+    /^Error: GitHub access: This Mac cannot sign in to GitHub[\s\S]*minimum requirement/,
+  );
+  assert.equal(
+    git(root, "remote", "get-url", "origin"),
+    "git@github.com:owner/recipes.git",
+  );
+});
+
+// --- init.sh bootstrap on a Mac with nothing installed ------------------------
+
+const stubs = {
+  curl: `#!/bin/bash
+echo "curl $*" >> "$STUB_LOG"
+while [ $# -gt 0 ]; do [ "$1" = -o ] && { echo pkg > "$2"; }; shift; done`,
+  pkgutil: `#!/bin/bash
+echo "pkgutil $*" >> "$STUB_LOG"
+echo "Package \\"Homebrew.pkg\\":"
+echo "   Status: signed by a developer certificate issued by Apple for distribution"
+echo "   Notarization: trusted by the Apple notary service"
+echo "    1. Developer ID Installer: Homebrew Maintainer (\${STUB_TEAM:-927JGANW46})"`,
+  osascript: `#!/bin/bash
+while [ "$1" = -e ]; do shift 2; done
+echo "osascript prompt=$2" >> "$STUB_LOG"
+if [ -n "\${STUB_CANCEL-}" ]; then echo "execution error: User canceled. (-128)"; exit 1; fi
+if ! output="$(/bin/sh -c "$1" 2>&1)"; then echo "execution error: $output (1)"; exit 1; fi`,
+  softwareupdate: `#!/bin/bash
+echo "softwareupdate $*" >> "$STUB_LOG"
+if [ "$1" = -l ]; then
+  [ -n "\${STUB_NO_CLT_LABEL-}" ] && exit 0
+  printf '%s\\n' "Software Update found the following new or updated software:" "* Label: Command Line Tools for Xcode-26.0" "	Title: Command Line Tools for Xcode, Version: 26.0"
+else
+  mkdir -p "$(dirname "$RECIPE_GRAMS_CLT_GIT")"; touch "$RECIPE_GRAMS_CLT_GIT"; chmod +x "$RECIPE_GRAMS_CLT_GIT"
+fi`,
+  "xcode-select": `#!/bin/bash
+echo "xcode-select $*" >> "$STUB_LOG"
+if [ "$1" = --install ]; then mkdir -p "$(dirname "$RECIPE_GRAMS_CLT_GIT")"; touch "$RECIPE_GRAMS_CLT_GIT"; chmod +x "$RECIPE_GRAMS_CLT_GIT"; fi`,
+  installer: `#!/bin/bash
+echo "installer $*" >> "$STUB_LOG"
+mkdir -p "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin"
+cat > "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew" <<'BREW'
+#!/bin/bash
+echo "brew $*" >> "$STUB_LOG"
+[ "$1" = list ] && exit 1
+printf '#!/bin/bash\\n[ "$1" = -p ] && echo 26.0.0 && exit\\necho "node $*" >> "$STUB_LOG"\\n' > "$(dirname "$0")/node"
+chmod +x "$(dirname "$0")/node"
+BREW
+chmod +x "$RECIPE_GRAMS_HOMEBREW_PREFIX/bin/brew"`,
+};
+
+async function brandNewMac(t, extraEnv = {}) {
+  const machine = await sandbox(t);
+  for (const [name, body] of Object.entries(stubs))
+    write(machine, `stubs/${name}`, `${body}\n`, 0o755);
+  const log = path.join(machine, "log");
+  writeFileSync(log, "");
+  const env = {
+    HOME: path.join(machine, "home"),
+    PATH: `${path.join(machine, "stubs")}:/usr/bin:/bin:/usr/sbin:/sbin`,
+    STUB_LOG: log,
+    RECIPE_GRAMS_CACHE: path.join(machine, "cache"),
+    RECIPE_GRAMS_CLT_GIT: path.join(machine, "clt/git"),
+    RECIPE_GRAMS_HOMEBREW_PREFIX: path.join(machine, "homebrew"),
+    ...extraEnv,
+  };
+  const init = (...args) => {
+    const result = spawnSync(
+      "/bin/bash",
+      [path.join(checkoutRoot, "scripts", "init.sh"), ...args],
+      { encoding: "utf8", env },
+    );
+    return {
+      ...result,
+      calls: readFileSync(log, "utf8").trim().split("\n").filter(Boolean),
+    };
+  };
+  return { init };
+}
+
+test("setup on a bare Mac installs git, Homebrew, and Node behind one password window", async (t) => {
+  const { init } = await brandNewMac(t);
+  const setup = init();
+  assert.equal(setup.status, 0, setup.stderr);
+  const programs = setup.calls.map((call) =>
+    call.split(" ").slice(0, 2).join(" "),
+  );
+  assert.deepEqual(programs, [
+    "curl -fsSL",
+    "pkgutil --check-signature",
+    "osascript prompt=Recipe-Grams",
+    "softwareupdate -l",
+    "softwareupdate -i",
+    "xcode-select --switch",
+    "installer -pkg",
+    "brew list",
+    "brew install",
+    "node scripts/init-environment.mjs",
+  ]);
+  assert.match(
+    setup.calls[2],
+    /install Apple's Command Line Tools and Homebrew/,
+  );
+  assert.equal(setup.calls.at(-1), "node scripts/init-environment.mjs setup");
+  assert.match(setup.stdout, /macOS will show a password window/);
+});
+
+test("the bare-Mac check reports what setup would install and installs nothing", async (t) => {
+  const { init } = await brandNewMac(t);
+  const check = init("--check");
+  assert.equal(check.status, 1);
+  assert.match(check.stdout, /missing\s+Command Line Tools/);
+  assert.match(check.stdout, /missing\s+Homebrew/);
+  assert.match(check.stdout, /missing\s+Node/);
+  assert.deepEqual(check.calls, []);
+});
+
+test("a closed password window or an unexpected signer installs nothing", async (t) => {
+  const cancelled = (await brandNewMac(t, { STUB_CANCEL: "1" })).init();
+  assert.equal(cancelled.status, 1);
+  assert.match(cancelled.stderr, /password window was closed/);
+  assert.ok(
+    !cancelled.calls.some((call) =>
+      /^(softwareupdate|installer|brew)/.test(call),
+    ),
+  );
+
+  const forged = (await brandNewMac(t, { STUB_TEAM: "ABCDE12345" })).init();
+  assert.equal(forged.status, 1);
+  assert.match(
+    forged.stderr,
+    /not signed and notarized by the expected developer/,
+  );
+  assert.ok(!forged.calls.some((call) => call.startsWith("osascript")));
+});
+
+test("without an unattended Command Line Tools update, Apple's window is used", async (t) => {
+  const { init } = await brandNewMac(t, { STUB_NO_CLT_LABEL: "1" });
+  const setup = init();
+  assert.equal(setup.status, 0, setup.stderr);
+  const prompts = setup.calls.filter((call) => call.startsWith("osascript"));
+  assert.equal(prompts.length, 2);
+  assert.match(prompts[1], /wants to install Homebrew\./);
+  assert.ok(setup.calls.includes("xcode-select --install"));
+  assert.match(setup.stdout, /click Install/);
 });

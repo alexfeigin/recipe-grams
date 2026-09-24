@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
+  appendFile,
   cp,
   mkdir,
   mkdtemp,
@@ -28,10 +29,15 @@ import {
   inspectImpeccableEntry,
   isAdaptedSkillFile,
   isReady,
+  knownHostsFile,
+  knowsGitHub,
+  originUrl,
+  parseGitHubRemote,
   readDeclaration,
   readProjectRoute,
   setupCommand,
   skillVersion,
+  systemPaths,
 } from "./dev-environment.mjs";
 
 // Setup installs the pins in dev-environment.json; upgrade resolves newer
@@ -346,6 +352,94 @@ export async function installMattpocockSkills({
   tools.log(`Installed ${names.length} mattpocock/skills (${spec.release}).`);
 }
 
+// --- GitHub access ----------------------------------------------------------
+
+// Plain-language reasons, since the agent relays them to the person at the Mac.
+export function explainGitHubFailure(output, repository) {
+  if (/Permission denied \(publickey/.test(output))
+    return (
+      "This Mac cannot sign in to GitHub with an SSH key. That is a minimum " +
+      "requirement for saving and sharing recipes: someone needs to create an " +
+      "SSH key on this Mac and add it to the user's GitHub account " +
+      "(https://github.com/settings/keys). Then run setup again."
+    );
+  const denied = /Permission to \S+ denied to ([\w-]+)/.exec(output);
+  if (denied)
+    return (
+      `GitHub account ${denied[1]} cannot save changes to ${repository}. Push ` +
+      `access is a minimum requirement: ask the repository owner to add ` +
+      `${denied[1]} as a collaborator, then run setup again.`
+    );
+  if (/Repository not found/.test(output))
+    return (
+      `The GitHub account on this Mac cannot see ${repository}. Push access is ` +
+      "a minimum requirement: ask the repository owner for access, then run " +
+      "setup again."
+    );
+  return (
+    `Could not reach GitHub to confirm access (${output.trim() || "no response"}). ` +
+    "Check the internet connection and run setup again."
+  );
+}
+
+// Confirms push access without pushing: GitHub only advertises refs to
+// receive-pack for accounts that may write, and nothing is sent.
+export async function ensureGitHubAccess({ root, declaration, tools }) {
+  const { remote } = declaration.github;
+  const { home } = systemPaths(declaration, tools.env);
+  const url = originUrl(root, remote);
+  const parsed = url && parseGitHubRemote(url);
+  if (!parsed)
+    throw new Error(
+      `GitHub access: ${remote} ${url ? `is ${url}, not a GitHub repository` : "is not configured"}.`,
+    );
+
+  if (!knowsGitHub(home)) {
+    const { ssh_keys: keys } = await getJson(
+      tools,
+      "https://api.github.com/meta",
+    );
+    const file = knownHostsFile(home);
+    await mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
+    await appendFile(file, keys.map((key) => `github.com ${key}\n`).join(""), {
+      mode: 0o600,
+    });
+    tools.log(`Added GitHub's published SSH host keys to ${file}.`);
+  }
+
+  const probe = tools.capture(
+    "ssh",
+    [
+      "-o",
+      "BatchMode=yes",
+      "-o",
+      "ConnectTimeout=20",
+      "git@github.com",
+      `git-receive-pack '${parsed.repository}.git'`,
+    ],
+    { input: "" },
+  );
+  if (probe.status !== 0)
+    throw new Error(
+      `GitHub access: ${explainGitHubFailure(
+        `${probe.stderr ?? ""}${probe.error?.message ?? ""}`,
+        parsed.repository,
+      )}`,
+    );
+
+  if (!parsed.ssh) {
+    await tools.run(
+      "git",
+      ["-C", root, "remote", "set-url", remote, parsed.sshUrl],
+      { label: "git remote set-url" },
+    );
+    tools.log(`Switched ${remote} to ${parsed.sshUrl} so pushes use SSH.`);
+  }
+  tools.log(
+    `GitHub access confirmed: this Mac can push to ${parsed.repository}.`,
+  );
+}
+
 // --- Setup ------------------------------------------------------------------
 
 function minimumMajor(range) {
@@ -376,6 +470,12 @@ export async function setupEnvironment({
         (!statuses || statuses.includes(item.status)),
     );
   try {
+    if (has("system"))
+      throw new Error(
+        "Apple's Command Line Tools or Homebrew are missing; run ./scripts/init.sh, which installs them first.",
+      );
+    if (before.required.length)
+      await ensureGitHubAccess({ root, declaration, tools });
     if (has("npm")) {
       const engines = JSON.parse(
         await readFile(path.join(root, "package.json"), "utf8"),
@@ -388,7 +488,7 @@ export async function setupEnvironment({
     }
     if (has("node"))
       throw new Error(
-        `The selected Node does not satisfy package.json engines. ${setupCommand} installs .nvmrc's version through nvm or Homebrew; select it (for example with \`nvm use\`) and rerun.`,
+        `The selected Node does not satisfy package.json engines. ${setupCommand} installs Node with Homebrew (or nvm where it is used); select it and rerun.`,
       );
     if (has("dependencies")) {
       await tools.run("npm", ["ci"], { cwd: root, label: "npm ci" });

@@ -321,6 +321,140 @@ function finding(component, status, subject, detail, extra = {}) {
   return { component, status, subject, detail, ...extra };
 }
 
+export function systemPaths(declaration, env = process.env) {
+  return {
+    commandLineTools:
+      env.RECIPE_GRAMS_CLT_GIT || declaration.system.commandLineTools,
+    homebrew:
+      env.RECIPE_GRAMS_HOMEBREW_PREFIX || declaration.system.homebrew.prefix,
+    home: env.HOME || os.homedir(),
+  };
+}
+
+function inspectSystem(declaration, env) {
+  const paths = systemPaths(declaration, env);
+  const findings = [];
+  if (!existsSync(paths.commandLineTools))
+    findings.push(
+      finding(
+        "system",
+        "missing",
+        "Command Line Tools",
+        "Apple's developer tools, which provide git, are not installed",
+      ),
+    );
+  if (!existsSync(path.join(paths.homebrew, "bin", "brew")))
+    findings.push(
+      finding(
+        "system",
+        "missing",
+        "Homebrew",
+        `${paths.homebrew}/bin/brew is not installed`,
+      ),
+    );
+  return findings;
+}
+
+// Accepts git@github.com:owner/repo(.git), ssh://git@github.com/owner/repo,
+// and https://github.com/owner/repo(.git).
+export function parseGitHubRemote(url) {
+  const match =
+    /^(?:git@github\.com:|ssh:\/\/git@github\.com\/|(https):\/\/(?:[^@/]+@)?github\.com\/)([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?$/.exec(
+      url.trim(),
+    );
+  if (!match) return null;
+  return {
+    ssh: !match[1],
+    repository: `${match[2]}/${match[3]}`,
+    sshUrl: `git@github.com:${match[2]}/${match[3]}.git`,
+  };
+}
+
+export function knownHostsFile(home) {
+  return path.join(home, ".ssh", "known_hosts");
+}
+
+export function knowsGitHub(home) {
+  const file = knownHostsFile(home);
+  if (!existsSync(file)) return false;
+  return (
+    spawnSync("ssh-keygen", ["-F", "github.com", "-f", file], {
+      stdio: "ignore",
+    }).status === 0
+  );
+}
+
+export function originUrl(root, remote) {
+  const result = spawnSync("git", ["-C", root, "remote", "get-url", remote], {
+    encoding: "utf8",
+  });
+  return result.status === 0 ? result.stdout.trim() : null;
+}
+
+// Offline view of GitHub access; setup confirms it with GitHub itself.
+function inspectGitHub(root, declaration, env) {
+  const paths = systemPaths(declaration, env);
+  // Without the Command Line Tools, /usr/bin/git opens Apple's install dialog.
+  if (!existsSync(paths.commandLineTools)) return [];
+  const { remote } = declaration.github;
+  const url = originUrl(root, remote);
+  const findings = [];
+  const parsed = url && parseGitHubRemote(url);
+  if (!url)
+    findings.push(
+      finding(
+        "github",
+        "missing",
+        "GitHub",
+        `this checkout has no ${remote} remote`,
+      ),
+    );
+  else if (!parsed)
+    findings.push(
+      finding(
+        "github",
+        "unexpected",
+        "GitHub",
+        `${remote} is ${url}, not a GitHub repository`,
+      ),
+    );
+  else if (!parsed.ssh)
+    findings.push(
+      finding(
+        "github",
+        "stale",
+        "GitHub",
+        `${remote} uses HTTPS; setup switches it to SSH after confirming access`,
+      ),
+    );
+  if (!knowsGitHub(paths.home))
+    findings.push(
+      finding(
+        "github",
+        "missing",
+        "GitHub host key",
+        `${knownHostsFile(paths.home)} does not list github.com; setup adds GitHub's published keys`,
+      ),
+    );
+  return findings;
+}
+
+function executableOnPath(name, searchPath = "") {
+  return searchPath
+    .split(path.delimiter)
+    .some((directory) => directory && existsSync(path.join(directory, name)));
+}
+
+// init.sh passes the caller's PATH; setup may have extended its own.
+function sessionNotes(declaration, env) {
+  const callerPath = env.RECIPE_GRAMS_CALLER_PATH ?? env.PATH;
+  if (executableOnPath("node", callerPath)) return [];
+  const brew = path.join(systemPaths(declaration, env).homebrew, "bin", "brew");
+  return [
+    `This session's PATH does not include Homebrew yet. New terminal and agent sessions will; in this one, prefix commands with: eval "$(${brew} shellenv)"`,
+  ];
+}
+
 function inspectRuntime(root, { nodeVersion, npmVersion }) {
   const engines = readJson(path.join(root, "package.json"))?.engines ?? {};
   const findings = [];
@@ -330,7 +464,7 @@ function inspectRuntime(root, { nodeVersion, npmVersion }) {
         "node",
         "wrong version",
         `Node ${nodeVersion}`,
-        `package.json engines require ${engines.node}; ${setupCommand} installs .nvmrc's version`,
+        `package.json engines require ${engines.node}; ${setupCommand} installs Node with Homebrew`,
       ),
     );
   if (!npmVersion)
@@ -567,11 +701,14 @@ export function inspectEnvironment({
         ),
       ],
       optional: [],
+      notes: [],
     };
   return {
     platform,
     supported: true,
     required: [
+      ...inspectSystem(declaration, env),
+      ...inspectGitHub(root, declaration, env),
       ...inspectRuntime(root, {
         nodeVersion,
         npmVersion:
@@ -582,6 +719,7 @@ export function inspectEnvironment({
       ...inspectImpeccable(root, declaration, platform),
     ],
     optional: inspectOptionalSkills(root, declaration),
+    notes: sessionNotes(declaration, env),
   };
 }
 
@@ -609,5 +747,6 @@ export function formatInspection(inspection) {
     lines.push(...inspection.optional.map(line));
     lines.push(`  ${setupCommand} installs the declared optional skills.`);
   }
+  lines.push(...inspection.notes.map((note) => `Note: ${note}`));
   return lines.join("\n");
 }
