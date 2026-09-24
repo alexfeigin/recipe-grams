@@ -8,17 +8,32 @@ measurements for reproducible cooking. Get a kitchen scale and start cooking.
 
 ## Work locally
 
-Use the Node version in [`.nvmrc`](.nvmrc) (`nvm use`) and npm 11 or newer.
-The minimum supported versions are declared in [package.json](package.json).
-Node runs the TypeScript modules used by the checks directly.
+You do not need a terminal: open this folder with a coding agent and ask for
+what you want, such as a new recipe with a photo. If something is missing on a
+new Apple Silicon Mac, the agent installs it. macOS may ask for your password
+when Apple's developer tools or Homebrew are needed. GitHub authentication is
+handled when a later GitHub action needs it.
+
+Behind that, one command prepares a clean clone and then confirms that it is
+ready to work:
 
 ```bash
-npm ci
-npx playwright install chromium    # once per machine
+./scripts/init.sh            # install missing requirements; keep installed versions
+./scripts/init.sh --check    # fast, offline presence check before each task
+./scripts/init.sh --audit    # optional comparison with pinned skill files
+./scripts/init.sh --upgrade  # explicitly update managed versions
 npm run dev
 ```
 
-Linux may also need `npx playwright install-deps chromium`.
+Run `--check` at the start of every task. Setup accepts any installed version
+of the required tools and skills, installs only missing pieces, and exits
+quickly when everything is present. It does not test push permissions or
+change the Git remote. Only `--upgrade` updates installed versions.
+[dev-environment.json](dev-environment.json) declares the first-install pins;
+[Development](docs/development.md#development-environment) explains what
+"ready" covers and how each requirement is installed and upgraded.
+Node runs the TypeScript modules used by the checks directly.
+
 For search and production URLs, run `npm run build` then `npm run preview`:
 Pagefind indexes built HTML, so search has no index in the dev server.
 

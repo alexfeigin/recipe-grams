@@ -1,0 +1,202 @@
+{
+  "description": "--check and setup accept any installed version and report only missing requirements. --audit compares the pinned managed skills; --upgrade changes versions. See docs/development.md#development-environment.",
+  "platforms": ["darwin-arm64"],
+  "system": {
+    "commands": ["git", "gh"],
+    "commandLineTools": "/Library/Developer/CommandLineTools/usr/bin/git",
+    "homebrew": {
+      "prefix": "/opt/homebrew",
+      "installer": "https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg",
+      "signerTeamId": "927JGANW46",
+      "minimumMacOS": "15"
+    }
+  },
+  "runtime": {
+    "readiness": "Node and npm executables are present; installed versions are accepted",
+    "install": "brew install node, or nvm install (.nvmrc) where nvm is already used; --upgrade may replace installed Node or npm"
+  },
+  "dependencies": {
+    "lockfile": "package-lock.json",
+    "install": "npm ci"
+  },
+  "browsers": {
+    "playwright": ["chromium", "chromium-headless-shell"],
+    "install": "npx playwright install chromium"
+  },
+  "impeccable": {
+    "role": "required when absent; any installed version is accepted by setup and --check",
+    "source": "https://github.com/pbakaus/impeccable",
+    "installer": "impeccable@4.1.0",
+    "version": "4.3.1",
+    "bundle": {
+      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.3.1/universal.zip",
+      "sha256": "1deea4cdfb1608df6d9e08ef359629e7cc866a22ab7c2195a835627b887f190b"
+    },
+    "providers": ["claude", "codex"],
+    "adaptation": "scripts/impeccable-project-route.md",
+    "files": {
+      "darwin-arm64": {
+        ".agents/skills/impeccable": "089f459b0dd5332986bb823aef7606df24d5f95e2c0824fcc81fb060e48786da",
+        ".claude/agents/impeccable-asset-producer.md": "16734752e171e9e8904f77db94d82cb211e0f1002dc44c04b329ec71a9313747",
+        ".claude/agents/impeccable-documenter.md": "bca49de3d2b79f22923cc32353ef0ffb882221439497f11e33d7798e82e5ed63",
+        ".claude/agents/impeccable-finish-reviewer.md": "c9d324ca3053d8c36b3c1521e7044747a59a8876cfcecec2cd4566def46a32f9",
+        ".claude/agents/impeccable-manual-edit-applier.md": "634b3281cc67d711ab250078f096b511d4d7a6df660fdec0c71bd0e4edf2ab4b",
+        ".claude/skills/impeccable": "0d82701bb4f266e3fba4f32fdfa21d7a9f22ceb8dfc6db2148ceffc5eed0a263"
+      }
+    }
+  },
+  "mattpocockSkills": {
+    "role": "optional; any installed version is accepted, and setup installs missing named skills",
+    "source": "https://github.com/mattpocock/skills",
+    "installer": "skills@1.7.0",
+    "release": "v1.2.3",
+    "revision": "6acc160e4e0cd062dbbbd7a1b26ae92855edf07e",
+    "agents": ["codex", "claude-code"],
+    "skills": {
+      "ask-matt": {
+        "path": "skills/engineering/ask-matt",
+        "sha256": "367fe48927ebf3955d31faab896f0dce336ce4762c35235feec3a3c0f3946e39"
+      },
+      "claude-handoff": {
+        "path": "skills/in-progress/claude-handoff",
+        "sha256": "346851fe3fae2056b11d6ef44d5eb05fb0168d213962b573c68dc48b3353cd12"
+      },
+      "code-review": {
+        "path": "skills/engineering/code-review",
+        "sha256": "87e5599f02e09f336a29026a01ca1a7c5df47ae29ff6d9c917982b74c13e9a2c"
+      },
+      "codebase-design": {
+        "path": "skills/engineering/codebase-design",
+        "sha256": "260e0ff6b050b81b182cc2bc78a9dbd942c0f607848814f2ce6a1eb99b2e1e0c"
+      },
+      "diagnosing-bugs": {
+        "path": "skills/engineering/diagnosing-bugs",
+        "sha256": "cf9fab18abbb62071d00fbd5b1df29bf382c5c0bdffebc3f41d0d3d51da5bfff"
+      },
+      "domain-modeling": {
+        "path": "skills/engineering/domain-modeling",
+        "sha256": "31d5dad5de4aa33dcaf9395efc87fafc60520f4b6cd8b16f83810d69416d5a00"
+      },
+      "git-guardrails-claude-code": {
+        "path": "skills/misc/git-guardrails-claude-code",
+        "sha256": "592fdcc9980d81d8bd004618bfb120ff6f32af588aec70a86a3c87cd7ee5058f"
+      },
+      "grill-me": {
+        "path": "skills/productivity/grill-me",
+        "sha256": "f693707c398047ccd8720c63e5df24eebb036537d26c6a21b014a3e6ec86f1ea"
+      },
+      "grill-with-docs": {
+        "path": "skills/engineering/grill-with-docs",
+        "sha256": "c637b32aad9d171d94ed40372befd9a9e0382e9ab0d574ca3fa5f82417a6c89b"
+      },
+      "grilling": {
+        "path": "skills/productivity/grilling",
+        "sha256": "d183b346a3c8220634cb36cedb31b6a9083fab6dad4053009882f5e245727b5f"
+      },
+      "handoff": {
+        "path": "skills/productivity/handoff",
+        "sha256": "3dfedc5850737c0e051d291981d83fbd95c739ce22e1f54ba4d1cf1ec127aa27"
+      },
+      "implement": {
+        "path": "skills/engineering/implement",
+        "sha256": "63fb97cd240aa2445d251752cdaaf23cb64ef39eebd748b365848af7c9e03e73"
+      },
+      "improve-codebase-architecture": {
+        "path": "skills/engineering/improve-codebase-architecture",
+        "sha256": "c306109f290acd0a4d714b7cda675efa26677dd04a010abe472c7f20ec9046ca"
+      },
+      "loop-me": {
+        "path": "skills/in-progress/loop-me",
+        "sha256": "5a7dc476e191cc962860ea1f66b5ab390002b44573eb4aadfb643c56ace557b1"
+      },
+      "migrate-to-shoehorn": {
+        "path": "skills/misc/migrate-to-shoehorn",
+        "sha256": "426c8a64cee3b1c39047c29b6c1c8a67d551bb5463ac6e07fdfaf8ff65280a0a"
+      },
+      "prototype": {
+        "path": "skills/engineering/prototype",
+        "sha256": "2c4c892891f1aa42e92bc8c90ba38aaae86f814a819e0c893a697c5e3eaf126d"
+      },
+      "research": {
+        "path": "skills/engineering/research",
+        "sha256": "5f562313de7b87eecf89d4d6fc1bf0c1de1db0410dc72177bf1efef6794f8874"
+      },
+      "resolving-merge-conflicts": {
+        "path": "skills/engineering/resolving-merge-conflicts",
+        "sha256": "a331ecce1aa056217f573151f9e4fc867b074be6263b32919890394646e930e8"
+      },
+      "scaffold-exercises": {
+        "path": "skills/misc/scaffold-exercises",
+        "sha256": "334948082ac2f00490ba99515142e18843d6bbdcbb37fbdb7e40c51dff62998b"
+      },
+      "setup-matt-pocock-skills": {
+        "path": "skills/engineering/setup-matt-pocock-skills",
+        "sha256": "f0ced766680677d9b9a8893b42c790bc3e6e1b805d13f2806e7d850c15352d8a"
+      },
+      "setup-pre-commit": {
+        "path": "skills/misc/setup-pre-commit",
+        "sha256": "3233fcad1d4a1ac123d747d82e5055413c32d0383715148a46bbc87d7633398c"
+      },
+      "setup-ts-deep-modules": {
+        "path": "skills/in-progress/setup-ts-deep-modules",
+        "sha256": "75aeedcb5b9af8844ed6fa06264924015086b7212160b9ae728da26d530489f8"
+      },
+      "tdd": {
+        "path": "skills/engineering/tdd",
+        "sha256": "62e31a514eb6ce2306e129d51e6773c399cefdc5415f31de7e75b4c3ec521f7d"
+      },
+      "teach": {
+        "path": "skills/productivity/teach",
+        "sha256": "ffda1c20d95faf9aadcfff38df3ab56b784a17b6f3fa1ba85965c86f4526fa20"
+      },
+      "to-questionnaire": {
+        "path": "skills/productivity/to-questionnaire",
+        "sha256": "993e1bb6c0dcbd6c88566723370da77fa81d322010eb7a1f51ef0934927b397e"
+      },
+      "to-spec": {
+        "path": "skills/engineering/to-spec",
+        "sha256": "cb370e806309ee32fbc72b5f7704ffe31249b7f583d27f72ff2e3b740e713b42"
+      },
+      "to-tickets": {
+        "path": "skills/engineering/to-tickets",
+        "sha256": "39882361bb71d17e94b7f36c081e234491fe402a31e2c4c7488416fa2fafe6ed"
+      },
+      "triage": {
+        "path": "skills/engineering/triage",
+        "sha256": "b0664d5c63a51209434494cb0a142d189fac89a1e5efd8513f185aca4b0206e3"
+      },
+      "wait-what": {
+        "path": "skills/productivity/wait-what",
+        "sha256": "06aec0d86501e0ca8b127b9e8434a4e98ca4d5550ce69968846865e6391698d5"
+      },
+      "wayfinder": {
+        "path": "skills/engineering/wayfinder",
+        "sha256": "455b83c37a5239134ee52d16894c55f449560c7c5c2c70b1c2406f61878bf5c7"
+      },
+      "wizard": {
+        "path": "skills/engineering/wizard",
+        "sha256": "c5b3500a64a34b9b800ef40191607590acb20eb26c878c955261a417784c6479"
+      },
+      "writing-beats": {
+        "path": "skills/in-progress/writing-beats",
+        "sha256": "f547c73a01f2e187dad82a217f40c2d408aee53a8d22214b63f8dca5999023ed"
+      },
+      "writing-for-agents": {
+        "path": "skills/productivity/writing-for-agents",
+        "sha256": "f3f15b8e9b6545e52f1bdfb53c13e4d89284aa71f332440e6f8c178f62ddd881"
+      },
+      "writing-fragments": {
+        "path": "skills/in-progress/writing-fragments",
+        "sha256": "b74d27e8e6b4d9ea64ead23e271fd1f6ae06c93e22ee0f7629b70deebbf4dbe8"
+      },
+      "writing-shape": {
+        "path": "skills/in-progress/writing-shape",
+        "sha256": "753f32245bdf6921ef63d008d2bd24d141bd26e5f7feadda94f0d59fd1c34b76"
+      }
+    }
+  },
+  "unmanaged": [
+    "GitHub credentials and push permissions, and the Pages deployment checkout used for releases",
+    "Personal skills installed outside this declaration"
+  ]
+}

@@ -5,6 +5,25 @@ recipe sources and their existing paths.
 
 ## Working agreement
 
+Before a task, run the offline `./scripts/init.sh --check`. It accepts any
+installed version and reports missing requirements. When something is missing,
+prepare the [environment](docs/development.md#development-environment) yourself,
+then continue the original request. The person may not use a terminal: never
+ask them to run commands. First tell them what will be installed, that macOS
+may show its password window for Apple's developer tools and Homebrew, and that
+a first setup can take about 20 minutes. Then run `./scripts/init.sh` as a
+long-running command and wait for it.
+
+- Check GitHub authentication and push permissions only when a requested GitHub
+  action needs them; setup does not test or change repository access.
+- If it notes that this session's PATH lacks Homebrew, prefix later commands
+  with the `eval "$(/opt/homebrew/bin/brew shellenv)"` it names.
+- Setup installs missing pieces and accepts what is already installed. Run
+  `./scripts/init.sh --upgrade` only when the person explicitly wants newer
+  versions, after explaining what it would change.
+
+A ready environment is not verification or release authorization.
+
 Establish the requested outcome, source owner, and relevant existing checks using
 the [task-to-source/check table](docs/development.md#choose-a-focused-check).
 Read the guidance routed to that task; expand scope only for a dependency,
@@ -21,7 +40,8 @@ authorize publication; preserve the user's requested delivery scope and exclusio
 
 ## Workflows
 
-Load every applicable repository skill before acting:
+Load every applicable repository skill before acting (`$name` is the skill of
+that name, whether Codex or Claude Code loads it):
 
 - Any file change: `$recipe-grams-safety` protects and synchronizes the shared checkout.
 - Recipe text, translations, measurements, images, catalog, markers, or index: `$recipe-grams-authoring`.
@@ -34,6 +54,8 @@ handoffs; known task edits do not restart preparation. Apply the safety process
 to newly discovered, unaccounted-for work.
 
 Name tracked repository skills `recipe-grams-*`; other locally installed skills remain private.
+Keep each in `.agents/skills/<name>` and link it for Claude Code with
+`ln -s ../../.agents/skills/<name> .claude/skills/<name>`; never copy it.
 
 ## Context by task
 
