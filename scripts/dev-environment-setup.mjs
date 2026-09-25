@@ -32,7 +32,6 @@ import {
   isReady,
   readDeclaration,
   readProjectRoute,
-  setupCommand,
   skillVersion,
   detectNpmVersion,
   satisfiesRange,

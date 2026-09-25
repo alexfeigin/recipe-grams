@@ -659,7 +659,7 @@ test("setup fills in a missing Impeccable copy and keeps installed ones", async 
 
   const tools = fakeTools({
     env,
-    run: async (command, args, { cwd }) => {
+    run: async (command, _args, { cwd }) => {
       if (command !== "npx") return;
       write(cwd, `${codex}/SKILL.md`, upstreamSkill());
       write(cwd, `${claude}/SKILL.md`, upstreamSkill());
@@ -689,7 +689,7 @@ test("setup adds missing Claude Code copies of optional skills only", async (t) 
   await rm(path.join(root, ".claude/skills/tdd"), { recursive: true });
   const tools = fakeTools({
     env,
-    run: async (command, args, { cwd }) => {
+    run: async (command, _args, { cwd }) => {
       if (command === "npx") writeSkill(cwd, "tdd", "# TDD\n");
     },
   });
@@ -813,7 +813,7 @@ test("a failed upgrade leaves the declaration and installation unchanged", async
     [`${bundleUrl}.sig.json`]: { version: "10.0.0", sha256: sha256(bundle) },
   };
   // The new release moved the Setup step the project route depends on.
-  const installNewRelease = async (command, args, { cwd }) => {
+  const installNewRelease = async (command, _args, { cwd }) => {
     if (command === "npx")
       write(
         cwd,
@@ -854,7 +854,7 @@ test("upgrade moves installed optional skills to the new revision", async (t) =>
   const tools = fakeTools({
     env,
     responses: upstreamResponses({ revision: "new-revision" }),
-    run: async (command, args, { cwd }) => {
+    run: async (command, _args, { cwd }) => {
       if (command === "npx") writeSkill(cwd, "tdd", next);
     },
   });
@@ -885,7 +885,7 @@ test("an upgrade restores its pins when the final setup fails", async (t) => {
   const tools = fakeTools({
     env,
     responses: upstreamResponses({ revision: "new-revision" }),
-    run: async (command, args, { cwd }) => {
+    run: async (command, _args, { cwd }) => {
       if (command === "npx") writeSkill(cwd, "tdd", "# TDD\n");
     },
   });

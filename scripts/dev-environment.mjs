@@ -138,7 +138,7 @@ function readJson(file) {
 
 // Content hash of a file or directory: relative paths, executable bits, symlink
 // targets, and file contents. `transform` may normalize a file before hashing.
-export function hashTree(target, transform = (relative, content) => content) {
+export function hashTree(target, transform = (_relative, content) => content) {
   let stat;
   try {
     stat = lstatSync(target);
