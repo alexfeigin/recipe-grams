@@ -29,6 +29,9 @@ Manual publication runs its own single final gate under a checkout lock so the
 helper owns the exact output it releases. Prior verification remains review
 evidence, but does not substitute for this publication-owned gate; do not run a
 separate gate immediately before invoking the helper.
+The gate tests site sources and output, not the tools that operate the gate or
+publish it. Run verification, preview, publication, and setup tool tests
+separately when those tools change.
 
 [Development](../development.md#select-verification) owns check selection,
 commands, execution order, preview lifecycle, and artifact locations.

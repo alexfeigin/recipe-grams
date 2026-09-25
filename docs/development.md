@@ -183,6 +183,11 @@ A failure or subsequent relevant change invalidates the affected evidence;
 resolve it and reverify before completion. A specific uncovered concern can
 justify an additional check; record what it addresses.
 
+The release gate checks the site it will publish. Tests of the verification,
+preview, publication, and environment tools run separately with
+`npm run test:tooling` when those tools change; they are not part of the release
+gate.
+
 Routine UI maintenance uses existing interaction assertions, including keyboard
 focus tests, without a mandatory visual audit. Substantial new UI with unsettled
 coverage can warrant visual exploration; capture testable expectations in
@@ -194,10 +199,10 @@ automated assertions and end the visual loop once the behavior is satisfactory.
 npm run verify
 ```
 
-The runner performs Astro checks and TypeScript checking, source/fixture tests,
-a clean rebuild including Pagefind, generated-output checks, preview-server tests,
-and all maintained Chromium suites, in that order. Source failures stop the run
-before spending time on a build. Each kind of assertion has one owner.
+The runner performs Astro checks and TypeScript checking, site-source fixture
+tests, a clean rebuild including Pagefind, generated-output checks, and all
+maintained Chromium suites, in that order. Source failures stop the run before
+spending time on a build. Each kind of assertion has one owner.
 
 The runner starts and identifies its own preview on an OS-assigned loopback port.
 It closes that preview after success, failure, or interruption and never reuses or
@@ -236,7 +241,7 @@ instead (see below).
 | Development environment readiness, setup, and upgrades        | `scripts/init.sh`, `scripts/install-system-tools.sh`, `scripts/init-environment.mjs`, `scripts/dev-environment.mjs`, `scripts/dev-environment-setup.mjs`, `dev-environment.json`; keep the check offline and read-only, stage installs before replacing checkout copies, and record upgrades only after staging passes. | `npm run test:dev-environment`; `./scripts/init.sh --check` against the real checkout.                                                                                                                                                           |
 | Impeccable project route and context wrapper                  | `scripts/impeccable-project-route.md`, `scripts/impeccable-context.mjs`, the adaptation in `scripts/dev-environment.mjs`; keep routine UI fixes on the focused-maintenance route.                                                                                                                                       | `npm run test:dev-environment`                                                                                                                                                                                                                   |
 | Build/publication checkout exclusion and manual publication   | `scripts/build-site.mjs`, `scripts/publish-site.mjs`, `scripts/checkout-operation-lock.mjs`, `scripts/verify-site.mjs`, and the ignored `/.pages` entry in `.gitignore`; keep release authorization separate from verification and publish only the verified active checkout through the fixed deployment subtree.      | `npm run test:publish-site`                                                                                                                                                                                                                      |
-| All source/fixture checks in the pre-build group              | The pure suites selected by `package.json`.                                                                                                                                                                                                                                                                             | `npm run verify:pure`                                                                                                                                                                                                                            |
+| Site-source fixture checks in the pre-build group             | The site and recipe pure suites selected by `package.json`; tool tests run separately.                                                                                                                                                                                                                                  | `npm run verify:pure`                                                                                                                                                                                                                            |
 | Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                                          | `npm run verify:generated`                                                                                                                                                                                                                       |
 | Images published only under `/images/`                        | `public/images/`, `scripts/verify-static-assets.mjs`; retain existing assets according to ADR 0043.                                                                                                                                                                                                                     | `npm run verify:static-assets`                                                                                                                                                                                                                   |
 | Google Search Console verification file                       | `public/google*.html`, `scripts/verify-search-console.mjs`; preserve the exact verification content.                                                                                                                                                                                                                    | `npm run verify:search-console`                                                                                                                                                                                                                  |
