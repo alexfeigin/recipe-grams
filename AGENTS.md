@@ -5,7 +5,8 @@ recipe sources and their existing paths.
 
 ## Working agreement
 
-Before a task, run the offline `./scripts/init.sh --check`. It accepts any
+At the start of each session, run the offline `./scripts/init.sh --check` once.
+Rerun it if requirements may have changed or a tool is missing. It accepts any
 installed version and reports missing requirements. When something is missing,
 prepare the [environment](docs/development.md#development-environment) yourself,
 then continue the original request. The person may not use a terminal: never
@@ -14,8 +15,10 @@ may show its password window for Apple's developer tools and Homebrew, and that
 a first setup can take about 20 minutes. Then run `./scripts/init.sh` as a
 long-running command and wait for it.
 
-- Check GitHub authentication and push permissions only when a requested GitHub
-  action needs them; setup does not test or change repository access.
+- For a requested GitHub action, run the intended CLI operation first. If it
+  fails, diagnose authentication or permissions. A sandbox may lack access to
+  the developer machine's GitHub login, so a sandbox failure does not establish
+  that the machine is logged out. Setup does not test or change repository access.
 - If it notes that this session's PATH lacks Homebrew, prefix later commands
   with the `eval "$(/opt/homebrew/bin/brew shellenv)"` it names.
 - Setup installs missing pieces and accepts what is already installed. Run

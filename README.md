@@ -19,13 +19,14 @@ ready to work:
 
 ```bash
 ./scripts/init.sh            # install missing requirements; keep installed versions
-./scripts/init.sh --check    # fast, offline presence check before each task
+./scripts/init.sh --check    # fast, offline presence check once per session
 ./scripts/init.sh --audit    # optional comparison with pinned skill files
 ./scripts/init.sh --upgrade  # explicitly update managed versions
 npm run dev
 ```
 
-Run `--check` at the start of every task. Setup accepts any installed version
+Run `--check` once at the start of a session, and rerun it if requirements may
+have changed or a tool is missing. Setup accepts any installed version
 of the required tools and skills, installs only missing pieces, and exits
 quickly when everything is present. It does not test push permissions or
 change the Git remote. Only `--upgrade` updates installed versions.

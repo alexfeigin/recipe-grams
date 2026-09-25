@@ -64,8 +64,9 @@ access reports any authentication or permission failure at that time.
 
 ### Check, setup, and upgrade
 
-- `--check` is read-only, offline, and well under a second. It checks presence
-  before every task. It never builds, runs verification, publishes, or contacts
+- `--check` is read-only, offline, and well under a second. Run it once at the
+  start of a session, and rerun it if requirements may have changed or a tool is
+  missing. It never builds, runs verification, publishes, or contacts
   GitHub. Only missing required items produce a nonzero exit status.
 - `--audit` is an optional offline comparison of the installed Impeccable files
   and project route, and of the named Matt Pocock skills, against the declared
