@@ -28,8 +28,9 @@ The named Matt Pocock skills are optional: their absence is reported but does
 not fail `--check`. Setup installs missing Codex or Claude Code copies at the
 declared revision and leaves installed copies alone, whatever their version.
 Homebrew and Apple's Command Line Tools are installation helpers only when
-needed. GitHub login, repository permissions, the Git remote's protocol,
-personal skills, and the Pages deployment checkout are outside readiness.
+needed. GitHub login, repository permissions, the Git remote's protocol, and
+personal skills are outside readiness. Releases need no provisioned Pages
+checkout: the publication command clones its own on first use.
 
 Codex reads project skills from `.agents/skills` and Claude Code from
 `.claude/skills`. The tracked `recipe-grams-*` skills live once in
@@ -161,14 +162,14 @@ stale; ordinary setup keeps the installed version.
   category.
 - **Application logic, interaction, and recipe/site-source changes covered by the
   gate:** use the narrowest relevant existing check from the table below during
-  implementation, then run `npm run verify` on the finished work. Preserve
-  meaningful existing coverage; add assertions for behavior contracts worth
-  protecting, not tests that merely mirror implementation.
-- **Release:** invoke the publication helper from committed, pushed source. It
-  runs and owns one final gate, then publishes that invocation's exact output.
-  Do not run a separate final gate immediately before it. An earlier verification
-  remains evidence for unchanged source, but its output cannot establish the
-  helper's exclusive ownership and is not reused for publication.
+  implementation, then finish with one final gate: `npm run verify` when no live
+  release follows, or the publication helper's gate for an authorized release.
+  Preserve meaningful existing coverage; add assertions for behavior contracts
+  worth protecting, not tests that merely mirror implementation.
+- **Release:** after focused checks, commit and push source changes, then invoke
+  the publication helper as the one final gate. It verifies the committed source
+  under its checkout lock and publishes that invocation's exact output through
+  the checkout's ignored `.pages/` Pages clone, creating it when absent.
   Verification alone does not authorize a release;
   follow the [publishing workflow](../.agents/skills/recipe-grams-publishing/SKILL.md)
   within the user's delivery scope and publication exclusions.
@@ -179,6 +180,11 @@ after it without a specific reason. Stop when the applicable evidence passes.
 A failure or subsequent relevant change invalidates the affected evidence;
 resolve it and reverify before completion. A specific uncovered concern can
 justify an additional check; record what it addresses.
+
+The release gate checks the site it will publish. Tests of the verification,
+preview, publication, and environment tools run separately with
+`npm run test:tooling` when those tools change; they are not part of the release
+gate.
 
 Routine UI maintenance uses existing interaction assertions, including keyboard
 focus tests, without a mandatory visual audit. Substantial new UI with unsettled
@@ -191,10 +197,13 @@ automated assertions and end the visual loop once the behavior is satisfactory.
 npm run verify
 ```
 
-The runner performs Astro checks and TypeScript checking, source/fixture tests,
-a clean rebuild including Pagefind, generated-output checks, preview-server tests,
-and all maintained Chromium suites, in that order. Source failures stop the run
-before spending time on a build. Each kind of assertion has one owner.
+Use this standalone command when no live publication follows; the publication
+helper invokes the same runner as its final gate for a release.
+
+The runner performs Astro checks and TypeScript checking, site-source fixture
+tests, a clean rebuild including Pagefind, generated-output checks, and all
+maintained Chromium suites, in that order. Source failures stop the run before
+spending time on a build. Each kind of assertion has one owner.
 
 The runner starts and identifies its own preview on an OS-assigned loopback port.
 It closes that preview after success, failure, or interruption and never reuses or
@@ -232,8 +241,8 @@ instead (see below).
 | Focused browser dispatch and command lifecycle                | `scripts/focused-verification.mjs`, `scripts/verify-focused.mjs`, `scripts/command-lifecycle.mjs`; keep the suite allowlist aligned with the `verify:*:browser` commands, reuse `withPreview` instead of arranging a server, and keep interruption closing child work.                                                  | `npm run test:focused`                                                                                                                                                                                                                           |
 | Development environment readiness, setup, and upgrades        | `scripts/init.sh`, `scripts/install-system-tools.sh`, `scripts/init-environment.mjs`, `scripts/dev-environment.mjs`, `scripts/dev-environment-setup.mjs`, `dev-environment.json`; keep the check offline and read-only, stage installs before replacing checkout copies, and record upgrades only after staging passes. | `npm run test:dev-environment`; `./scripts/init.sh --check` against the real checkout.                                                                                                                                                           |
 | Impeccable project route and context wrapper                  | `scripts/impeccable-project-route.md`, `scripts/impeccable-context.mjs`, the adaptation in `scripts/dev-environment.mjs`; keep routine UI fixes on the focused-maintenance route.                                                                                                                                       | `npm run test:dev-environment`                                                                                                                                                                                                                   |
-| Build/publication checkout exclusion and manual publication   | `scripts/build-site.mjs`, `scripts/publish-site.mjs`, `scripts/checkout-operation-lock.mjs`, `scripts/verify-site.mjs`; keep release authorization separate from verification and publish only the verified active checkout through the fixed deployment subtree.                                                       | `npm run test:publish-site`                                                                                                                                                                                                                      |
-| All source/fixture checks in the pre-build group              | The pure suites selected by `package.json`.                                                                                                                                                                                                                                                                             | `npm run verify:pure`                                                                                                                                                                                                                            |
+| Build/publication checkout exclusion and manual publication   | `scripts/build-site.mjs`, `scripts/publish-site.mjs`, `scripts/checkout-operation-lock.mjs`, `scripts/verify-site.mjs`, and the ignored `/.pages` entry in `.gitignore`; keep release authorization separate from verification and publish only the verified active checkout through the fixed deployment subtree.      | `npm run test:publish-site`                                                                                                                                                                                                                      |
+| Site-source fixture checks in the pre-build group             | The site and recipe pure suites selected by `package.json`; tool tests run separately.                                                                                                                                                                                                                                  | `npm run verify:pure`                                                                                                                                                                                                                            |
 | Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                                          | `npm run verify:generated`                                                                                                                                                                                                                       |
 | Images published only under `/images/`                        | `public/images/`, `scripts/verify-static-assets.mjs`; retain existing assets according to ADR 0043.                                                                                                                                                                                                                     | `npm run verify:static-assets`                                                                                                                                                                                                                   |
 | Google Search Console verification file                       | `public/google*.html`, `scripts/verify-search-console.mjs`; preserve the exact verification content.                                                                                                                                                                                                                    | `npm run verify:search-console`                                                                                                                                                                                                                  |
@@ -287,8 +296,8 @@ matching. Unknown suites, unknown arguments, missing values, and invalid filters
 fail with the usage before anything is built or started, and a filter matching
 nothing fails instead of reporting success. Every run rebuilds from scratch
 including Pagefind, and the owned preview replaces any `SITE_BASE_URL` already
-in the environment. This is development feedback; it does not replace
-`npm run verify`.
+in the environment. This is development feedback; finish with the completion
+gate selected above.
 
 To check a running preview or published site, provide its URL with a trailing slash:
 

@@ -29,7 +29,6 @@ await runInterruptible(async (signal) => {
     await rm("dist", { recursive: true, force: true });
     await run("build", { RECIPE_GRAMS_CHECKOUT_LOCK: lock.token });
     await run("verify:generated");
-    await run("test:preview");
     await withPreview(async (baseUrl) => {
       console.log(`Checking this build at ${baseUrl}`);
       await run("verify:browser", { SITE_BASE_URL: baseUrl });

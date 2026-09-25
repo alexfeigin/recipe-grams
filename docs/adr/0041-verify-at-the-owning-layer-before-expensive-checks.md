@@ -26,9 +26,14 @@ those stages. Failures or relevant changes invalidate affected evidence and must
 be addressed before completion.
 
 Manual publication runs its own single final gate under a checkout lock so the
-helper owns the exact output it releases. Prior verification remains review
-evidence, but does not substitute for this publication-owned gate; do not run a
-separate gate immediately before invoking the helper.
+helper owns the exact output it releases. For an authorized release, use focused
+checks during implementation, then commit and push source changes before
+invoking the publication command as the one final gate. Use standalone
+`npm run verify` when no release follows.
+
+The gate tests site sources and output, not the tools that operate the gate or
+publish it. Run verification, preview, publication, and setup tool tests
+separately when those tools change.
 
 [Development](../development.md#select-verification) owns check selection,
 commands, execution order, preview lifecycle, and artifact locations.

@@ -2,20 +2,28 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import {
   chmod,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
   realpath,
   rename,
   rm,
+  readdir,
   symlink,
   writeFile,
 } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { test } from "node:test";
-import { publishSite, replacePublishedSubtree } from "./publish-site.mjs";
+import {
+  managedDestinationPath,
+  pagesCloneUrls,
+  publishSite,
+  replacePublishedSubtree,
+} from "./publish-site.mjs";
 
 const exec = promisify(execFile);
 
@@ -36,7 +44,8 @@ async function commitAll(root, message) {
 }
 
 async function setupRepositories(t, { published = "old\n" } = {}) {
-  const base = await mkdtemp(path.join(os.tmpdir(), "publish-site-test-"));
+  // Spaces exercise arbitrary checkout paths.
+  const base = await mkdtemp(path.join(os.tmpdir(), "publish site test "));
   t.after(() => rm(base, { recursive: true, force: true }));
   const source = path.join(base, "source");
   const sourceRemote = path.join(base, "source-remote.git");
@@ -50,7 +59,7 @@ async function setupRepositories(t, { published = "old\n" } = {}) {
     sourceRemote,
   ]);
   await initializeRepository(source);
-  await writeFile(path.join(source, ".gitignore"), ".astro/\ndist/\n");
+  await writeFile(path.join(source, ".gitignore"), ".astro/\ndist/\n/.pages\n");
   await writeFile(path.join(source, "source.txt"), "committed source\n");
   await commitAll(source, "Initial source");
   await git(source, "remote", "add", "origin", sourceRemote);
@@ -697,4 +706,573 @@ test("rejects source/destination overlap and a symlinked published subtree", asy
     publishSite(publicationOptions(repositories)),
     /Published subtree must be a real directory/,
   );
+});
+
+// The managed checkout is cloned from a file:// URL: Git's local-path clone
+// optimization would otherwise ignore --depth.
+async function setupManagedRepositories(t, options) {
+  const repositories = await setupRepositories(t, options);
+  // Give the remote history to truncate and a branch the clone should skip.
+  await writeFile(
+    path.join(repositories.destination, "history.txt"),
+    "later\n",
+  );
+  await commitAll(repositories.destination, "Later destination commit");
+  await git(repositories.destination, "push");
+  await git(repositories.destination, "push", "origin", "master:preview");
+  return {
+    ...repositories,
+    managed: managedDestinationPath(await realpath(repositories.source)),
+  };
+}
+
+function managedOptions(repositories, overrides = {}) {
+  const options = publicationOptions(repositories, {
+    expectedRemote: pathToFileURL(repositories.destinationRemote).href,
+    ...overrides,
+  });
+  delete options.destination;
+  return options;
+}
+
+function writesSite(content) {
+  return async ({ sourceRoot }) => {
+    await rm(path.join(sourceRoot, "dist"), { recursive: true, force: true });
+    await mkdir(path.join(sourceRoot, "dist"));
+    await writeFile(path.join(sourceRoot, "dist", "index.html"), content);
+  };
+}
+
+async function exists(candidate) {
+  try {
+    await lstat(candidate);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
+async function revision(root, ref = "HEAD") {
+  return (await git(root, "rev-parse", ref)).stdout.trim();
+}
+
+async function cloneWithIdentity(remote, target) {
+  await exec("git", ["clone", "--quiet", remote, target]);
+  await git(target, "config", "user.name", "Recipe-Grams Test");
+  await git(target, "config", "user.email", "recipe-grams@example.test");
+}
+
+async function pushRemoteCommit(repositories, name) {
+  const other = path.join(repositories.base, `remote writer ${name}`);
+  await cloneWithIdentity(repositories.destinationRemote, other);
+  await writeFile(path.join(other, `${name}.txt`), `${name}\n`);
+  await commitAll(other, `Remote ${name} commit`);
+  await git(other, "push");
+  return revision(other);
+}
+
+test("creates a shallow single-branch managed clone on first use and reuses it", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  assert.equal(await exists(repositories.managed), false);
+
+  const first = await publishSite(managedOptions(repositories));
+
+  assert.equal(first.status, "published");
+  assert.equal(
+    (
+      await git(repositories.managed, "rev-parse", "--is-shallow-repository")
+    ).stdout.trim(),
+    "true",
+  );
+  assert.equal(
+    (
+      await git(repositories.managed, "for-each-ref", "--format=%(refname)")
+    ).stdout.trim(),
+    "refs/heads/master\nrefs/remotes/origin/master",
+  );
+  assert.equal(
+    (
+      await git(
+        repositories.managed,
+        "rev-parse",
+        "--abbrev-ref",
+        "@{upstream}",
+      )
+    ).stdout.trim(),
+    "origin/master",
+  );
+  assert.equal(
+    await revision(repositories.destinationRemote, "master"),
+    await revision(repositories.managed),
+  );
+  assert.equal(
+    (
+      await git(
+        repositories.destinationRemote,
+        "show",
+        "master:recipe-grams/index.html",
+      )
+    ).stdout,
+    "new\n",
+  );
+  assert.equal(
+    (await git(repositories.source, "status", "--porcelain")).stdout,
+    "",
+  );
+  assert.deepEqual(await readdir(path.dirname(repositories.managed)), [
+    "alexfeigin.github.io",
+  ]);
+
+  await git(repositories.managed, "config", "recipe-grams.reused", "yes");
+  const second = await publishSite(
+    managedOptions(repositories, { verify: writesSite("newer\n") }),
+  );
+  assert.equal(second.status, "published");
+  assert.equal(
+    (
+      await git(repositories.managed, "config", "recipe-grams.reused")
+    ).stdout.trim(),
+    "yes",
+  );
+  assert.equal(
+    await revision(repositories.destinationRemote, "master"),
+    second.publicationRevision,
+  );
+});
+
+test("recreates the managed clone after a clean removes ignored files", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  await publishSite(managedOptions(repositories));
+  await git(repositories.source, "clean", "-ffdx");
+  assert.equal(await exists(repositories.managed), false);
+
+  const result = await publishSite(
+    managedOptions(repositories, { verify: writesSite("after clean\n") }),
+  );
+
+  assert.equal(result.status, "published");
+  assert.equal(
+    await revision(repositories.managed),
+    await revision(repositories.destinationRemote, "master"),
+  );
+});
+
+test("publishes each source checkout through its own managed clone", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const otherSource = path.join(repositories.base, "another place", "recipes");
+  await mkdir(path.dirname(otherSource));
+  await cloneWithIdentity(repositories.sourceRemote, otherSource);
+  const otherManaged = managedDestinationPath(await realpath(otherSource));
+
+  await publishSite(
+    managedOptions(repositories, { verify: writesSite("first\n") }),
+  );
+  const firstCheckoutHead = await revision(repositories.managed);
+  const second = await publishSite(
+    managedOptions(repositories, {
+      sourceRoot: otherSource,
+      verify: async (context) => {
+        assert.equal(context.sourceRoot, await realpath(otherSource));
+        await writesSite("second\n")(context);
+      },
+    }),
+  );
+
+  assert.equal(second.status, "published");
+  assert.notEqual(otherManaged, repositories.managed);
+  assert.equal(await revision(otherManaged), second.publicationRevision);
+  assert.equal(await revision(repositories.managed), firstCheckoutHead);
+  assert.equal(
+    (
+      await git(
+        repositories.destinationRemote,
+        "show",
+        "master:recipe-grams/index.html",
+      )
+    ).stdout,
+    "second\n",
+  );
+});
+
+const invalidOccupants = [
+  {
+    name: "a file",
+    error: /must be a real directory/,
+    async create({ managed }) {
+      await mkdir(path.dirname(managed));
+      await writeFile(managed, "not a checkout\n");
+    },
+    async snapshot({ managed }) {
+      return readFile(managed, "utf8");
+    },
+  },
+  {
+    name: "a symbolic link to a valid checkout",
+    error: /must be a real directory/,
+    async create({ managed, base, destinationRemote }) {
+      const elsewhere = path.join(base, "elsewhere");
+      await cloneWithIdentity(pathToFileURL(destinationRemote).href, elsewhere);
+      await mkdir(path.dirname(managed));
+      await symlink(elsewhere, managed);
+    },
+    async snapshot({ managed }) {
+      return (await lstat(managed)).isSymbolicLink();
+    },
+  },
+  {
+    name: "a symbolic link in place of the managed directory",
+    error: /Managed Pages directory must be a real directory/,
+    async create({ managed, base }) {
+      await mkdir(path.join(base, "linked pages"));
+      await symlink(path.join(base, "linked pages"), path.dirname(managed));
+    },
+    async snapshot({ managed }) {
+      return (await lstat(path.dirname(managed))).isSymbolicLink();
+    },
+  },
+  {
+    name: "a partial clone",
+    error: /not a complete Pages checkout/,
+    async create({ managed }) {
+      await mkdir(managed, { recursive: true });
+      await writeFile(path.join(managed, "index.html"), "partial\n");
+    },
+    async snapshot({ managed }) {
+      return readFile(path.join(managed, "index.html"), "utf8");
+    },
+  },
+  {
+    name: "the wrong repository",
+    error: /Destination origin fetch URL .* expected/,
+    async create({ managed, sourceRemote }) {
+      await mkdir(path.dirname(managed));
+      await cloneWithIdentity(pathToFileURL(sourceRemote).href, managed);
+    },
+  },
+  {
+    name: "the wrong branch",
+    error: /Destination must be on master; found preview/,
+    async create({ managed, destinationRemote }) {
+      await mkdir(path.dirname(managed));
+      await cloneWithIdentity(pathToFileURL(destinationRemote).href, managed);
+      await git(managed, "switch", "--quiet", "preview");
+    },
+  },
+  {
+    name: "a dirty checkout",
+    error: /Destination checkout has uncommitted or staged work/,
+    async create({ managed, destinationRemote }) {
+      await mkdir(path.dirname(managed));
+      await cloneWithIdentity(pathToFileURL(destinationRemote).href, managed);
+      await writeFile(path.join(managed, "unrelated.txt"), "unfinished\n");
+    },
+  },
+  {
+    name: "a divergent checkout",
+    error: /could not fast-forward/,
+    async create(repositories) {
+      const { managed, destinationRemote } = repositories;
+      await mkdir(path.dirname(managed));
+      await cloneWithIdentity(pathToFileURL(destinationRemote).href, managed);
+      await writeFile(path.join(managed, "local.txt"), "local\n");
+      await commitAll(managed, "Local destination commit");
+      await pushRemoteCommit(repositories, "divergent");
+    },
+  },
+];
+
+for (const occupant of invalidOccupants) {
+  test(`refuses a managed path occupied by ${occupant.name} without changing it`, async (t) => {
+    const repositories = await setupManagedRepositories(t);
+    await occupant.create(repositories);
+    const snapshot = async () =>
+      occupant.snapshot
+        ? occupant.snapshot(repositories)
+        : [
+            await revision(repositories.managed),
+            (await git(repositories.managed, "status", "--porcelain")).stdout,
+            (await git(repositories.managed, "branch", "--show-current"))
+              .stdout,
+          ];
+    const before = await snapshot();
+    const remoteBefore = await revision(
+      repositories.destinationRemote,
+      "master",
+    );
+    let verified = false;
+
+    await assert.rejects(
+      publishSite(
+        managedOptions(repositories, { verify: async () => (verified = true) }),
+      ),
+      occupant.error,
+    );
+
+    assert.equal(verified, false);
+    assert.deepEqual(await snapshot(), before);
+    assert.equal(
+      await revision(repositories.destinationRemote, "master"),
+      remoteBefore,
+    );
+  });
+}
+
+test("a failed clone creates no managed checkout", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  let verified = false;
+  await assert.rejects(
+    publishSite(
+      managedOptions(repositories, {
+        expectedRemote: pathToFileURL(
+          path.join(repositories.base, "missing-remote.git"),
+        ).href,
+        verify: async () => (verified = true),
+      }),
+    ),
+    /Could not clone the Pages repository; no managed checkout was created/,
+  );
+  assert.equal(verified, false);
+  assert.deepEqual(await readdir(path.dirname(repositories.managed)), []);
+});
+
+test("an interrupted clone's staging is discarded and the checkout is recreated", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const staging = path.join(
+    path.dirname(repositories.managed),
+    ".clone-interrupted",
+  );
+  const stale = path.join(staging, "alexfeigin.github.io");
+  await mkdir(stale, { recursive: true });
+  await writeFile(
+    path.join(staging, ".recipe-grams-publish-site-staging"),
+    "recipe-grams publish-site staging\n",
+  );
+  await writeFile(path.join(stale, "partial.txt"), "partial\n");
+
+  const result = await publishSite(managedOptions(repositories));
+
+  assert.equal(result.status, "published");
+  assert.deepEqual(await readdir(path.dirname(repositories.managed)), [
+    "alexfeigin.github.io",
+  ]);
+});
+
+test("preserves unrelated ignored directories while removing owned clone staging", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const parent = path.dirname(repositories.managed);
+  const unrelated = path.join(parent, ".clone-notes");
+  await mkdir(unrelated, { recursive: true });
+  await writeFile(path.join(unrelated, "work.txt"), "keep this\n");
+
+  const result = await publishSite(managedOptions(repositories));
+
+  assert.equal(result.status, "published");
+  assert.equal(
+    await readFile(path.join(unrelated, "work.txt"), "utf8"),
+    "keep this\n",
+  );
+});
+
+test("source preflight failures do not create a managed checkout", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  await writeFile(path.join(repositories.source, "source.txt"), "dirty\n");
+  await assert.rejects(
+    publishSite(managedOptions(repositories)),
+    /Source checkout has uncommitted or staged work/,
+  );
+  assert.equal(await exists(path.dirname(repositories.managed)), false);
+
+  await git(repositories.source, "restore", "source.txt");
+  await writeFile(
+    path.join(repositories.source, ".gitignore"),
+    ".astro/\ndist/\n",
+  );
+  await commitAll(repositories.source, "Stop ignoring the Pages checkout");
+  await git(repositories.source, "push");
+  await assert.rejects(
+    publishSite(managedOptions(repositories)),
+    /does not ignore \.pages\/alexfeigin\.github\.io\//,
+  );
+  assert.equal(await exists(path.dirname(repositories.managed)), false);
+});
+
+test("concurrent first publications from one checkout initialize one clone", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  let started;
+  const verifying = new Promise((resolve) => (started = resolve));
+  let release;
+  const held = new Promise((resolve) => (release = resolve));
+  const first = publishSite(
+    managedOptions(repositories, {
+      verify: async (context) => {
+        started();
+        await held;
+        await writesSite("new\n")(context);
+      },
+    }),
+  );
+  const second = publishSite(managedOptions(repositories));
+  try {
+    await assert.rejects(second, /Another verification or publication owns/);
+  } finally {
+    await verifying;
+    release();
+  }
+  assert.equal((await first).status, "published");
+  assert.deepEqual(await readdir(path.dirname(repositories.managed)), [
+    "alexfeigin.github.io",
+  ]);
+});
+
+test("stops instead of reporting unchanged when the remote advances during verification", async (t) => {
+  const repositories = await setupManagedRepositories(t, {
+    published: "new\n",
+  });
+  await rm(path.join(repositories.destination, "recipe-grams", "obsolete.txt"));
+  await commitAll(repositories.destination, "Remove obsolete output");
+  await git(repositories.destination, "push");
+  let raced;
+
+  await assert.rejects(
+    publishSite(
+      managedOptions(repositories, {
+        verify: async (context) => {
+          raced = await pushRemoteCommit(repositories, "concurrent");
+          await writesSite("new\n")(context);
+        },
+      }),
+    ),
+    /origin\/master advanced from .* during verification.*Rerun publication/s,
+  );
+
+  assert.equal(await revision(repositories.destinationRemote, "master"), raced);
+  assert.notEqual(await revision(repositories.managed), raced);
+  assert.equal(
+    (await git(repositories.managed, "status", "--porcelain")).stdout,
+    "",
+  );
+});
+
+test("stops instead of reporting unchanged when the remote advances during copy", async (t) => {
+  const repositories = await setupManagedRepositories(t, {
+    published: "new\n",
+  });
+  await rm(path.join(repositories.destination, "recipe-grams", "obsolete.txt"));
+  await commitAll(repositories.destination, "Remove obsolete output");
+  await git(repositories.destination, "push");
+  let raced;
+
+  await assert.rejects(
+    publishSite(
+      managedOptions(repositories, {
+        copy: async (options) => {
+          raced = await pushRemoteCommit(repositories, "during-copy");
+          await replacePublishedSubtree(options);
+        },
+      }),
+    ),
+    /origin\/master advanced from .*Rerun publication/s,
+  );
+
+  assert.equal(await revision(repositories.destinationRemote, "master"), raced);
+  assert.notEqual(await revision(repositories.managed), raced);
+});
+
+test("a new managed clone commits as the source's repository-local identity", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const globalConfig = path.join(repositories.base, "global.gitconfig");
+  // Without a configured identity, Git must refuse rather than guess one.
+  await writeFile(globalConfig, "[user]\n\tuseConfigOnly = true\n");
+  const saved = {
+    GIT_CONFIG_GLOBAL: process.env.GIT_CONFIG_GLOBAL,
+    GIT_CONFIG_NOSYSTEM: process.env.GIT_CONFIG_NOSYSTEM,
+  };
+  process.env.GIT_CONFIG_GLOBAL = globalConfig;
+  process.env.GIT_CONFIG_NOSYSTEM = "1";
+  t.after(() => {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+
+  const result = await publishSite(managedOptions(repositories));
+
+  assert.equal(result.status, "published");
+  assert.equal(
+    (
+      await git(
+        repositories.destinationRemote,
+        "log",
+        "-1",
+        "--format=%an <%ae>",
+        "master",
+      )
+    ).stdout.trim(),
+    "Recipe-Grams Test <recipe-grams@example.test>",
+  );
+  assert.equal(
+    await readFile(globalConfig, "utf8"),
+    "[user]\n\tuseConfigOnly = true\n",
+  );
+});
+
+test("clones through the source checkout's transport first", () => {
+  const ssh = "git@github.com:alexfeigin/alexfeigin.github.io.git";
+  const https = "https://github.com/alexfeigin/alexfeigin.github.io.git";
+  assert.deepEqual(
+    pagesCloneUrls(ssh, "git@github.com:alexfeigin/recipe-grams.git"),
+    [ssh, https],
+  );
+  assert.deepEqual(
+    pagesCloneUrls(ssh, "https://github.com/alexfeigin/recipe-grams"),
+    [https, ssh],
+  );
+  assert.deepEqual(pagesCloneUrls(https, "ssh://git@github.com/a/b.git"), [
+    ssh,
+    https,
+  ]);
+  assert.deepEqual(pagesCloneUrls("/srv/pages.git", "https://x/y"), [
+    "/srv/pages.git",
+  ]);
+});
+
+test("an explicit destination is never created", async (t) => {
+  const repositories = await setupRepositories(t);
+  const missing = path.join(repositories.base, "missing pages");
+  await assert.rejects(
+    publishSite(publicationOptions(repositories, { destination: missing })),
+    /Destination checkout does not exist/,
+  );
+  assert.equal(await exists(missing), false);
+});
+
+test("rejects a nested explicit destination other than the managed checkout", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const nested = path.join(repositories.source, ".pages", "other");
+  await mkdir(path.dirname(nested));
+  await cloneWithIdentity(
+    pathToFileURL(repositories.destinationRemote).href,
+    nested,
+  );
+  await assert.rejects(
+    publishSite(
+      publicationOptions(repositories, {
+        destination: nested,
+        expectedRemote: pathToFileURL(repositories.destinationRemote).href,
+      }),
+    ),
+    /Source and destination repositories must be separate paths/,
+  );
+
+  await publishSite(managedOptions(repositories));
+  const explicit = await publishSite(
+    publicationOptions(repositories, {
+      destination: repositories.managed,
+      expectedRemote: pathToFileURL(repositories.destinationRemote).href,
+      verify: writesSite("explicit\n"),
+    }),
+  );
+  assert.equal(explicit.status, "published");
 });
