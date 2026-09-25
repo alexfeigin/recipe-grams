@@ -33,11 +33,14 @@ publication command. Commit and push the source branch first.
 npm run publish:site -- --message "{short commit message}"
 ```
 
-The destination defaults to `~/sources/alexfeigin.github.io/`; use
-`--destination <checkout>` for the same repository at another path. The helper
-runs the final gate once, owns that run's output, replaces only
-`recipe-grams/`, and pushes the deployment commit. Do not run a separate final
-gate immediately before it.
+This one command works from any clone or worktree, including a fresh one. By
+default the helper publishes through this checkout's ignored
+`.pages/alexfeigin.github.io/` clone, creating it on first use and recreating it
+after it is removed; there is no manual clone or setup step.
+`--destination <checkout>` instead names an existing checkout of the same Pages
+repository. The helper runs the final gate once, owns that run's output,
+replaces only `recipe-grams/`, and pushes the deployment commit. Do not run a
+separate final gate immediately before it.
 
 **Success:** Carry forward the helper's source revision, destination, deployment
 revision or no-change result, and site link. Stop after a successful push; Pages
@@ -45,8 +48,10 @@ may take time to update, and publication does not include live-site polling or a
 post-push browser audit.
 
 **Exceptions:** The helper preserves dirty or staged destination work and stops
-on source-state problems, unexpected identity or branch, divergence, concurrent
-verification, scoped-copy violations, and failed Git operations. Report its
+on source-state problems, an invalid occupant at the managed Pages path,
+unexpected identity or branch, divergence, a remote that advanced during
+verification, concurrent verification, scoped-copy violations, and failed Git
+operations, including a failed first clone. Report its
 actionable error and leave recovery state visible. Resolve exceptional state
 explicitly, preserving unrelated work; a rejected push is not retried through
 reset, rebase, stash, or force-push.

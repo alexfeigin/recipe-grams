@@ -196,7 +196,7 @@
     }
   },
   "unmanaged": [
-    "GitHub credentials and push permissions, and the Pages deployment checkout used for releases",
+    "GitHub credentials and push permissions",
     "Personal skills installed outside this declaration"
   ]
 }
