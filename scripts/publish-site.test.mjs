@@ -1038,12 +1038,16 @@ test("a failed clone creates no managed checkout", async (t) => {
 
 test("an interrupted clone's staging is discarded and the checkout is recreated", async (t) => {
   const repositories = await setupManagedRepositories(t);
-  const stale = path.join(
+  const staging = path.join(
     path.dirname(repositories.managed),
     ".clone-interrupted",
-    "alexfeigin.github.io",
   );
+  const stale = path.join(staging, "alexfeigin.github.io");
   await mkdir(stale, { recursive: true });
+  await writeFile(
+    path.join(staging, ".recipe-grams-publish-site-staging"),
+    "recipe-grams publish-site staging\n",
+  );
   await writeFile(path.join(stale, "partial.txt"), "partial\n");
 
   const result = await publishSite(managedOptions(repositories));
@@ -1052,6 +1056,22 @@ test("an interrupted clone's staging is discarded and the checkout is recreated"
   assert.deepEqual(await readdir(path.dirname(repositories.managed)), [
     "alexfeigin.github.io",
   ]);
+});
+
+test("preserves unrelated ignored directories while removing owned clone staging", async (t) => {
+  const repositories = await setupManagedRepositories(t);
+  const parent = path.dirname(repositories.managed);
+  const unrelated = path.join(parent, ".clone-notes");
+  await mkdir(unrelated, { recursive: true });
+  await writeFile(path.join(unrelated, "work.txt"), "keep this\n");
+
+  const result = await publishSite(managedOptions(repositories));
+
+  assert.equal(result.status, "published");
+  assert.equal(
+    await readFile(path.join(unrelated, "work.txt"), "utf8"),
+    "keep this\n",
+  );
 });
 
 test("source preflight failures do not create a managed checkout", async (t) => {
@@ -1132,6 +1152,31 @@ test("stops instead of reporting unchanged when the remote advances during verif
     (await git(repositories.managed, "status", "--porcelain")).stdout,
     "",
   );
+});
+
+test("stops instead of reporting unchanged when the remote advances during copy", async (t) => {
+  const repositories = await setupManagedRepositories(t, {
+    published: "new\n",
+  });
+  await rm(path.join(repositories.destination, "recipe-grams", "obsolete.txt"));
+  await commitAll(repositories.destination, "Remove obsolete output");
+  await git(repositories.destination, "push");
+  let raced;
+
+  await assert.rejects(
+    publishSite(
+      managedOptions(repositories, {
+        copy: async (options) => {
+          raced = await pushRemoteCommit(repositories, "during-copy");
+          await replacePublishedSubtree(options);
+        },
+      }),
+    ),
+    /origin\/master advanced from .*Rerun publication/s,
+  );
+
+  assert.equal(await revision(repositories.destinationRemote, "master"), raced);
+  assert.notEqual(await revision(repositories.managed), raced);
 });
 
 test("a new managed clone commits as the source's repository-local identity", async (t) => {

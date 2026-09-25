@@ -10,6 +10,7 @@ import {
   realpath,
   rename,
   rm,
+  writeFile,
 } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -19,6 +20,7 @@ import { acquireCheckoutOperationLock } from "./checkout-operation-lock.mjs";
 const managedPagesDirectory = ".pages";
 const managedCheckoutName = "alexfeigin.github.io";
 const cloneStagingPrefix = ".clone-";
+const cloneStagingMarker = ".recipe-grams-publish-site-staging";
 const expectedDestinationRemote =
   "git@github.com:alexfeigin/alexfeigin.github.io.git";
 const publishedSubtree = "recipe-grams";
@@ -274,14 +276,33 @@ async function cloneManagedDestination({
     if (error.code !== "EEXIST") throw error;
   }
   requireRealDirectory(await lstat(parent), parent, "Managed Pages directory");
-  // The source lock is held, so any staging directory is from an interrupted run.
+  // The source lock excludes another publication, but ignored .pages/ may also
+  // contain unrelated work. Remove only staging that this helper marked.
   for (const entry of await readdir(parent)) {
     if (entry.startsWith(cloneStagingPrefix)) {
-      await rm(path.join(parent, entry), { recursive: true, force: true });
+      const candidate = path.join(parent, entry);
+      const candidateStats = await lstatIfPresent(candidate);
+      if (!candidateStats?.isDirectory() || candidateStats.isSymbolicLink()) {
+        continue;
+      }
+      const marker = path.join(candidate, cloneStagingMarker);
+      const markerStats = await lstatIfPresent(marker);
+      if (
+        markerStats?.isFile() &&
+        !markerStats.isSymbolicLink() &&
+        (await readFile(marker, "utf8")) ===
+          "recipe-grams publish-site staging\n"
+      ) {
+        await rm(candidate, { recursive: true, force: true });
+      }
     }
   }
   const staging = await mkdtemp(path.join(parent, cloneStagingPrefix));
   try {
+    await writeFile(
+      path.join(staging, cloneStagingMarker),
+      "recipe-grams publish-site staging\n",
+    );
     const cloned = path.join(staging, managedCheckoutName);
     const failures = [];
     let clonedUrl;
@@ -824,6 +845,10 @@ export async function publishSite({
     log(`Source revision: ${initialSource.revision}`);
     log(`Destination: ${resolvedDestination} (${publishedSubtree}/)`);
     if (staged.length === 0) {
+      await requireRemoteUnchanged(
+        resolvedDestination,
+        synchronizedDestination.revision,
+      );
       log(
         "Publication result: published content already matches; no commit or push was needed.",
       );
