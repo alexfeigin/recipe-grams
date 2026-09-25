@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import {
   cp,
   lstat,
+  mkdir,
   mkdtemp,
   readdir,
   readFile,
@@ -10,16 +11,14 @@ import {
   rename,
   rm,
 } from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { acquireCheckoutOperationLock } from "./checkout-operation-lock.mjs";
 
-const defaultDestination = path.join(
-  os.homedir(),
-  "sources",
-  "alexfeigin.github.io",
-);
+// The default destination is a command-owned clone inside the active checkout.
+const managedPagesDirectory = ".pages";
+const managedCheckoutName = "alexfeigin.github.io";
+const cloneStagingPrefix = ".clone-";
 const expectedDestinationRemote =
   "git@github.com:alexfeigin/alexfeigin.github.io.git";
 const publishedSubtree = "recipe-grams";
@@ -201,7 +200,161 @@ async function sourceState(sourceRoot, { fetch = false } = {}) {
       `Source branch ${branch} is not exactly at its upstream revision. Push committed source changes and resolve remote differences first.`,
     );
   }
-  return { branch, revision };
+  return { branch, remote, revision };
+}
+
+export function managedDestinationPath(sourceRoot) {
+  return path.join(sourceRoot, managedPagesDirectory, managedCheckoutName);
+}
+
+// Offer both GitHub transports for the expected repository, starting with the
+// one the source checkout already uses. A local remote has only itself.
+export function pagesCloneUrls(expectedRemote, sourceRemoteUrl = "") {
+  const normalized = normalizeRemote(expectedRemote, process.cwd());
+  if (path.isAbsolute(normalized)) return [expectedRemote];
+  const separator = normalized.indexOf("/");
+  const host = normalized.slice(0, separator);
+  const repository = normalized.slice(separator + 1);
+  const ssh = `git@${host}:${repository}.git`;
+  const https = `https://${host}/${repository}.git`;
+  return /^https?:\/\//i.test(sourceRemoteUrl.trim())
+    ? [https, ssh]
+    : [ssh, https];
+}
+
+async function lstatIfPresent(candidate) {
+  try {
+    return await lstat(candidate);
+  } catch (error) {
+    if (error.code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+function requireRealDirectory(stats, candidate, label) {
+  if (stats.isSymbolicLink() || !stats.isDirectory()) {
+    throw new Error(
+      `${label} must be a real directory, not a file or symbolic link: ${candidate}. Move it aside, then retry to recreate it.`,
+    );
+  }
+}
+
+// Commit as the source repository's configured identity when the new clone has
+// none of its own, without touching global Git configuration.
+async function inheritCommitIdentity(sourceRoot, checkout) {
+  for (const key of ["user.name", "user.email"]) {
+    if (await optionalGitOutput(checkout, ["config", "--get", key])) continue;
+    const value = await optionalGitOutput(sourceRoot, ["config", "--get", key]);
+    if (value) await git(checkout, ["config", "--local", key, value]);
+  }
+}
+
+async function cloneManagedDestination({
+  sourceRoot,
+  sourceRemoteUrl,
+  expectedRemote,
+  parent,
+  checkout,
+}) {
+  const relative = path
+    .relative(sourceRoot, checkout)
+    .split(path.sep)
+    .join("/");
+  try {
+    await git(sourceRoot, ["check-ignore", "--quiet", "--", `${relative}/`]);
+  } catch (error) {
+    throw new Error(
+      `Source checkout does not ignore ${relative}/; publish from a revision whose .gitignore excludes ${managedPagesDirectory}/.`,
+      { cause: error },
+    );
+  }
+  try {
+    await mkdir(parent);
+  } catch (error) {
+    if (error.code !== "EEXIST") throw error;
+  }
+  requireRealDirectory(await lstat(parent), parent, "Managed Pages directory");
+  // The source lock is held, so any staging directory is from an interrupted run.
+  for (const entry of await readdir(parent)) {
+    if (entry.startsWith(cloneStagingPrefix)) {
+      await rm(path.join(parent, entry), { recursive: true, force: true });
+    }
+  }
+  const staging = await mkdtemp(path.join(parent, cloneStagingPrefix));
+  try {
+    const cloned = path.join(staging, managedCheckoutName);
+    const failures = [];
+    let clonedUrl;
+    for (const url of pagesCloneUrls(expectedRemote, sourceRemoteUrl)) {
+      try {
+        await runProcess(
+          "git",
+          [
+            "clone",
+            "--quiet",
+            "--depth",
+            "1",
+            "--single-branch",
+            "--branch",
+            publishingBranch,
+            "--",
+            url,
+            cloned,
+          ],
+          { env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } },
+        );
+        clonedUrl = url;
+        break;
+      } catch (error) {
+        failures.push(error.message);
+        await rm(cloned, { recursive: true, force: true });
+      }
+    }
+    if (!clonedUrl) {
+      throw new Error(
+        `Could not clone the Pages repository; no managed checkout was created. Check GitHub access for ${expectedRemote}, then retry.\n${failures.join("\n")}`,
+      );
+    }
+    await inheritCommitIdentity(sourceRoot, cloned);
+    if (await lstatIfPresent(checkout)) {
+      throw new Error(
+        `Managed Pages checkout appeared during cloning: ${checkout}`,
+      );
+    }
+    await rename(cloned, checkout);
+  } finally {
+    await rm(staging, { recursive: true, force: true });
+  }
+}
+
+// Reuse the managed checkout when present; otherwise create it. An existing
+// occupant is never replaced, and later checks validate its repository state.
+async function prepareManagedDestination({
+  sourceRoot,
+  sourceRemoteUrl,
+  expectedRemote,
+  log,
+}) {
+  const checkout = managedDestinationPath(sourceRoot);
+  const parent = path.dirname(checkout);
+  const parentStats = await lstatIfPresent(parent);
+  if (parentStats) {
+    requireRealDirectory(parentStats, parent, "Managed Pages directory");
+    const checkoutStats = await lstatIfPresent(checkout);
+    if (checkoutStats) {
+      requireRealDirectory(checkoutStats, checkout, "Managed Pages checkout");
+      return checkout;
+    }
+  }
+  log(`Creating managed Pages checkout at ${checkout}...`);
+  await cloneManagedDestination({
+    sourceRoot,
+    sourceRemoteUrl,
+    expectedRemote,
+    parent,
+    checkout,
+  });
+  return checkout;
 }
 
 async function validatePublishedSubtree(destinationRoot) {
@@ -305,6 +458,20 @@ async function destinationState(
     branch,
     revision,
   };
+}
+
+// Another checkout may publish while this one verifies; never report or commit
+// against a stale view of the remote.
+async function requireRemoteUnchanged(destinationRoot, revision) {
+  await git(destinationRoot, ["fetch", "--quiet", "origin", publishingBranch]);
+  const remoteRevision = cleanOutput(
+    await git(destinationRoot, ["rev-parse", "FETCH_HEAD"]),
+  );
+  if (remoteRevision !== revision) {
+    throw new Error(
+      `Destination origin/${publishingBranch} advanced from ${revision} to ${remoteRevision} during verification, probably through another publication; nothing was copied or committed. Rerun publication to verify against the new destination state.`,
+    );
+  }
 }
 
 async function changedDestinationPaths(destinationRoot) {
@@ -469,9 +636,39 @@ async function defaultVerify({ sourceRoot, lockToken }) {
   });
 }
 
+async function resolveDestination({
+  sourceRoot,
+  sourceRemote,
+  destination,
+  expectedRemote,
+  log,
+}) {
+  if (destination !== undefined) {
+    return requireRepositoryRoot(destination, "Destination checkout");
+  }
+  const checkout = await prepareManagedDestination({
+    sourceRoot,
+    sourceRemoteUrl: await optionalGitOutput(sourceRoot, [
+      "remote",
+      "get-url",
+      sourceRemote,
+    ]),
+    expectedRemote,
+    log,
+  });
+  try {
+    return await requireRepositoryRoot(checkout, "Managed Pages checkout");
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nIt is not a complete Pages checkout. Move it aside, then retry to recreate it.`,
+      { cause: error.cause },
+    );
+  }
+}
+
 export async function publishSite({
   sourceRoot,
-  destination = defaultDestination,
+  destination,
   message,
   expectedRemote = expectedDestinationRemote,
   verify = defaultVerify,
@@ -484,30 +681,37 @@ export async function publishSite({
     sourceRoot,
     "Source checkout",
   );
-  const resolvedDestination = await requireRepositoryRoot(
-    destination,
-    "Destination checkout",
-  );
-  if (
-    resolvedSource === resolvedDestination ||
-    isInside(resolvedSource, resolvedDestination) ||
-    isInside(resolvedDestination, resolvedSource)
-  ) {
-    throw new Error(
-      "Source and destination repositories must be separate paths.",
-    );
-  }
   const output = path.resolve(resolvedSource, "dist");
   if (!isInside(resolvedSource, output)) {
     throw new Error(`Invalid generated output path: ${output}`);
   }
-  const target = await validatePublishedSubtree(resolvedDestination);
+  // Hold the source lock before inspecting or creating the managed checkout.
   const lock = await acquireCheckoutOperationLock(resolvedSource, {
     purpose: "site publication",
   });
 
   let destinationLock;
   try {
+    const initialSource = await sourceState(resolvedSource, { fetch: true });
+    const resolvedDestination = await resolveDestination({
+      sourceRoot: resolvedSource,
+      sourceRemote: initialSource.remote,
+      destination,
+      expectedRemote,
+      log,
+    });
+    // Only the managed checkout may be nested inside the source checkout.
+    if (
+      resolvedSource === resolvedDestination ||
+      isInside(resolvedDestination, resolvedSource) ||
+      (isInside(resolvedSource, resolvedDestination) &&
+        resolvedDestination !== managedDestinationPath(resolvedSource))
+    ) {
+      throw new Error(
+        "Source and destination repositories must be separate paths.",
+      );
+    }
+    const target = await validatePublishedSubtree(resolvedDestination);
     const gitDirectory = cleanOutput(
       await git(resolvedDestination, [
         "rev-parse",
@@ -519,7 +723,6 @@ export async function publishSite({
       purpose: "destination publication",
       lockDirectory: gitDirectory,
     });
-    const initialSource = await sourceState(resolvedSource, { fetch: true });
     await destinationState(resolvedDestination, expectedRemote);
     try {
       await git(resolvedDestination, [
@@ -559,6 +762,10 @@ export async function publishSite({
         "Destination revision changed during verification; nothing was copied.",
       );
     }
+    await requireRemoteUnchanged(
+      resolvedDestination,
+      synchronizedDestination.revision,
+    );
 
     const outputDigest = await digestTree(output);
     await copy({
@@ -656,11 +863,16 @@ export async function publishSite({
 }
 
 function usage() {
-  return `Usage: npm run publish:site -- [--destination <checkout>] --message <message>\n\nThis performs a live publication after running the full verification gate.`;
+  return `Usage: npm run publish:site -- [--destination <checkout>] --message <message>
+
+This performs a live publication after running the full verification gate.
+Without --destination, it uses this checkout's ignored ${managedPagesDirectory}/${managedCheckoutName}/
+clone of the Pages repository, creating it on first use. --destination names an
+existing Pages checkout instead and is never created.`;
 }
 
 export function parseArguments(args) {
-  const options = { destination: defaultDestination };
+  const options = {};
   for (let index = 0; index < args.length; index++) {
     const argument = args[index];
     if (argument === "--help" || argument === "-h") return { help: true };
