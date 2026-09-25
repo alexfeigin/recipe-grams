@@ -37,9 +37,13 @@ Use focused feedback during implementation and the
 [verification selection policy](docs/development.md#select-verification) at
 completion. Documentation/report-only work gets source/diff review; application
 logic, interaction, and recipe/site-source changes covered by the gate finish
-with `npm run verify`. Stop after sufficient evidence; repeat checks only for
-changed inputs, failures, or a specific uncovered concern. Verification does not
-authorize publication; preserve the user's requested delivery scope and exclusions.
+with one final gate: `npm run verify` when no live release follows, or the
+publication helper's gate when a release is authorized. For a release, commit
+and push source changes after focused checks, then invoke the helper as the
+final gate. Stop after sufficient evidence; repeat checks only for changed
+inputs, failures, or a specific uncovered concern. Verification does not
+authorize publication; preserve the user's requested delivery scope and
+exclusions.
 
 ## Workflows
 

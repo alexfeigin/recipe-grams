@@ -162,16 +162,14 @@ stale; ordinary setup keeps the installed version.
   category.
 - **Application logic, interaction, and recipe/site-source changes covered by the
   gate:** use the narrowest relevant existing check from the table below during
-  implementation, then run `npm run verify` on the finished work. Preserve
-  meaningful existing coverage; add assertions for behavior contracts worth
-  protecting, not tests that merely mirror implementation.
-- **Release:** invoke the publication helper from committed, pushed source. It
-  runs and owns one final gate, then publishes that invocation's exact output
-  through the checkout's ignored `.pages/` Pages clone, which it creates when
-  absent.
-  Do not run a separate final gate immediately before it. An earlier verification
-  remains evidence for unchanged source, but its output cannot establish the
-  helper's exclusive ownership and is not reused for publication.
+  implementation, then finish with one final gate: `npm run verify` when no live
+  release follows, or the publication helper's gate for an authorized release.
+  Preserve meaningful existing coverage; add assertions for behavior contracts
+  worth protecting, not tests that merely mirror implementation.
+- **Release:** after focused checks, commit and push source changes, then invoke
+  the publication helper as the one final gate. It verifies the committed source
+  under its checkout lock and publishes that invocation's exact output through
+  the checkout's ignored `.pages/` Pages clone, creating it when absent.
   Verification alone does not authorize a release;
   follow the [publishing workflow](../.agents/skills/recipe-grams-publishing/SKILL.md)
   within the user's delivery scope and publication exclusions.
@@ -198,6 +196,9 @@ automated assertions and end the visual loop once the behavior is satisfactory.
 ```bash
 npm run verify
 ```
+
+Use this standalone command when no live publication follows; the publication
+helper invokes the same runner as its final gate for a release.
 
 The runner performs Astro checks and TypeScript checking, site-source fixture
 tests, a clean rebuild including Pagefind, generated-output checks, and all
@@ -295,8 +296,8 @@ matching. Unknown suites, unknown arguments, missing values, and invalid filters
 fail with the usage before anything is built or started, and a filter matching
 nothing fails instead of reporting success. Every run rebuilds from scratch
 including Pagefind, and the owned preview replaces any `SITE_BASE_URL` already
-in the environment. This is development feedback; it does not replace
-`npm run verify`.
+in the environment. This is development feedback; finish with the completion
+gate selected above.
 
 To check a running preview or published site, provide its URL with a trailing slash:
 

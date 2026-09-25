@@ -18,8 +18,9 @@ authoring obligations. Retain meaningful existing tests; a passing final gate
 already includes checking, building, generated checks, and browser tests. Carry
 that evidence forward while its inputs remain current.
 
-For recipe publishing, commit and push the current Recipe-Grams branch after
-verification passes. Commit source changes before deploying them.
+For an authorized site release, finish focused checks, commit and push source
+changes, then let the publication command run the one final gate. For covered
+site-source work without a release, finish with `npm run verify`.
 
 ## Publish GitHub Pages
 
@@ -39,8 +40,7 @@ default the helper publishes through this checkout's ignored
 after it is removed; there is no manual clone or setup step.
 `--destination <checkout>` instead names an existing checkout of the same Pages
 repository. The helper runs the final gate once, owns that run's output,
-replaces only `recipe-grams/`, and pushes the deployment commit. Do not run a
-separate final gate immediately before it.
+replaces only `recipe-grams/`, and pushes the deployment commit.
 
 **Success:** Carry forward the helper's source revision, destination, deployment
 revision or no-change result, and site link. Stop after a successful push; Pages
