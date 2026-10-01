@@ -6,23 +6,25 @@
 
 - Half a pack of spaghetti (thin pasta recommended)
 - Olive oil
-- 2 tablespoons sweet paprika
-- 1 small can of tomato paste
+- 2 heaping teaspoons sweet paprika
+- 120 g tomato concentrate (22° Brix)
 - Granulated garlic
+- Sugar, about 4 g, plus more to taste
 - Salt and pepper to taste
 - Cayenne pepper or hot paprika (optional)
 
 ## Instructions:
 
-1. Cook the pasta until done, drain, and set aside.
-2. Heat a little olive oil in a pot.
-3. Add sweet paprika, tomato paste, granulated garlic, salt, and pepper. Optionally, add cayenne pepper or hot paprika for a spicy kick.
-4. Stir the mixture for a few seconds at the bottom of the pot to develop the flavors.
-5. Add the pasta to the pot and mix well with tongs until the pasta is evenly coated with the sauce.
-6. Leave the pasta in the pot for a few more minutes to get a slight crisp, stirring occasionally.
+1. Start cooking the pasta in lightly salted boiling water. Use less salt than you would if draining the pasta, since some pasta water will enter the sauce and concentrate as it cooks.
+2. While the pasta cooks, heat a little olive oil in another pot.
+3. Add sweet paprika, tomato concentrate, granulated garlic, about 4 g sugar, and pepper. Optionally, add cayenne pepper or hot paprika for a spicy kick.
+4. Cook down the tomato concentrate, stirring to develop the flavors.
+5. About 2 minutes before the packet's stated al dente time, transfer the pasta directly into the sauce with tongs, letting the water clinging to the pasta enter the sauce.
+6. Start tasting the pasta with the sauce as soon as you have added it. Finish cooking in the sauce, tossing with tongs. If the pasta is still firm and the sauce is too dry, ladle in a little pasta water at a time; this adds both moisture and salt.
+7. If the pasta is already al dente and needs more salt, add plain salt without adding more water. If the flavor feels flat, try adding a little more sugar to taste.
 
 ## Note:
 
-For a full pack of pasta, double the amount of sweet paprika, but one can of tomato paste should suffice. You can add a second can for a thicker texture.
+For a full pack of pasta, double the amount of sweet paprika, but 120 g tomato concentrate should suffice. You can use 240 g for a thicker texture.
 
 ![pasta](../public/images/paprikesh.jpeg)
