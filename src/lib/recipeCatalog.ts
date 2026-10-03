@@ -407,15 +407,15 @@ export const recipeCatalog: RecipeCatalog = {
       "pizza.jpg",
     ),
   }),
-  purple_cabbage_salad: featuredRecipe("salads_pickles", ["vegan"], 16, {
+  cabbage_salad: featuredRecipe("salads_pickles", ["vegan"], 16, {
     en: localizedMetadata(
-      "Purple Cabbage Salad",
-      "A crunchy purple cabbage salad with soy dressing.",
+      "Cabbage Salad",
+      "A crunchy cabbage salad with soy dressing, using cabbage of any color.",
       "purple_cabbage_salad.jpg",
     ),
     he: localizedMetadata(
-      "סלט כרוב סגול",
-      "סלט כרוב סגול פריך עם רוטב סויה.",
+      "סלט כרוב",
+      "סלט כרוב פריך עם רוטב סויה, מכרוב בכל צבע.",
       "purple_cabbage_salad.jpg",
     ),
   }),

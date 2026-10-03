@@ -1,17 +1,17 @@
 [Back to Menu](../index.MD)
 
-# Purple Cabbage Salad a Recipe of Dina, Sash's mom
+# Cabbage Salad a Recipe of Dina, Sash's mom
 
 ## Ingredients
 
-- 1 head of purple cabbage, sliced into thin strips
+- About 1 kg cabbage (any color), sliced into thin strips
 
 ### For the dressing:
 
-- ½ cup neutral-flavored vegetable oil (grape seed/canola/other)
-- ½ cup Japanese-style soy sauce (Kikkoman/Yamasa)
-- 3 tablespoons sugar
-- ½ teaspoon flat salt
+- 110 grams neutral-flavored vegetable oil (grape seed/canola/other)
+- 140 grams Japanese-style soy sauce (Kikkoman/Yamasa)
+- 38 grams sugar
+- 3 grams salt
 
 - 100 grams pine nuts
 - 100 grams white sesame seeds
@@ -23,4 +23,4 @@
 2. In a dry non-stick pan, toast the sesame seeds, sunflower seeds separately, and the pine nuts separately until they all start to brown and smell fragrant. Spread them out on a flat plate to cool.
 3. Before serving, mix everything together with the pine nuts, sesame seeds, and seeds.
 
-![Purple cabbage salad](../public/images/purple_cabbage_salad.jpg)
+![Cabbage salad](../public/images/purple_cabbage_salad.jpg)

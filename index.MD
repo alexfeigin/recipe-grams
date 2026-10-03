@@ -41,12 +41,12 @@
 <br>
 <img src="public/images/titles_for_index/green_salad.png" alt="prez" width="70" height="70">
 
-| Hebrew (he)                                         | English (en)                                           |
-| --------------------------------------------------- | ------------------------------------------------------ |
-| [סלט כרוב סגול](he/purple_cabbage_salad.MD) 🥬🅥     | [Purple cabbage salad](en/purple_cabbage_salad.MD) 🥬🅥 |
-| [סלט גזר](he/carrot_salad.MD) 🥕★🅥                  | [carrot salad](en/carrot_salad.MD) 🥕★🅥                |
-| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥         | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥   |
-| [סלט קולסלו ויניגרט](he/colslaw_vinaigrette.MD) 🥗🅥 | [Coleslaw Vinaigrette](en/colslaw_vinaigrette.MD) 🥗🅥  |
+| Hebrew (he)                                         | English (en)                                          |
+| --------------------------------------------------- | ----------------------------------------------------- |
+| [סלט כרוב](he/cabbage_salad.MD) 🥬🅥                 | [Cabbage salad](en/cabbage_salad.MD) 🥬🅥              |
+| [סלט גזר](he/carrot_salad.MD) 🥕★🅥                  | [carrot salad](en/carrot_salad.MD) 🥕★🅥               |
+| [גזר מוחמץ](he/quick_pickle_carrot.MD) 🥕 🅥         | [Quick Pickle Carrot](en/quick_pickle_carrot.MD) 🥕🅥  |
+| [סלט קולסלו ויניגרט](he/colslaw_vinaigrette.MD) 🥗🅥 | [Coleslaw Vinaigrette](en/colslaw_vinaigrette.MD) 🥗🅥 |
 
 <br>
 <br>
