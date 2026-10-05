@@ -477,7 +477,7 @@ export async function setupEnvironment({
   const report = () => {
     const after = inspect(declaration);
     tools.log(formatInspection(after));
-    return isReady(after);
+    return isReady(after) && (!audit || after.optional.length === 0);
   };
   if (!before.supported) return report();
 
@@ -705,15 +705,40 @@ async function upgradeImpeccable({
 
 async function upgradeMattpocockSkills({ declaration, latest, tools }) {
   const spec = { ...declaration.mattpocockSkills, installer: latest.installer };
-  const names = Object.keys(spec.skills);
-  return withStaging("recipe-grams-skills", async (staging) => {
-    const installed = await installSkillsInto(
-      staging,
-      tools,
-      spec,
-      latest.revision,
-      names,
+  // Check the immutable release tree before installing. An optional skill
+  // removed from the source is retired; one still listed must install correctly.
+  const repository = githubRepository(spec.source);
+  const listing = await getJson(
+    tools,
+    `https://api.github.com/repos/${repository}/git/trees/${latest.revision}?recursive=1`,
+  );
+  const available = new Set(
+    (listing.tree ?? [])
+      .filter((entry) => entry.type === "blob")
+      .map(
+        (entry) =>
+          /^skills\/(?:[^/]+\/)*([a-z0-9][a-z0-9-]*)\/SKILL\.md$/.exec(
+            entry.path,
+          )?.[1],
+      )
+      .filter(Boolean),
+  );
+  if (listing.truncated || !available.size)
+    throw new Error(
+      `Cannot determine the available upstream skills at ${latest.revision}; the release tree is incomplete or lists no skills.`,
     );
+  const names = Object.keys(spec.skills).filter((name) => available.has(name));
+  const retired = Object.keys(spec.skills).filter(
+    (name) => !available.has(name),
+  );
+  if (retired.length)
+    tools.log(
+      `Retired upstream: ${retired.join(", ")}. These names will no longer be managed; existing local copies are preserved.`,
+    );
+  return withStaging("recipe-grams-skills", async (staging) => {
+    const installed = names.length
+      ? await installSkillsInto(staging, tools, spec, latest.revision, names)
+      : {};
     return {
       ...spec,
       release: latest.release,
@@ -785,6 +810,7 @@ export async function upgradeEnvironment({
   if (!npmVersion || !satisfiesRange(npmVersion, npmRange))
     await upgradeNpm({ root, tools });
 
+  tools.log("Checking upstream for newer managed skill versions...");
   const latest = await resolveLatest(tools, declaration);
   const impeccable = declaration.impeccable;
   const skills = declaration.mattpocockSkills;
@@ -802,10 +828,22 @@ export async function upgradeEnvironment({
     `(${latest.mattpocockSkills.revision.slice(0, 7)}, ${latest.mattpocockSkills.installer})`;
 
   if (impeccableCurrent && skillsCurrent) {
+    tools.log("Recorded versions are current; checking installed copies...");
+    let ready;
+    try {
+      ready = await setup();
+    } catch (error) {
+      throw new Error(
+        `Upgrade failed: ${error.message}\n${declarationFile} is unchanged. Retry with ${upgradeCommand} after resolving the setup failure.`,
+        { cause: error },
+      );
+    }
     tools.log(
-      `Already at the newest upstream versions: ${summary}. ${declarationFile} is unchanged; setup replaces only installed copies that differ from these pins.`,
+      ready
+        ? `Already on the latest versions: ${summary}.`
+        : `Upgrade failed: installed copies still need attention. ${declarationFile} is unchanged. Retry with ${upgradeCommand} after resolving the setup failure.`,
     );
-    return setup();
+    return ready;
   }
 
   tools.log(`Upgrading to ${summary}.`);
@@ -828,7 +866,7 @@ export async function upgradeEnvironment({
       });
   } catch (error) {
     throw new Error(
-      `Upgrade stopped: ${error.message}\n${declarationFile} and the installed skills are unchanged.`,
+      `Upgrade failed: ${error.message}\n${declarationFile} and the installed skills are unchanged.`,
     );
   }
 
@@ -836,7 +874,7 @@ export async function upgradeEnvironment({
   const previousDeclaration = await readFile(declarationPath);
   tools.signal?.throwIfAborted();
   await writeAtomically(declarationPath, formatDeclaration(next));
-  tools.log(`Recorded ${summary} in ${declarationFile}.`);
+  tools.log("Validated the new versions; applying them to installed copies...");
 
   let ready;
   try {
@@ -845,7 +883,10 @@ export async function upgradeEnvironment({
     tools.signal?.throwIfAborted();
   } catch (error) {
     await writeAtomically(declarationPath, previousDeclaration);
-    throw error;
+    throw new Error(
+      `Upgrade failed: ${error.message}\n${declarationFile} was restored to its previous pins. Retry with ${upgradeCommand} after resolving the setup failure.`,
+      { cause: error },
+    );
   }
   if (ready) {
     const kept = new Set(Object.keys(next.impeccable.files[platform]));
@@ -854,10 +895,11 @@ export async function upgradeEnvironment({
     );
     for (const entry of obsolete)
       await rm(path.join(root, entry), { recursive: true, force: true });
+    tools.log(`Upgrade complete: ${summary}. Recorded in ${declarationFile}.`);
   } else {
     await writeAtomically(declarationPath, previousDeclaration);
     tools.log(
-      `The environment is not ready, so ${declarationFile} was restored to its previous pins. ` +
+      `Upgrade failed: installed copies still need attention, so ${declarationFile} was restored to its previous pins. ` +
         `Retry with ${upgradeCommand} after resolving the setup failure.`,
     );
   }

@@ -22,7 +22,13 @@ if (mode === "check" || mode === "audit") {
 } else if (mode === "setup" || mode === "upgrade") {
   await runInterruptible(async (signal) => {
     const run = mode === "setup" ? setupEnvironment : upgradeEnvironment;
-    if (!(await run({ tools: defaultTools(signal) }))) process.exitCode = 1;
+    try {
+      if (!(await run({ tools: defaultTools(signal) }))) process.exitCode = 1;
+    } catch (error) {
+      if (/^(Upgrade|Setup) (failed|stopped):/.test(error.message)) throw error;
+      const action = mode === "upgrade" ? "Upgrade" : "Setup";
+      throw new Error(`${action} failed: ${error.message}`, { cause: error });
+    }
   });
 } else {
   console.error("Usage: ./scripts/init.sh [--check | --audit | --upgrade]");

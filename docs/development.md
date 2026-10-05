@@ -91,10 +91,22 @@ access reports any authentication or permission failure at that time.
   them in dev-environment.json in one write, and then runs setup against those
   pins, replacing installed Impeccable and Matt Pocock copies that differ from
   them. When no skill is newer it leaves the declaration unchanged and
-  reinstalls only copies that differ from the pins. If staging or final
-  setup fails, the declaration retains or returns to its previous pins; run
-  `./scripts/init.sh --upgrade` again after resolving the failure. Commit a
-  successful updated declaration like any other change.
+  reinstalls only copies that differ from the pins. A successful run ends with
+  `Upgrade complete`; a repeat run with current installed copies ends with
+  `Already on the latest versions` and runs no installers. Installer output
+  such as “Done” describes its staging step, not the overall upgrade result.
+  If staging or final setup fails, the command exits nonzero, reports the failure,
+  and the declaration retains or returns to its previous pins. Optional skills
+  remain optional for ordinary setup. Upgrade checks the resolved release's
+  complete source tree and retires selected skill names that upstream removed:
+  it reports the names, drops their managed pins on success, and preserves their
+  existing local copies. Moving a skill between source directories keeps its
+  name managed; a rename is treated as retirement of the old name, without
+  guessing which new skill to select. Skills still listed upstream must install
+  and match their pins for the upgrade to succeed. A failed or incomplete source
+  listing stops the upgrade without retiring anything.
+  Run `./scripts/init.sh --upgrade` again after resolving the reported failure.
+  Commit a successful updated declaration like any other change.
 
 ### External skill sources
 

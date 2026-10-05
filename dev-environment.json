@@ -27,21 +27,21 @@
     "role": "required when absent; any installed version is accepted by setup and --check",
     "source": "https://github.com/pbakaus/impeccable",
     "installer": "impeccable@4.1.0",
-    "version": "4.3.1",
+    "version": "4.5.0",
     "bundle": {
-      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.3.1/universal.zip",
-      "sha256": "1deea4cdfb1608df6d9e08ef359629e7cc866a22ab7c2195a835627b887f190b"
+      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.5.0/universal.zip",
+      "sha256": "a6877c158ec90c63560728553d2e737081afa8a79b86c507fa8d15a81fffd475"
     },
     "providers": ["claude", "codex"],
     "adaptation": "scripts/impeccable-project-route.md",
     "files": {
       "darwin-arm64": {
-        ".agents/skills/impeccable": "089f459b0dd5332986bb823aef7606df24d5f95e2c0824fcc81fb060e48786da",
-        ".claude/agents/impeccable-asset-producer.md": "16734752e171e9e8904f77db94d82cb211e0f1002dc44c04b329ec71a9313747",
+        ".agents/skills/impeccable": "1df37be3c2ca603a0dfd09166ca267d4012455efada2b670861e3a4043d2aa8f",
+        ".claude/agents/impeccable-asset-producer.md": "1f71222448ccc0fedc7356d39c0a7f47bd5fddcfd2b9352e17e606856aa1823e",
         ".claude/agents/impeccable-documenter.md": "bca49de3d2b79f22923cc32353ef0ffb882221439497f11e33d7798e82e5ed63",
-        ".claude/agents/impeccable-finish-reviewer.md": "c9d324ca3053d8c36b3c1521e7044747a59a8876cfcecec2cd4566def46a32f9",
+        ".claude/agents/impeccable-finish-reviewer.md": "d9f1f653e1b704c78adddbaf927fddf481b5ea452cbf88fbc5af8793a418b259",
         ".claude/agents/impeccable-manual-edit-applier.md": "634b3281cc67d711ab250078f096b511d4d7a6df660fdec0c71bd0e4edf2ab4b",
-        ".claude/skills/impeccable": "0d82701bb4f266e3fba4f32fdfa21d7a9f22ceb8dfc6db2148ceffc5eed0a263"
+        ".claude/skills/impeccable": "73ecfd5680916335327270418551ebb25e51ba8ad50eb5571721c84136913732"
       }
     }
   },
@@ -49,53 +49,53 @@
     "role": "optional; any installed version is accepted, and setup installs missing named skills",
     "source": "https://github.com/mattpocock/skills",
     "installer": "skills@1.7.0",
-    "release": "v1.2.3",
-    "revision": "6acc160e4e0cd062dbbbd7a1b26ae92855edf07e",
+    "release": "v1.3.1",
+    "revision": "24fe0ef7737efae15c87225755e9f6f5965e4888",
     "agents": ["codex", "claude-code"],
     "skills": {
       "ask-matt": {
         "path": "skills/engineering/ask-matt",
-        "sha256": "367fe48927ebf3955d31faab896f0dce336ce4762c35235feec3a3c0f3946e39"
+        "sha256": "614a746774577bef83e89b6a42d89a4f310ce284b7de949593307a810e8c99e7"
       },
       "claude-handoff": {
         "path": "skills/in-progress/claude-handoff",
-        "sha256": "346851fe3fae2056b11d6ef44d5eb05fb0168d213962b573c68dc48b3353cd12"
+        "sha256": "a3d2cf626005da2aec2505b6061056119837bca2ac1f668e1adbc7b0736095bd"
       },
       "code-review": {
         "path": "skills/engineering/code-review",
-        "sha256": "87e5599f02e09f336a29026a01ca1a7c5df47ae29ff6d9c917982b74c13e9a2c"
+        "sha256": "cf6a211ec37edc7f10bab816c8ae6506831eb566e209eef642cf8cf5afdf40f6"
       },
       "codebase-design": {
         "path": "skills/engineering/codebase-design",
-        "sha256": "260e0ff6b050b81b182cc2bc78a9dbd942c0f607848814f2ce6a1eb99b2e1e0c"
+        "sha256": "967032d9eead896fbc84e3d91f5dd051130b666b3b155247d3a932c24e1d6697"
       },
       "diagnosing-bugs": {
         "path": "skills/engineering/diagnosing-bugs",
-        "sha256": "cf9fab18abbb62071d00fbd5b1df29bf382c5c0bdffebc3f41d0d3d51da5bfff"
+        "sha256": "82aac5b17e5d152e7b92085e1f5f79ac2d551f6b12a9e69e0f42a04b64454048"
       },
       "domain-modeling": {
         "path": "skills/engineering/domain-modeling",
-        "sha256": "31d5dad5de4aa33dcaf9395efc87fafc60520f4b6cd8b16f83810d69416d5a00"
+        "sha256": "6c803adbca216354e95d2acbed918b9c005ab94a971f327a3e7de257f419dc87"
       },
       "git-guardrails-claude-code": {
         "path": "skills/misc/git-guardrails-claude-code",
-        "sha256": "592fdcc9980d81d8bd004618bfb120ff6f32af588aec70a86a3c87cd7ee5058f"
+        "sha256": "b831a394e1745cbfb08d004df8bf4d7673709c5cf9e14bd9168b8d84def106db"
       },
       "grill-me": {
         "path": "skills/productivity/grill-me",
-        "sha256": "f693707c398047ccd8720c63e5df24eebb036537d26c6a21b014a3e6ec86f1ea"
+        "sha256": "2e6ecc339b8c08fdaf8440c79f309be6adc1e275160cfd1c32975e176a4a049c"
       },
       "grill-with-docs": {
         "path": "skills/engineering/grill-with-docs",
-        "sha256": "c637b32aad9d171d94ed40372befd9a9e0382e9ab0d574ca3fa5f82417a6c89b"
+        "sha256": "f82480298aeededc69effb8445173e922048764eb244752513e28eeadc2567f2"
       },
       "grilling": {
         "path": "skills/productivity/grilling",
-        "sha256": "d183b346a3c8220634cb36cedb31b6a9083fab6dad4053009882f5e245727b5f"
+        "sha256": "52afd7e67a178aded323d4ee739e77688620542cadb10e3c2defc09c35a804e7"
       },
       "handoff": {
         "path": "skills/productivity/handoff",
-        "sha256": "3dfedc5850737c0e051d291981d83fbd95c739ce22e1f54ba4d1cf1ec127aa27"
+        "sha256": "219b3cf9832761e8cb0fe81b49b8ab9f420e08617102e49126bbdf5edb7c52c9"
       },
       "implement": {
         "path": "skills/engineering/implement",
@@ -103,11 +103,11 @@
       },
       "improve-codebase-architecture": {
         "path": "skills/engineering/improve-codebase-architecture",
-        "sha256": "c306109f290acd0a4d714b7cda675efa26677dd04a010abe472c7f20ec9046ca"
+        "sha256": "a06adb368b32959b3ffd0338bd04608878349eca337f0d44fec7d4f3ea728081"
       },
       "loop-me": {
         "path": "skills/in-progress/loop-me",
-        "sha256": "5a7dc476e191cc962860ea1f66b5ab390002b44573eb4aadfb643c56ace557b1"
+        "sha256": "052922879cc0c94f18ae972cbf80e43c6f6ed259da1e80f294f7dd818f84276d"
       },
       "migrate-to-shoehorn": {
         "path": "skills/misc/migrate-to-shoehorn",
@@ -115,15 +115,11 @@
       },
       "prototype": {
         "path": "skills/engineering/prototype",
-        "sha256": "2c4c892891f1aa42e92bc8c90ba38aaae86f814a819e0c893a697c5e3eaf126d"
+        "sha256": "dddb9397baf2e1515bc0606cdeadbe08624e111ec8276940a9b713d740834e1b"
       },
       "research": {
         "path": "skills/engineering/research",
-        "sha256": "5f562313de7b87eecf89d4d6fc1bf0c1de1db0410dc72177bf1efef6794f8874"
-      },
-      "resolving-merge-conflicts": {
-        "path": "skills/engineering/resolving-merge-conflicts",
-        "sha256": "a331ecce1aa056217f573151f9e4fc867b074be6263b32919890394646e930e8"
+        "sha256": "ec6c41819c9124c7cda3678a2db0dfb91a81c144d90fbb09d0dbc230be909da3"
       },
       "scaffold-exercises": {
         "path": "skills/misc/scaffold-exercises",
@@ -131,67 +127,67 @@
       },
       "setup-matt-pocock-skills": {
         "path": "skills/engineering/setup-matt-pocock-skills",
-        "sha256": "f0ced766680677d9b9a8893b42c790bc3e6e1b805d13f2806e7d850c15352d8a"
+        "sha256": "de02fe39dd163c9c45bd09ebd285ec7852734cb3cb559c6bf5d70fdcbb5240a0"
       },
       "setup-pre-commit": {
         "path": "skills/misc/setup-pre-commit",
-        "sha256": "3233fcad1d4a1ac123d747d82e5055413c32d0383715148a46bbc87d7633398c"
+        "sha256": "574aadece1bcee88e944d2b34af74da4e1f4b6da26f2b44481f8cbb9dc4933ae"
       },
       "setup-ts-deep-modules": {
         "path": "skills/in-progress/setup-ts-deep-modules",
-        "sha256": "75aeedcb5b9af8844ed6fa06264924015086b7212160b9ae728da26d530489f8"
+        "sha256": "f8b2baa88a2ae303506d0eae33c4a636857bff284241f5447a981956e572db0c"
       },
       "tdd": {
         "path": "skills/engineering/tdd",
-        "sha256": "62e31a514eb6ce2306e129d51e6773c399cefdc5415f31de7e75b4c3ec521f7d"
+        "sha256": "b471621ad323bd328cd4b1d0bde6abe3cb7aa408d280afd72d1e390a648c2ba1"
       },
       "teach": {
         "path": "skills/productivity/teach",
-        "sha256": "ffda1c20d95faf9aadcfff38df3ab56b784a17b6f3fa1ba85965c86f4526fa20"
+        "sha256": "d6ee2720bae6c77b5fdffabd994f763b74f3737d6bbe4747cb2276d4d5bdd4b6"
       },
       "to-questionnaire": {
         "path": "skills/productivity/to-questionnaire",
-        "sha256": "993e1bb6c0dcbd6c88566723370da77fa81d322010eb7a1f51ef0934927b397e"
+        "sha256": "972f5247d92ffaee297bbcf12d4624f6d51039de9c34b622b90afe6d6c4cfc14"
       },
       "to-spec": {
         "path": "skills/engineering/to-spec",
-        "sha256": "cb370e806309ee32fbc72b5f7704ffe31249b7f583d27f72ff2e3b740e713b42"
+        "sha256": "730330005a4f066b3bf765bf8ece36a48fa96365dc0b4971fdb82e0605d3a3e2"
       },
       "to-tickets": {
         "path": "skills/engineering/to-tickets",
-        "sha256": "39882361bb71d17e94b7f36c081e234491fe402a31e2c4c7488416fa2fafe6ed"
+        "sha256": "015a0ebb9f586629b1e11ccd7f00fc2c16b6814bae70c7f4d6cd79a8d52f8053"
       },
       "triage": {
         "path": "skills/engineering/triage",
-        "sha256": "b0664d5c63a51209434494cb0a142d189fac89a1e5efd8513f185aca4b0206e3"
+        "sha256": "a9d06148e5160642da67c7f4b5c72296beee03c4b3b6be578e5b3b3c54358d25"
       },
       "wait-what": {
         "path": "skills/productivity/wait-what",
-        "sha256": "06aec0d86501e0ca8b127b9e8434a4e98ca4d5550ce69968846865e6391698d5"
+        "sha256": "874d2144cca19a2e7389f23bd924d16e0b53fb30d13e1c05014f37633418b63d"
       },
       "wayfinder": {
         "path": "skills/engineering/wayfinder",
-        "sha256": "455b83c37a5239134ee52d16894c55f449560c7c5c2c70b1c2406f61878bf5c7"
+        "sha256": "de7f883f149cbf793675f7a94f461c15b41de452fdb87a186d2cfb23219e3aaf"
       },
       "wizard": {
         "path": "skills/engineering/wizard",
-        "sha256": "c5b3500a64a34b9b800ef40191607590acb20eb26c878c955261a417784c6479"
+        "sha256": "81819b5781dd704085dddb829c63057611486f26cdbf867ae5cbbbcf41eefd6c"
       },
       "writing-beats": {
         "path": "skills/in-progress/writing-beats",
-        "sha256": "f547c73a01f2e187dad82a217f40c2d408aee53a8d22214b63f8dca5999023ed"
+        "sha256": "d51040cb5a20bf8b40175bc9282e69fdb756c6be91113e2091a2062f23c9a8fc"
       },
       "writing-for-agents": {
         "path": "skills/productivity/writing-for-agents",
-        "sha256": "f3f15b8e9b6545e52f1bdfb53c13e4d89284aa71f332440e6f8c178f62ddd881"
+        "sha256": "445b269b4a412c95acfa62d0d7004145fd3854a5eaed5e4a22f886555f7696cf"
       },
       "writing-fragments": {
         "path": "skills/in-progress/writing-fragments",
-        "sha256": "b74d27e8e6b4d9ea64ead23e271fd1f6ae06c93e22ee0f7629b70deebbf4dbe8"
+        "sha256": "978f4d3c121dce2fa31aa642592579fdc8752f65434175595e0c845a2f402a93"
       },
       "writing-shape": {
         "path": "skills/in-progress/writing-shape",
-        "sha256": "753f32245bdf6921ef63d008d2bd24d141bd26e5f7feadda94f0d59fd1c34b76"
+        "sha256": "a9a34e41ba5dab32a11ec2773ef7ed787bceaee034b8dc5315512dbd54ed74b0"
       }
     }
   },

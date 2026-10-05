@@ -257,6 +257,11 @@ function upstreamResponses({
     "https://api.github.com/repos/mattpocock/skills/commits/v1.2.3": {
       sha: revision,
     },
+    [`https://api.github.com/repos/mattpocock/skills/git/trees/${revision}?recursive=1`]:
+      {
+        truncated: false,
+        tree: [{ type: "blob", path: "skills/engineering/tdd/SKILL.md" }],
+      },
     "https://registry.npmjs.org/impeccable/latest": { version: "4.1.0" },
     "https://registry.npmjs.org/skills/latest": { version: "1.7.0" },
   };
@@ -789,8 +794,8 @@ test("upgrade with nothing newer downloads and reinstalls nothing", async (t) =>
   assert.equal(ready, true);
   assert.deepEqual(tools.calls, []);
   assert.match(
-    tools.logs[0],
-    /Already at the newest upstream versions: Impeccable 9\.9\.9/,
+    tools.logs.at(-1),
+    /Already on the latest versions: Impeccable 9\.9\.9/,
   );
   assert.equal(
     readFileSync(path.join(root, "dev-environment.json"), "utf8"),
@@ -841,7 +846,7 @@ test("a failed upgrade leaves the declaration and installation unchanged", async
     await assert.rejects(upgrade, reason);
     await assert.rejects(
       upgrade,
-      /^Error: Upgrade stopped: [\s\S]*dev-environment\.json and the installed skills are unchanged\.$/,
+      /^Error: Upgrade failed: [\s\S]*dev-environment\.json and the installed skills are unchanged\.$/,
     );
     assert.equal(readFileSync(declarationFile, "utf8"), before);
     assert.equal(hashTree(path.join(root, ".claude")), installed);
@@ -876,6 +881,182 @@ test("upgrade moves installed optional skills to the new revision", async (t) =>
     readFileSync(path.join(root, "dev-environment.json"), "utf8"),
   );
   assert.equal(recorded.mattpocockSkills.revision, "new-revision");
+});
+
+test("upgrade fails if an upstream-listed skill was not installed", async (t) => {
+  const { root, env } = await readyFixture(t);
+  const file = path.join(root, "dev-environment.json");
+  const before = readFileSync(file, "utf8");
+  const installed = hashTree(path.join(root, ".agents/skills/tdd"));
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    // Upstream lists tdd, but the installer fails to produce it.
+  });
+  await assert.rejects(
+    upgradeEnvironment({ root, tools, platform: "darwin-arm64" }),
+    /^Error: Upgrade failed: .*did not provide the skill "tdd" for every agent\.\ndev-environment\.json and the installed skills are unchanged\.$/,
+  );
+  assert.equal(readFileSync(file, "utf8"), before);
+  assert.equal(hashTree(path.join(root, ".agents/skills/tdd")), installed);
+});
+
+test("upgrade retires an upstream-removed skill, preserves local copies, and does not retry", async (t) => {
+  const { root, env, inspect, declaration } = await readyFixture(t);
+  const retired = "resolving-merge-conflicts";
+  writeSkill(root, retired, "# Old conflict skill\n");
+  declaration.mattpocockSkills.skills[retired] = {
+    path: `skills/engineering/${retired}`,
+    sha256: hashTree(path.join(root, ".agents/skills", retired)),
+  };
+  write(root, "dev-environment.json", formatDeclaration(declaration));
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    run: async (command, _args, { cwd }) => {
+      if (command === "npx") writeSkill(cwd, "tdd", "# TDD, next release\n");
+    },
+  });
+  const upgrade = () =>
+    upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: (declaration) => inspect({ declaration }),
+    });
+  assert.equal(await upgrade(), true);
+  const recorded = JSON.parse(
+    readFileSync(path.join(root, "dev-environment.json"), "utf8"),
+  );
+  assert.equal(recorded.mattpocockSkills.skills[retired], undefined);
+  assert.ok(
+    tools.logs.some((message) =>
+      /Retired upstream: resolving-merge-conflicts.*preserved/.test(message),
+    ),
+  );
+  assert.ok(tools.calls.every((call) => !call.includes(retired)));
+  for (const directory of Object.values(agentSkillDirectories))
+    assert.equal(
+      readFileSync(path.join(root, directory, retired, "SKILL.md"), "utf8"),
+      "# Old conflict skill\n",
+    );
+  tools.calls.length = 0;
+  tools.logs.length = 0;
+  assert.equal(await upgrade(), true);
+  assert.deepEqual(tools.calls, []);
+  assert.match(tools.logs.at(-1), /^Already on the latest versions:/);
+});
+
+test("an incomplete upstream skill listing cannot retire skills", async (t) => {
+  const { root, env } = await readyFixture(t);
+  const file = path.join(root, "dev-environment.json");
+  const before = readFileSync(file, "utf8");
+  for (const listing of [
+    { truncated: true, tree: [] },
+    { truncated: false, tree: [] },
+  ]) {
+    const tools = fakeTools({
+      env,
+      responses: {
+        ...upstreamResponses({ revision: "new-revision" }),
+        "https://api.github.com/repos/mattpocock/skills/git/trees/new-revision?recursive=1":
+          listing,
+      },
+    });
+    await assert.rejects(
+      upgradeEnvironment({ root, tools, platform: "darwin-arm64" }),
+      /Cannot determine the available upstream skills/,
+    );
+    assert.equal(readFileSync(file, "utf8"), before);
+    assert.deepEqual(tools.calls, []);
+  }
+});
+
+test("current pins do not report latest when repairing an installed copy fails", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  const file = path.join(root, "dev-environment.json");
+  const before = readFileSync(file, "utf8");
+  writeSkill(root, "tdd", "# Changed locally\n");
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses(),
+    run: async (command) => {
+      if (command === "npx") throw new Error("skills install failed (1)");
+    },
+  });
+  assert.equal(
+    await upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: (declaration) => inspect({ declaration }),
+    }),
+    false,
+  );
+  assert.equal(readFileSync(file, "utf8"), before);
+  assert.match(tools.logs.at(-1), /^Upgrade failed:.*unchanged/);
+  assert.ok(
+    !tools.logs.some((message) => /^Already on the latest/.test(message)),
+  );
+});
+
+test("a successful upgrade reports completion and the repeat run is already current", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    run: async (command, _args, { cwd }) => {
+      if (command === "npx") writeSkill(cwd, "tdd", "# TDD, next release\n");
+    },
+  });
+  const upgrade = () =>
+    upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: (declaration) => inspect({ declaration }),
+    });
+  assert.equal(await upgrade(), true);
+  assert.match(tools.logs.at(-1), /^Upgrade complete:/);
+  tools.calls.length = 0;
+  tools.logs.length = 0;
+  assert.equal(await upgrade(), true);
+  assert.deepEqual(tools.calls, []);
+  assert.match(tools.logs.at(-1), /^Already on the latest versions:/);
+});
+
+test("upgrade fails when an optional skill cannot be installed", async (t) => {
+  const { root, env, inspect } = await readyFixture(t);
+  const file = path.join(root, "dev-environment.json");
+  const before = readFileSync(file, "utf8");
+  let installs = 0;
+  const tools = fakeTools({
+    env,
+    responses: upstreamResponses({ revision: "new-revision" }),
+    run: async (command, _args, { cwd }) => {
+      if (command !== "npx") return;
+      if (++installs === 2) throw new Error("skills install failed (1)");
+      writeSkill(cwd, "tdd", "# TDD, next release\n");
+    },
+  });
+  assert.equal(
+    await upgradeEnvironment({
+      root,
+      tools,
+      platform: "darwin-arm64",
+      inspect: (declaration) => inspect({ declaration }),
+    }),
+    false,
+  );
+  assert.equal(readFileSync(file, "utf8"), before);
+  assert.ok(
+    tools.logs.some((message) => /skills install failed/.test(message)),
+  );
+  assert.match(
+    tools.logs.at(-1),
+    /Upgrade failed:.*restored to its previous pins/,
+  );
+  assert.ok(!tools.logs.some((message) => /^Upgrade complete:/.test(message)));
 });
 
 test("an upgrade restores its pins when the final setup fails", async (t) => {
