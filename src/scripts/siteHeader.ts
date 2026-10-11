@@ -1,5 +1,6 @@
 import { uiLabels } from "../i18n/ui";
-import { isRecipeLanguage, sitePath } from "../lib/site";
+import { getPageContext } from "../lib/pageContext";
+import { isRecipeLanguage, languages, sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
 
 const mobileNavigationQuery = "(max-width: 880px)";
@@ -114,6 +115,11 @@ function createSearch(
   const { language, basePath } = settings;
   const labels = uiLabels[language].search;
   const pagefindBundle = sitePath(basePath, "pagefind/pagefind.js");
+  // The page's own language leads; matches in the other language follow.
+  const searchLanguages = [
+    language,
+    ...languages.filter((candidate) => candidate !== language),
+  ];
   const area = requireElement<HTMLElement>(header, "[data-search-area]");
   const overlay = requireElement<HTMLElement>(header, "[data-search-overlay]");
   const input = requireElement<HTMLInputElement>(header, "[data-search-input]");
@@ -195,13 +201,16 @@ function createSearch(
     results.replaceChildren();
   }
 
-  function renderResults(searchResults: PagefindResultData[]) {
+  function renderResults(searchResults: SearchResult[]) {
     results.replaceChildren();
 
     for (const result of searchResults) {
       const link = document.createElement("a");
       link.className = "search-result";
       link.href = normalizeResultUrl(result.url);
+      // A result may be in the other language and reads in its own direction.
+      link.lang = result.language;
+      link.dir = getPageContext(result.language, basePath).direction;
 
       const title = document.createElement("strong");
       title.textContent = result.meta.title ?? link.href;
@@ -246,11 +255,22 @@ function createSearch(
     hideResultsLayer();
     try {
       const pagefind = await getPagefind();
-      const search = await pagefind.search(query, { filters: { language } });
+      const matches = await Promise.all(
+        searchLanguages.map(async (resultLanguage) => {
+          const search = await pagefind.search(query, {
+            filters: { language: resultLanguage },
+          });
+          return search.results.map((result) => ({ result, resultLanguage }));
+        }),
+      );
       const searchResults = await Promise.all(
-        search.results
+        matches
+          .flat()
           .slice(0, maximumSearchResults)
-          .map((result) => result.data()),
+          .map(async ({ result, resultLanguage }) => ({
+            ...(await result.data()),
+            language: resultLanguage,
+          })),
       );
       if (searchId !== lastSearchId) return;
       input.removeAttribute("aria-busy");
@@ -328,6 +348,8 @@ type PagefindResultData = {
     markers?: string;
   };
 };
+
+type SearchResult = PagefindResultData & { language: RecipeLanguage };
 
 type PagefindModule = {
   init?: () => Promise<void> | void;

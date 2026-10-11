@@ -103,12 +103,6 @@ for (const language of ["en", "he"]) {
       await input.fill(copy[language].replacement);
       await expect(results.first()).toContainText(copy[language].result);
 
-      for (const href of await results.evaluateAll((links) =>
-        links.map((link) => link.href),
-      )) {
-        expect(new URL(href).pathname).toContain(`/${language}/`);
-      }
-
       await input.press("ArrowDown");
       await expect(results.first()).toBeFocused();
       await page.keyboard.press("Escape");

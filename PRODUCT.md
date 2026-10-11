@@ -34,8 +34,10 @@ code. Recipe Markdown remains independently readable.
   language switch opens its counterpart, or the other language's home when no
   counterpart exists.
 - **Search:** available in the header on every page and at every width. It searches
-  recipe bodies in the current language, starts at two characters, and shows up to
-  eight results with title, snippet, category and markers when available.
+  recipe bodies in both languages, starts at two characters, and shows up to
+  eight results with title, snippet, category and markers when available. Results
+  in the page's language come first; opening one in the other language continues
+  in that language. A query matches the words as typed and is not translated.
 - **Poolish calculator:** generic mode accepts dough and ratio inputs; pizza mode
   uses a pizza count and preset ratios. Results separate poolish and final dough.
   Invalid inputs replace quantities with an explanation and disable copying;
@@ -45,7 +47,7 @@ code. Recipe Markdown remains independently readable.
   (in pizza mode) or shared links. `poolish_calc.sh` remains the CLI counterpart.
 
 Semantic ingredient, method, timing, and nutrition parsing, Recipe JSON-LD,
-cross-language search, and a dedicated search results page remain out of scope.
+translated search, and a dedicated search results page remain out of scope.
 
 ## Brand Commitments
 
