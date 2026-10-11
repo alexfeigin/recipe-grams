@@ -26,29 +26,29 @@
   "impeccable": {
     "role": "required when absent; any installed version is accepted by setup and --check",
     "source": "https://github.com/pbakaus/impeccable",
-    "installer": "impeccable@4.1.0",
-    "version": "4.5.0",
+    "installer": "impeccable@4.5.2",
+    "version": "4.5.2",
     "bundle": {
-      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.5.0/universal.zip",
-      "sha256": "a6877c158ec90c63560728553d2e737081afa8a79b86c507fa8d15a81fffd475"
+      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.5.2/universal.zip",
+      "sha256": "8b445a7529581a36626b328c3077e3d3dd7fbf247521e20ec8759ca939f77470"
     },
     "providers": ["claude", "codex"],
     "adaptation": "scripts/impeccable-project-route.md",
     "files": {
       "darwin-arm64": {
-        ".agents/skills/impeccable": "1df37be3c2ca603a0dfd09166ca267d4012455efada2b670861e3a4043d2aa8f",
-        ".claude/agents/impeccable-asset-producer.md": "1f71222448ccc0fedc7356d39c0a7f47bd5fddcfd2b9352e17e606856aa1823e",
+        ".agents/skills/impeccable": "e8f0268814ce13980d043ce8ae7bba63ccf59fb5c87cdb5e17a430cc93faff30",
+        ".claude/agents/impeccable-asset-producer.md": "c8bdcb9a4de2319f42972f6bfeb83f6524868b27cf32b6671babc603172bf40b",
         ".claude/agents/impeccable-documenter.md": "bca49de3d2b79f22923cc32353ef0ffb882221439497f11e33d7798e82e5ed63",
         ".claude/agents/impeccable-finish-reviewer.md": "d9f1f653e1b704c78adddbaf927fddf481b5ea452cbf88fbc5af8793a418b259",
         ".claude/agents/impeccable-manual-edit-applier.md": "634b3281cc67d711ab250078f096b511d4d7a6df660fdec0c71bd0e4edf2ab4b",
-        ".claude/skills/impeccable": "73ecfd5680916335327270418551ebb25e51ba8ad50eb5571721c84136913732"
+        ".claude/skills/impeccable": "12668624f2faa850d64518ca35dda3eb9fcb9b92c8e0baebe4b1dc42bb3c731a"
       }
     }
   },
   "mattpocockSkills": {
     "role": "optional; any installed version is accepted, and setup installs missing named skills",
     "source": "https://github.com/mattpocock/skills",
-    "installer": "skills@1.7.0",
+    "installer": "skills@1.7.2",
     "release": "v1.3.1",
     "revision": "24fe0ef7737efae15c87225755e9f6f5965e4888",
     "agents": ["codex", "claude-code"],
