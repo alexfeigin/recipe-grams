@@ -8,7 +8,7 @@ Recipes must remain readable on GitHub while their images and site assets publis
 at predictable URLs. Astro's root `images/` public-directory override prevented
 other static files from using the conventional `public/` directory. Keep one
 tracked image source in `public/images/` and let Astro publish it only under
-`/images/`. This supersedes ADR 0036 and the image-hosting progression in
+`/images/`. This supersedes the former ADR 0036 (removed; see git history) and the image-hosting progression in
 historical ADRs 0016 and 0024; it preserves the single-source and readable-recipe
 reasons behind those decisions without a symlink or manually duplicated files.
 

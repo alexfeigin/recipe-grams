@@ -1,7 +1,7 @@
 # Original architecture decisions
 
 Historical reference only. The [decision index](../adr/README.md) routes current
-work to accepted ADRs 0036–0042, consolidated by topic. This archive preserves the
+work to accepted ADRs 0037–0043, consolidated by topic. This archive preserves the
 original ADR identities 0001–0035; read it only for an earlier rationale or the
 exact wording of a superseded choice. The consolidation changes the documentation,
 not the site's behavior.
@@ -13,7 +13,7 @@ claims about “today” still describe their original checkpoints.
 
 ## Topic index
 
-- [Sources and publication](../adr/0036-preserve-readable-recipe-sources.md): [0001](#adr-0001), [0005](#adr-0005), [0006](#adr-0006), [0007](#adr-0007), [0008](#adr-0008), [0011](#adr-0011), [0012](#adr-0012), [0015](#adr-0015), [0016](#adr-0016), [0018](#adr-0018), [0023](#adr-0023), [0024](#adr-0024), [0025](#adr-0025), [0028](#adr-0028).
+- [Sources and publication](../adr/0043-serve-static-assets-from-public.md): [0001](#adr-0001), [0005](#adr-0005), [0006](#adr-0006), [0007](#adr-0007), [0008](#adr-0008), [0011](#adr-0011), [0012](#adr-0012), [0015](#adr-0015), [0016](#adr-0016), [0018](#adr-0018), [0023](#adr-0023), [0024](#adr-0024), [0025](#adr-0025), [0028](#adr-0028).
 - [Catalog intent and validation](../adr/0037-model-catalog-browsing-intent-explicitly.md): [0017](#adr-0017), [0019](#adr-0019), [0020](#adr-0020), [0030](#adr-0030).
 - [URLs and languages](../adr/0038-use-explicit-localized-routes-and-copy.md): [0004](#adr-0004), [0009](#adr-0009), [0013](#adr-0013), [0022](#adr-0022), [0035](#adr-0035).
 - [Code boundaries](../adr/0039-separate-page-assembly-and-feature-modules.md): [0026](#adr-0026), [0029](#adr-0029), [0032](#adr-0032), [0034](#adr-0034).
@@ -241,7 +241,7 @@ The dispositions resolved under this rule, all **retained in place**:
 - `images/titles_for_index/cookie.png` and `images/titles_for_index/doughnut.png` — two of the nine emoji title icons added together in `ef2f0a7` for the legacy index's category headers. Seven are in use; these two are the unused spares of a coherent set, and they stay with their siblings as the palette for a future index category.
 - `images/leopard_expm.jpeg` — a leopard-spot pattern reference committed in `c638897` beside the leopard cookies recipe and its photographs. It is a pattern reference rather than a photograph of the food, which is why no recipe links it, and it is kept as part of that contribution's material.
 
-None of the three has ever been referenced from tracked text. See [the issue 22 record](../verification/issue-22-unreferenced-assets.md) for the evidence behind these dispositions.
+None of the three has ever been referenced from tracked text.
 
 ## ADR 0029
 

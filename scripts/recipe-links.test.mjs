@@ -47,7 +47,7 @@ for (const [label, language, destination, expected] of [
   ["same-page fragment", "en", "#for-nerds", undefined],
   ["site-absolute path", "en", "/recipe-grams/en/salt/", undefined],
   ["legacy index link", "en", "../index.MD", undefined],
-  ["repo file link", "en", "../poolish_calc.sh", undefined],
+  ["repo file link", "en", "../package.json", undefined],
   ["outside the repo", "en", "../../elsewhere/salt.MD", undefined],
   ["lowercase extension", "en", "salt.md", undefined],
   ["non-recipe directory", "en", "notes/salt.MD", undefined],
