@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alexfeigin.github.io/recipe-grams/sitemap-index.xml
