@@ -120,6 +120,19 @@ for (const language of ["en", "he"]) {
           await check(copy, "copy focus");
         }
 
+        if (surface === "recipe") {
+          const link = page.locator(".recipe-body a").first();
+          await page.mouse.move(0, 0);
+          await check(link, "recipe link default");
+          await link.hover();
+          await check(link, "recipe link hover");
+          await page.mouse.move(0, 0);
+          await page.keyboard.press("Shift");
+          await link.focus();
+          await check(link, "recipe link focus");
+          await expect(link).not.toHaveCSS("outline-style", "none");
+        }
+
         // The short desktop calculator may never scroll far enough to show it.
         if (surface !== "calculator") {
           const backToTop = page.locator(".back-to-top");

@@ -10,6 +10,42 @@ test("English landing card opens a generated recipe page", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Rice Pilaf" })).toBeVisible();
 });
 
+for (const [language, path] of [
+  ["en", ""],
+  ["he", "he/"],
+]) {
+  test(`${language} landing cards show no file name or category chip`, async ({
+    page,
+  }) => {
+    await page.goto(`${baseUrl}${path}`);
+    await expect(page.locator(".recipe-card").first()).toBeVisible();
+    await expect(page.locator(".card-meta, .card-category")).toHaveCount(0);
+
+    const rows = await page.locator(".recipe-grid").evaluateAll((grids) =>
+      grids.map((grid) => {
+        const cards = [...grid.querySelectorAll(".recipe-card")];
+        return {
+          imageRatios: cards.map((card) => {
+            const box = card.querySelector("a > img, .image-placeholder");
+            const { width, height } = box.getBoundingClientRect();
+            return width / height;
+          }),
+          titleTops: cards.map((card) =>
+            Math.round(
+              card.querySelector("h4").getBoundingClientRect().top -
+                card.getBoundingClientRect().top,
+            ),
+          ),
+        };
+      }),
+    );
+    for (const { imageRatios, titleTops } of rows) {
+      for (const ratio of imageRatios) expect(ratio).toBeCloseTo(1.5, 1);
+      expect(new Set(titleTops).size).toBe(1);
+    }
+  });
+}
+
 test("Recipe language switch preserves a shared fragment", async ({ page }) => {
   await page.goto(`${baseUrl}en/pizza_dough/#nerd-stats`);
   await page.locator(".desktop-language-picker a").click();
