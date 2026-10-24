@@ -220,7 +220,6 @@ const searchDirection = page.direction;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-sizing: border-box;
     display: grid;
     direction: ltr;
     grid-template-columns:
@@ -308,7 +307,6 @@ const searchDirection = page.direction;
   .language-picker a,
   .language-picker span {
     display: inline-flex;
-    box-sizing: border-box;
     align-items: center;
   }
 
@@ -336,6 +334,12 @@ const searchDirection = page.direction;
     min-width: 6.75rem;
     align-items: center;
     gap: 0.55rem;
+  }
+
+  /* Keep the original outer control sizes under the shared page reset. */
+  .search-control,
+  .language-picker {
+    box-sizing: content-box;
   }
 
   .search-control {
@@ -487,7 +491,6 @@ const searchDirection = page.direction;
     inset-inline: 0;
     top: calc(100% + 0.3rem);
     z-index: 40;
-    box-sizing: border-box;
     max-height: min(68dvh, 640px);
     overflow: auto;
     border: 1px solid var(--line);

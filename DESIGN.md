@@ -21,7 +21,7 @@ blue accent, darkened to `#487889` to give white labels about 4.86:1 contrast;
 preserve readable contrast in hover and focus states too.
 
 Pages own heading scales (`clamp()`), spacing, shadow depth, and genuine local
-variants: landing category-chip colors and calculator-specific accent shades.
+variants such as calculator-specific accent shades.
 
 ## Layout and interaction
 
