@@ -12,7 +12,7 @@
 | `npm run verify`                             | The full gate described below.                                                                      |
 | `npm run verify:focused`                     | One browser suite against its own build and preview.                                                |
 | `npm run verify:catalog-source`              | Real recipe sources and catalog, without a build.                                                   |
-| `npm run verify:generated`                   | Every `scripts/verify-*.mjs` built-output check, against a current build.                           |
+| `npm run verify:generated`                   | All generated-output checks, against a current build.                                               |
 | `npm run verify:browser`                     | All Chromium suites against `SITE_BASE_URL`.                                                        |
 | `npm run publish:site`                       | Manual release; see the publishing skill.                                                           |
 
@@ -281,7 +281,7 @@ Recipe sources use uppercase `.MD`; include them when searching, for example
 `.ts` extensions in TypeScript imports, including transitive imports (see the
 pure calculation tests); Astro's extensionless imports are not a Node template.
 
-The pure checks need no build, browser, or `SITE_BASE_URL`. the preview tests exercise
+The pure checks need no build, browser, or `SITE_BASE_URL`. The preview tests exercise
 the preview lifecycle separately. Generated checks (`scripts/verify-<name>.mjs`) split responsibilities:
 `recipe-pages` owns source-to-page coverage and landing card destinations;
 `catalog` owns card membership and catalog-order card sequence; `navigation` owns expected
@@ -338,7 +338,13 @@ To check a running preview or published site, provide its URL with a trailing sl
 SITE_BASE_URL=https://alexfeigin.github.io/recipe-grams/ npm run verify:browser
 ```
 
-The same variable works for focused browser commands. Retired `verify:issue*`
+To run one suite against that target, pass its spec to `verify:browser`:
+
+```bash
+SITE_BASE_URL=https://alexfeigin.github.io/recipe-grams/ npm run verify:browser -- scripts/verify-navigation-browser.spec.mjs
+```
+
+Retired `verify:issue*`
 and per-suite `verify:*:browser` aliases, and per-suite URL variables in historical notes, are not current commands.
 
 ## Keep documentation current
