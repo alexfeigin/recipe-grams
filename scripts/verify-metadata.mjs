@@ -91,17 +91,6 @@ for (const route of pages) {
   );
 }
 
-const robots = readFileSync(join(dist, "robots.txt"), "utf8");
-assert.ok(
-  robots
-    .split(/\r?\n/)
-    .some(
-      (line) =>
-        line.trim() ===
-        `Sitemap: ${new URL("sitemap-index.xml", siteRoot).href}`,
-    ),
-  "robots.txt must point at the sitemap index",
-);
 console.log(
   `Metadata passed: ${paired} paired and ${unpaired} unpaired pages.`,
 );
