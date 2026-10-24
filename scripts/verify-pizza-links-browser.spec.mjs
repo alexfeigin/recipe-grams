@@ -33,10 +33,6 @@ for (const language of ["en", "he"]) {
     await calculator.click();
     expect((await navigation).status()).toBe(200);
     await expect(page.locator("html")).toHaveAttribute("lang", language);
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      "noindex",
-    );
     await expect(page.locator("[data-pagefind-body]")).toHaveCount(0);
     await expect(page.locator('[data-field="pizzaCount"]')).toBeVisible();
     await expect(page.locator('[data-field="desiredDough"]')).toBeHidden();

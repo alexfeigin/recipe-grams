@@ -275,11 +275,20 @@ owns Pagefind artifacts; `verify:search-console` owns the exact verification fil
 `verify:sitemap` checks that every built page except the static Search Console
 verification file appears in the sitemap. `verify:metadata` owns `hreflang`
 alternates, canonical links, the calculator's `noindex`, and `robots.txt`.
+Its checker regression fixtures run with `npm run test:metadata` before building.
 
 The build creates `sitemap-index.xml` and a numbered sitemap under `dist/`.
 After publishing the build, submit
 `https://alexfeigin.github.io/recipe-grams/sitemap-index.xml` in Google Search
 Console. The page head also links to the sitemap index for crawlers.
+
+Crawler discovery uses the host-root
+[`https://alexfeigin.github.io/robots.txt`](https://alexfeigin.github.io/robots.txt),
+maintained in the separate Pages repository. It already advertises this sitemap.
+The `public/robots.txt` copy builds under `/recipe-grams/robots.txt`; crawlers do
+not use that subdirectory copy. The generated check validates its sitemap URL,
+not the host-root file. Keep the host-root declaration aligned when changing the
+hosting URL; the publication helper continues to replace only `recipe-grams/`.
 
 The link checker resolves local references as a browser does, including the site
 base, queries, and HTML/SVG fragments. External resources, CSS URLs, and `srcset`
