@@ -275,7 +275,6 @@ owns Pagefind artifacts; `verify:search-console` owns the exact verification fil
 `verify:sitemap` checks that every built page except the static Search Console
 verification file appears in the sitemap. `verify:metadata` owns `hreflang`
 alternates, canonical links, the calculator's `noindex`, and `robots.txt`.
-Its checker regression fixtures run with `npm run test:metadata` before building.
 
 The build creates `sitemap-index.xml` and a numbered sitemap under `dist/`.
 After publishing the build, submit
