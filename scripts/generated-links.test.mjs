@@ -55,9 +55,9 @@ test("resolves page-relative, base-prefixed, absolute local, asset and fragment 
 
 for (const [label, html, error] of [
   [
-    "original shell link",
-    '<a href="../poolish_calc.sh">shell</a>',
-    /missing en\/poolish_calc\.sh/,
+    "repo file link",
+    '<a href="../removed.sh">shell</a>',
+    /missing en\/removed\.sh/,
   ],
   ["relative page", '<a href="../missing/">broken</a>', /missing en\/missing/],
   [

@@ -2,8 +2,6 @@ import { expect, test } from "@playwright/test";
 
 import { baseUrl } from "./browser-target.mjs";
 const productionBase = "https://alexfeigin.github.io/recipe-grams/";
-const shellUrl =
-  "https://github.com/alexfeigin/recipe-grams/blob/master/poolish_calc.sh";
 
 for (const language of ["en", "he"]) {
   test(`${language}: pizza resources work and calculator stays out of global navigation`, async ({
@@ -21,11 +19,10 @@ for (const language of ["en", "he"]) {
     const response = await page.goto(`${baseUrl}${language}/pizza_dough/`);
     expect(response.status()).toBe(200);
     const body = page.locator(".recipe-body");
-    await expect(body.locator(`a[href="${shellUrl}"]`)).toBeVisible();
     const calculator = body.locator(`a[href="${calculatorHref}"]`);
     await expect(calculator).toBeVisible();
     await expect(page.locator('header a[href*="poolish"]')).toHaveCount(0);
-    await expect(body.locator('a[href="../poolish_calc.sh"]')).toHaveCount(0);
+    await expect(body.locator('a[href*="poolish_calc.sh"]')).toHaveCount(0);
     await expect(body.locator('a[href*="ggalmazor.com"]')).toHaveCount(0);
 
     const navigation = page.waitForResponse(

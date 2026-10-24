@@ -223,8 +223,7 @@ stops another server. Startup and check failures exit nonzero. Run one full
 verification at a time per checkout because builds share `dist/`.
 
 Verification does not format or edit tracked files. Failure screenshots, traces,
-and output go to ignored `.astro/verification/browser/`; historical screenshots
-are never overwritten. Passing screenshots are not assertions and are not saved
+and output go to ignored `.astro/verification/browser/`. Passing screenshots are not assertions and are not saved
 as routine evidence. Check touched-file formatting separately with
 `npx prettier --check <files>`; use `--write` when needed.
 

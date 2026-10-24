@@ -44,7 +44,7 @@ code. Recipe Markdown remains independently readable.
   valid results can be copied as localized text. `?mode=` preserves the selected
   mode across language switching. The calculator is intentionally `noindex`,
   excluded from search and global navigation, and reached from pizza recipes
-  (in pizza mode) or shared links. `poolish_calc.sh` remains the CLI counterpart.
+  (in pizza mode) or shared links.
 
 Semantic ingredient, method, timing, and nutrition parsing, Recipe JSON-LD,
 translated search, and a dedicated search results page remain out of scope.

@@ -1,51 +1,13 @@
-**/target/
-!.mvn/wrapper/maven-wrapper.jar
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-/build/
-
 .DS_Store
 node_modules/
 .astro/
+/dist/
 # Command-owned Pages checkout and clone staging for `npm run publish:site`.
 /.pages
 /test-results/
 /playwright-report/
 .impeccable/config.local.json
 .impeccable/screenshots/
-
-### policy files ###
-/policy_backup.json
-/alerts_backup.json
-
-### log files ###
-*.log
-/logs/
-application-vault.properties
-
-## compile frontend ##
-server/src/main/resources/static/public/onboarding/
-
 
 .agents/*
 !.agents/skills/
