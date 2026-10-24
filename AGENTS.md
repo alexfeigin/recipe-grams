@@ -77,3 +77,17 @@ work, and [docs/development.md](docs/development.md) for checks. Consult
 Read [history](docs/history/README.md) only to investigate an earlier choice;
 archived ADRs and verification notes are not instructions. Accepted UI behavior
 takes precedence over older guidance.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for `alexfeigin/recipe-grams`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context; the glossary is `CONTEXT.md` and decisions are under `docs/adr/`. See `docs/agents/domain.md`.
