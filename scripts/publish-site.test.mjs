@@ -1099,27 +1099,33 @@ test("source preflight failures do not create a managed checkout", async (t) => 
 
 test("concurrent first publications from one checkout initialize one clone", async (t) => {
   const repositories = await setupManagedRepositories(t);
-  let started;
-  const verifying = new Promise((resolve) => (started = resolve));
   let release;
   const held = new Promise((resolve) => (release = resolve));
-  const first = publishSite(
-    managedOptions(repositories, {
-      verify: async (context) => {
-        started();
-        await held;
-        await writesSite("new\n")(context);
-      },
-    }),
-  );
-  const second = publishSite(managedOptions(repositories));
+  const options = managedOptions(repositories, {
+    verify: async (context) => {
+      await held;
+      await writesSite("new\n")(context);
+    },
+  });
+  const publications = [publishSite(options), publishSite(options)];
+  const settled = Promise.allSettled(publications);
   try {
-    await assert.rejects(second, /Another verification or publication owns/);
+    // Either caller can acquire the lock; the other must fail while it is held.
+    await assert.rejects(
+      Promise.race(publications),
+      /Another verification or publication owns/,
+    );
   } finally {
-    await verifying;
     release();
   }
-  assert.equal((await first).status, "published");
+  const outcomes = await settled;
+  assert.equal(
+    outcomes.filter(({ status }) => status === "rejected").length,
+    1,
+  );
+  const published = outcomes.filter(({ status }) => status === "fulfilled");
+  assert.equal(published.length, 1);
+  assert.equal(published[0].value.status, "published");
   assert.deepEqual(await readdir(path.dirname(repositories.managed)), [
     "alexfeigin.github.io",
   ]);

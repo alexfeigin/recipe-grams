@@ -43,5 +43,18 @@ selected browser suite owns its preview the same way, rather than trusting an
 externally arranged server; the explicit-URL commands remain for deliberate
 checks of another preview or the published site.
 
+## Tooling decision
+
+The tooling around the gate (checkout lock, preview ownership, publish guards,
+the setup installer, and their test suites) outgrew the site code it serves.
+Keep the checkout lock and the publish guards: they prevent concurrent builds
+from corrupting `dist/` and releases of unverified output. Simplify the setup
+installer, and do not extend it or its large test suites; prefer reducing it
+when it next changes. This records the decision only; the tooling is not
+rewritten. Package scripts stay few: each suite group runs as one `node --test`
+call (`test:pure`, `test:tooling`), tooling tests stay outside the gate, and
+individual checks run directly as `node` files rather than through per-suite
+aliases.
+
 Consolidates historical ADRs 0031, 0033; see the
 [original records](../history/decisions.md#topic-index).

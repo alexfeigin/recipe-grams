@@ -25,7 +25,7 @@ await runInterruptible(async (signal) => {
     await run("check");
     await run("typecheck");
     await run("verify:catalog-source");
-    await run("verify:pure");
+    await run("test:pure");
     await rm("dist", { recursive: true, force: true });
     await run("build", { RECIPE_GRAMS_CHECKOUT_LOCK: lock.token });
     await run("verify:generated");

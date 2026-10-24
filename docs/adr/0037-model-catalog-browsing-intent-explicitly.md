@@ -26,7 +26,7 @@ existing in only one language; the authoring workflow creates complete pairs.
 `collectCatalogDiagnostics` checks the catalog against discovered sources. Listing
 recipes has no side effects; the build runs the diagnostics once at start
 (`recipeCatalogCheck` in `astro.config.mjs`), printing warnings and failing on
-errors. `verify:catalog-source` reports the same diagnostics without a build. Severity is explicit:
+errors. `npm run verify:catalog-source` reports the same diagnostics without a build. Severity is explicit:
 
 | Condition                                                                        | Result                                                        |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |

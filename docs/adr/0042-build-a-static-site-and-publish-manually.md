@@ -20,6 +20,11 @@ the built output. Committing source and deploying the site are separate steps;
 the [publishing workflow](../../.agents/skills/recipe-grams-publishing/SKILL.md)
 owns the procedure.
 
+The publication helper and its guards (checkout lock, verified-source release)
+are kept as they are; the surrounding setup installer is a candidate for
+simplification and is not to be extended (see
+[ADR 0041](0041-verify-at-the-owning-layer-before-expensive-checks.md#tooling-decision)).
+
 Automatic deployment remains deferred. It can be introduced if manual releases
 become a burden.
 

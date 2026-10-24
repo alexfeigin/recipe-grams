@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -146,21 +153,12 @@ test("keeps the selected suite and the filter text intact", () => {
   );
 });
 
-test("the allowlist matches the maintained per-suite browser commands", async () => {
-  const { scripts } = JSON.parse(
-    await readFile(path.join(checkoutRoot, "package.json"), "utf8"),
-  );
-  const perSuiteCommands = Object.entries(scripts)
-    .map(([name, command]) => [/^verify:(.+):browser$/.exec(name), command])
-    .filter(([match]) => match)
-    .map(([match, command]) => [
-      match[1],
-      command.replace("playwright test ", ""),
-    ]);
+test("the allowlist covers every maintained browser spec", async () => {
+  const specs = (await readdir(path.join(checkoutRoot, "scripts")))
+    .filter((name) => /^verify-.+-browser\.spec\.mjs$/.test(name))
+    .map((name) => `scripts/${name}`);
 
-  assert.deepEqual(Object.fromEntries(perSuiteCommands), browserSuites);
-  for (const spec of Object.values(browserSuites))
-    assert.ok(existsSync(path.join(checkoutRoot, spec)), `missing ${spec}`);
+  assert.deepEqual(Object.values(browserSuites).sort(), specs.sort());
 });
 
 test("rebuilds cleanly and runs only the selected suite against its own preview", async (t) => {
