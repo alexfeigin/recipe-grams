@@ -26,7 +26,8 @@ const navItems = data.categorySections.map((section) => ({
   title={labels.pageTitle}
   description={labels.pageDescription}
   pageHref={page.homeHref}
-  canonical={false}
+  canonical={true}
+  alternateHref={page.alternateHomeHref}
   socialImage={{
     source: placeholderLogoSource,
     alt: "Recipe-Grams",

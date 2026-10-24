@@ -20,6 +20,7 @@ type Props = {
   description: string;
   pageHref: string;
   canonical: boolean;
+  alternateHref?: string;
   noindex?: boolean;
   socialImage: SocialImage;
   socialType?: "website" | "article";
@@ -34,6 +35,7 @@ const {
   description,
   pageHref,
   canonical,
+  alternateHref,
   noindex = false,
   socialImage,
   socialType = "website",
@@ -45,6 +47,7 @@ const {
 const page = getPageContext(language, import.meta.env.BASE_URL);
 const siteOrigin = Astro.site ?? Astro.url;
 const pageUrl = new URL(pageHref, siteOrigin).href;
+const alternateUrl = alternateHref && new URL(alternateHref, siteOrigin).href;
 const socialImageUrl = new URL(
   sitePath(page.basePath, socialImage.source),
   siteOrigin,
@@ -70,6 +73,18 @@ const socialImageUrl = new URL(
     />
     <slot name="head" />
     {canonical && <link rel="canonical" href={pageUrl} />}
+    {
+      alternateUrl && (
+        <>
+          <link rel="alternate" hreflang={page.language} href={pageUrl} />
+          <link
+            rel="alternate"
+            hreflang={page.alternateLanguage}
+            href={alternateUrl}
+          />
+        </>
+      )
+    }
     <link rel="sitemap" href={sitePath(page.basePath, "sitemap-index.xml")} />
     {noindex && <meta name="robots" content="noindex" />}
     <FaviconLinks />

@@ -257,7 +257,7 @@ instead (see below).
 | Built pages, catalog, navigation, links, and search artifacts | `scripts/verify-*.mjs`; generated assertion responsibilities are listed below.                                                                                                                                                                                                                                          | `npm run verify:generated`                                                                                                                                                                                                                       |
 | Images published only under `/images/`                        | `public/images/`, `scripts/verify-static-assets.mjs`; retain existing assets according to ADR 0043.                                                                                                                                                                                                                     | `npm run verify:static-assets`                                                                                                                                                                                                                   |
 | Google Search Console verification file                       | `public/google*.html`, `scripts/verify-search-console.mjs`; preserve the exact verification content.                                                                                                                                                                                                                    | `npm run verify:search-console`                                                                                                                                                                                                                  |
-| Generated sitemap and page coverage                           | `astro.config.mjs`, `src/layouts/SitePage.astro`, `scripts/verify-sitemap.mjs`; keep hosting/base URLs aligned.                                                                                                                                                                                                         | `npm run verify:sitemap`                                                                                                                                                                                                                         |
+| Generated sitemap and page coverage                           | `astro.config.mjs`, `src/layouts/SitePage.astro`, `scripts/verify-sitemap.mjs`, `scripts/verify-metadata.mjs`; keep hosting/base URLs aligned.                                                                                                                                                                          | `npm run verify:sitemap`, `npm run verify:metadata`                                                                                                                                                                                              |
 | Other reader interactions                                     | Existing `scripts/verify-*-browser.spec.mjs` assertions and their feature owners.                                                                                                                                                                                                                                       | `npm run verify:focused -- --suite <name>`, or the matching `verify:*:browser` command against an explicit target.                                                                                                                               |
 
 Recipe sources use uppercase `.MD`; include them when searching, for example
@@ -273,12 +273,18 @@ destinations; `verify:links` owns destination existence; `verify:static-assets`
 owns image placement; `verify:search-index`
 owns Pagefind artifacts; `verify:search-console` owns the exact verification file;
 `verify:sitemap` checks that every built page except the static Search Console
-verification file appears in the sitemap.
+verification file appears in the sitemap. `verify:metadata` owns `hreflang`
+alternates, canonical links, and the calculator's `noindex`.
 
 The build creates `sitemap-index.xml` and a numbered sitemap under `dist/`.
 After publishing the build, submit
 `https://alexfeigin.github.io/recipe-grams/sitemap-index.xml` in Google Search
 Console. The page head also links to the sitemap index for crawlers.
+
+Crawlers read `robots.txt` only at the host root, so it is not a site source
+here: `https://alexfeigin.github.io/robots.txt` lives in the separate Pages
+repository and already advertises this sitemap. Keep it aligned when changing
+the hosting URL; the publication helper replaces only `recipe-grams/`.
 
 The link checker resolves local references as a browser does, including the site
 base, queries, and HTML/SVG fragments. External resources, CSS URLs, and `srcset`
