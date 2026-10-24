@@ -27,7 +27,7 @@ pages have that asymmetry; recipe and side-page URLs name their language.
 Slugs come from filenames, so renaming a recipe changes shared URLs. Side pages
 use `src/pages/[language]/<name>.astro` and generate paths from `languages`.
 Reserve side-page names: `poolish.MD` would collide with the calculator, and
-`verify:recipes` rejects a recipe URL that renders a side page.
+`scripts/verify-recipe-pages.mjs` rejects a recipe URL that renders a side page.
 
 The former English `/poolish/` route was removed without a redirect in ADR 0035.
 Known recipe links were updated; old shared links are a known compatibility loss.
