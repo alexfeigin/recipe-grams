@@ -11,16 +11,17 @@ pages retain their own content and styling.
 
 ## Consequences
 
-| Module                       | Owns                                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------------ |
-| `src/lib/site.ts`            | Languages, identity/category/marker types, and `sitePath`; no filesystem work or interface copy. |
-| `src/lib/recipeCatalog.ts`   | Catalog data, lookups, eligibility, diagnostics; depends on site vocabulary.                     |
-| `src/lib/recipeSources.ts`   | Lightweight build-time discovery of localized Markdown recipe sources.                           |
-| `src/lib/recipePages.ts`     | Landing data, catalog reporting, and Markdown rendering; consumes source discovery and catalog.  |
-| `src/lib/recipeLinks.ts`     | Markdown destination transformation, independently testable with fixtures.                       |
-| `src/lib/pageContext.ts`     | Language-derived direction, social locale, labels, and current/alternate home URLs.              |
-| `src/layouts/SitePage.astro` | Shared document shell, common metadata, theme import, and header.                                |
-| `src/scripts/`               | Typed browser behavior, separate from build-time modules.                                        |
+| Module                         | Owns                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `src/lib/site.ts`              | Languages, identity/category/marker types, and `sitePath`; no filesystem work or interface copy. |
+| `src/lib/recipeCatalog.ts`     | Catalog data, lookups, eligibility, diagnostics; depends on site vocabulary.                     |
+| `src/lib/recipeSources.ts`     | Lightweight build-time discovery of localized Markdown recipe sources.                           |
+| `src/lib/recipePages.ts`       | Landing data and Markdown rendering; consumes source discovery and catalog.                      |
+| `src/lib/catalogBuildCheck.ts` | Build integration that reports catalog diagnostics and fails the build on errors.                |
+| `src/lib/recipeLinks.ts`       | Markdown destination transformation, independently testable with fixtures.                       |
+| `src/lib/pageContext.ts`       | Language-derived direction, social locale, labels, and current/alternate home URLs.              |
+| `src/layouts/SitePage.astro`   | Shared document shell, common metadata, theme import, and header.                                |
+| `src/scripts/`                 | Typed browser behavior, separate from build-time modules.                                        |
 
 Pages supply their own title, description, published path, social image, canonical
 and indexing choices, and header links. They keep their `<main>` and local styles;

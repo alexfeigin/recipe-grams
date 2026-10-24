@@ -1,0 +1,24 @@
+---
+import { languageNames } from "../i18n/ui";
+import type { RecipeLanguage } from "../lib/site";
+
+type Props = {
+  language: RecipeLanguage;
+  languageHref: string;
+};
+
+const { language, languageHref } = Astro.props;
+const options = ["he", "en"] as const;
+---
+
+{
+  options.map((option) =>
+    option === language ? (
+      <span aria-current="page">{languageNames[option]}</span>
+    ) : (
+      <a href={languageHref} data-language-switch>
+        {languageNames[option]}
+      </a>
+    ),
+  )
+}

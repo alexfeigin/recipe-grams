@@ -1,14 +1,10 @@
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { createSatteriMarkdownProcessor } from "@astrojs/markdown-satteri";
-import {
-  collectCatalogDiagnostics,
-  selectFeaturedRecipes,
-} from "./recipeCatalog";
+import { listRecipePairs, selectFeaturedRecipes } from "./recipeCatalog";
 import { createSiteDestinationPlugin } from "./recipeLinks";
 import { uiLabels } from "../i18n/ui";
 import {
-  languages,
   sitePath,
   type RecipeCategoryId,
   type RecipeLanguage,
@@ -41,8 +37,6 @@ export type CategorySection = {
 
 const repoRoot = process.cwd();
 
-let lastCheckedRecipes = "";
-
 // One renderer per language and base path: the destination plugin is fixed at
 // creation, and building a renderer loads a syntax highlighter.
 const markdownRenderers = new Map<
@@ -51,60 +45,7 @@ const markdownRenderers = new Map<
 >();
 
 export function listLocalizedRecipes(): LocalizedRecipe[] {
-  const recipes = listLocalizedRecipeSources(repoRoot);
-
-  reportCatalogDiagnostics(recipes);
-
-  return recipes;
-}
-
-function reportCatalogDiagnostics(recipes: LocalizedRecipe[]): void {
-  const checked = recipes
-    .map((recipe) => `${recipe.language}/${recipe.slug}`)
-    .join("\n");
-
-  if (checked === lastCheckedRecipes) {
-    return;
-  }
-
-  const diagnostics = collectCatalogDiagnostics(recipes);
-
-  for (const diagnostic of diagnostics) {
-    if (diagnostic.severity === "warning") {
-      console.warn(`[recipe catalog] ${diagnostic.message}`);
-    }
-  }
-
-  const errors = diagnostics.filter(
-    (diagnostic) => diagnostic.severity === "error",
-  );
-
-  if (errors.length > 0) {
-    throw new Error(
-      [
-        "Incomplete recipe catalog metadata:",
-        ...errors.map((error) => `  - ${error.message}`),
-      ].join("\n"),
-    );
-  }
-
-  lastCheckedRecipes = checked;
-}
-
-function listRecipePairs(localizedRecipes: LocalizedRecipe[]): string[] {
-  const slugsByLanguage = new Map<RecipeLanguage, Set<string>>();
-
-  for (const language of languages) {
-    slugsByLanguage.set(language, new Set());
-  }
-
-  for (const recipe of localizedRecipes) {
-    slugsByLanguage.get(recipe.language)?.add(recipe.slug);
-  }
-
-  return Array.from(slugsByLanguage.get("en") ?? [])
-    .filter((slug) => slugsByLanguage.get("he")?.has(slug))
-    .sort();
+  return listLocalizedRecipeSources(repoRoot);
 }
 
 export function findLocalizedRecipe(
@@ -117,7 +58,6 @@ export function findLocalizedRecipe(
 export function getLandingPageData(language: RecipeLanguage, basePath: string) {
   const labels = uiLabels[language];
   const localizedRecipes = listLocalizedRecipes();
-  const pairedSlugs = listRecipePairs(localizedRecipes);
   const cards: RecipeCard[] = selectFeaturedRecipes(
     language,
     localizedRecipes,
@@ -143,7 +83,7 @@ export function getLandingPageData(language: RecipeLanguage, basePath: string) {
     .filter((section) => section.recipes.length > 0);
 
   return {
-    recipePairCount: pairedSlugs.length,
+    recipePairCount: listRecipePairs(localizedRecipes).length,
     categoryCount: categorySections.length,
     categorySections,
   };

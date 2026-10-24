@@ -40,7 +40,7 @@ function localizations(title = "Dish", description = "A dish.") {
 
 function featured(localizedMetadata = localizations()) {
   return {
-    listing: { intent: "featured", categoryId: "mains", featuredOrder: 1 },
+    listing: { intent: "featured", categoryId: "mains" },
     markerIds: [],
     localizations: localizedMetadata,
   };

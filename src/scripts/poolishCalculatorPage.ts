@@ -8,6 +8,7 @@ import { calculatorLabels } from "../i18n/calculator";
 import type { CalculatorLabels } from "../i18n/calculator";
 import { isRecipeLanguage } from "../lib/site";
 import { setLanguageSwitchQuery } from "./languageSwitch";
+import { createElementLookup } from "./requireElement";
 
 type CalculatorInputs = Record<keyof CalculatorFields, HTMLInputElement>;
 type CalculatorOutputs = Record<keyof CalculatorResult, HTMLElement>;
@@ -27,16 +28,7 @@ const outputDigits: Record<keyof CalculatorResult, number> = {
 
 const noQuantity = "—";
 
-function requireElement<T extends Element>(
-  root: ParentNode,
-  selector: string,
-): T {
-  const element = root.querySelector<T>(selector);
-  if (!element) {
-    throw new Error(`The poolish calculator is missing ${selector}.`);
-  }
-  return element;
-}
+const requireElement = createElementLookup("The poolish calculator");
 
 function requireLabels(root: HTMLElement): CalculatorLabels {
   const { language } = root.dataset;

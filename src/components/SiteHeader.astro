@@ -1,5 +1,5 @@
 ---
-import { languageNames } from "../i18n/ui";
+import LanguageOptions from "./LanguageOptions.astro";
 import { getPageContext, type NavItem } from "../lib/pageContext";
 import { sitePath, type RecipeLanguage } from "../lib/site";
 
@@ -19,8 +19,6 @@ const homeLabel = labels.accessibility.home;
 const toggleNavigationLabel = labels.accessibility.toggleNavigation;
 const navLabel = labels.accessibility.mainNavigation;
 const languagePickerLabel = labels.accessibility.languagePicker;
-const hebrewLabel = languageNames.he;
-const englishLabel = languageNames.en;
 const basePath = page.basePath;
 const logoHref = sitePath(basePath, "images/recipe-grams-logo.png");
 const searchLabels = labels.search;
@@ -122,46 +120,12 @@ const searchDirection = page.direction;
     class="language-picker desktop-language-picker"
     aria-label={languagePickerLabel}
   >
-    {
-      language === "he" ? (
-        <span aria-current="page">{hebrewLabel}</span>
-      ) : (
-        <a href={languageHref} data-language-switch>
-          {hebrewLabel}
-        </a>
-      )
-    }
-    {
-      language === "en" ? (
-        <span aria-current="page">{englishLabel}</span>
-      ) : (
-        <a href={languageHref} data-language-switch>
-          {englishLabel}
-        </a>
-      )
-    }
+    <LanguageOptions language={language} languageHref={languageHref} />
   </div>
 
   <div class="mobile-actions">
     <div class="language-picker" aria-label={languagePickerLabel}>
-      {
-        language === "he" ? (
-          <span aria-current="page">{hebrewLabel}</span>
-        ) : (
-          <a href={languageHref} data-language-switch>
-            {hebrewLabel}
-          </a>
-        )
-      }
-      {
-        language === "en" ? (
-          <span aria-current="page">{englishLabel}</span>
-        ) : (
-          <a href={languageHref} data-language-switch>
-            {englishLabel}
-          </a>
-        )
-      }
+      <LanguageOptions language={language} languageHref={languageHref} />
     </div>
 
     <button
@@ -546,7 +510,7 @@ const searchDirection = page.direction;
     margin-left: -0.2rem;
   }
 
-  .language-picker a {
+  .language-picker :global(a) {
     min-width: 2rem;
     min-height: 30px;
     justify-content: center;
@@ -556,14 +520,14 @@ const searchDirection = page.direction;
     text-decoration: none;
   }
 
-  .language-picker a:hover,
-  .language-picker a:focus-visible {
+  .language-picker :global(a:hover),
+  .language-picker :global(a:focus-visible) {
     background: var(--olive-tint);
     color: var(--tomato);
     outline: none;
   }
 
-  .language-picker span[aria-current="page"] {
+  .language-picker :global(span[aria-current="page"]) {
     min-width: 2rem;
     min-height: 30px;
     justify-content: center;

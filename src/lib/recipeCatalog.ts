@@ -17,7 +17,6 @@ export type LocalizedRecipeMetadata = {
 export type FeaturedListing = {
   intent: "featured";
   categoryId: RecipeCategoryId;
-  featuredOrder: number;
 };
 
 export type UnlistedListing = {
@@ -39,7 +38,6 @@ export type FeaturedRecipe = {
   slug: string;
   language: RecipeLanguage;
   categoryId: RecipeCategoryId;
-  featuredOrder: number;
   markerIds: RecipeMarkerId[];
   metadata: LocalizedRecipeMetadata;
 };
@@ -51,222 +49,9 @@ export type CatalogDiagnostic = {
   message: string;
 };
 
+// Landing cards appear in this order within their category.
 export const recipeCatalog: RecipeCatalog = {
-  banana_bread: featuredRecipe("sweets", ["favorite"], 28, {
-    en: localizedMetadata(
-      "Banana Bread",
-      "A soft banana cake for using ripe bananas.",
-      "bananaBread1.jpg",
-    ),
-    he: localizedMetadata(
-      "עוגת בננות",
-      "עוגת בננות רכה לבננות בשלות.",
-      "bananaBread1.jpg",
-    ),
-  }),
-  borscht: featuredRecipe("mains", [], 15, {
-    en: localizedMetadata(
-      "Borscht",
-      "A comforting beet soup with a deep red broth.",
-      "borscht.jpg",
-    ),
-    he: localizedMetadata(
-      "בורשט",
-      "מרק סלק מנחם עם צבע וטעם עמוקים.",
-      "borscht.jpg",
-    ),
-  }),
-  carrot_cake_muffins: featuredRecipe("sweets", [], 28.375, {
-    en: localizedMetadata(
-      "Easy Sweet Carrot Muffins or Loaf Cake",
-      "A lightly sweet carrot batter that works as muffins or a loaf cake.",
-      "carrot_cake_muffin.jpg",
-    ),
-    he: localizedMetadata(
-      "מאפינס או עוגת גזר מתוקה וקלה",
-      "בלילת גזר מתוקה וקלה שמתאימה למאפינס או לעוגת אינגליש קייק.",
-      "carrot_cake_muffin.jpg",
-    ),
-  }),
-  carrot_salad: featuredRecipe("salads_pickles", ["favorite", "vegan"], 17, {
-    en: localizedMetadata(
-      "Sweet and Sour Carrot Salad",
-      "Dina's bright carrot salad with a sweet-sour dressing.",
-      "carrot_salad.jpg",
-    ),
-    he: localizedMetadata(
-      "סלט גזר חמוץ מתוק",
-      "סלט הגזר של דינה עם רוטב חמוץ-מתוק.",
-      "carrot_salad.jpg",
-    ),
-  }),
-  chicken_meatballs: featuredRecipe("mains", ["favorite"], 12, {
-    en: localizedMetadata(
-      "Quick Chicken Meatballs",
-      "Sash's quick chicken meatballs for a simple family dinner.",
-      "meatballsc.jpeg",
-    ),
-    he: localizedMetadata(
-      "קציצות עוף מהירות",
-      "קציצות העוף המהירות של סש לארוחת ערב.",
-      "meatballsc.jpeg",
-    ),
-  }),
-  chicken_soup: featuredRecipe("mains", ["favorite"], 14, {
-    en: localizedMetadata(
-      "Chicken and Vegetable Soup",
-      "A homestyle chicken soup with vegetables.",
-      "chicken_soup.jpg",
-    ),
-    he: localizedMetadata(
-      "מרק עוף וירקות",
-      "מרק עוף וירקות ביתי ומנחם.",
-      "chicken_soup.jpg",
-    ),
-  }),
-  choclatechip_vegan: featuredRecipe("sweets", ["vegan"], 22, {
-    en: localizedMetadata(
-      "Vegan Chocolate Chip Cookies",
-      "Plant-based cookies with crisp edges and soft centers.",
-      "Veganchoc.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות שוקולד צ'יפס טבעוניות",
-      "עוגיות טבעוניות עם קצוות פריכים ומרכז רך.",
-      "Veganchoc.jpeg",
-    ),
-  }),
-  chocolate_cake: featuredRecipe("sweets", [], 27, {
-    en: localizedMetadata(
-      "Chocolate Cake",
-      "A straightforward chocolate cake for celebrations.",
-      "chocake.jpg",
-    ),
-    he: localizedMetadata(
-      "עוגת שוקולד",
-      "עוגת שוקולד פשוטה לאירועים וליומיום.",
-      "chocake.jpg",
-    ),
-  }),
-  chocolatechip_cookies: featuredRecipe("sweets", ["favorite"], 20, {
-    en: localizedMetadata(
-      "Chocolate Chip Cookies",
-      "Classic chocolate chip cookies measured by weight.",
-      "chocookies.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות שוקולד צ'יפס",
-      "עוגיות שוקולד צ'יפס קלאסיות בגרמים.",
-      "chocookies.jpeg",
-    ),
-  }),
-  chouquettes: featuredRecipe("sweets", ["favorite"], 24, {
-    en: localizedMetadata(
-      "Chouquettes",
-      "Light choux pastry puffs finished with pearl sugar.",
-      "chouquettes.jpeg",
-    ),
-    he: localizedMetadata(
-      "שוקטים",
-      "פחזניות קלילות מבצק רבוך עם סוכר פנינים.",
-      "chouquettes.jpeg",
-    ),
-  }),
-  coconut_almond_choclate_cookies: featuredRecipe("sweets", ["vegan"], 21, {
-    en: localizedMetadata(
-      "Coconut Almond Chocolate Cookies",
-      "Coconut and almond cookies with chocolate in a vegan dough.",
-      "almondcoconut.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות קוקוס, שוקולד ושקדים",
-      "עוגיות קוקוס ושקדים עם שוקולד בבצק טבעוני.",
-      "almondcoconut.jpeg",
-    ),
-  }),
-  colslaw_vinaigrette: featuredRecipe("salads_pickles", ["vegan"], 19, {
-    en: localizedMetadata(
-      "Coleslaw with Simple Vinaigrette",
-      "Crisp coleslaw dressed with a simple vinaigrette.",
-      "coleslaw.jpg",
-    ),
-    he: localizedMetadata(
-      "סלט קולסלאו עם ויניגרט פשוט",
-      "קולסלאו פריך עם ויניגרט פשוט.",
-      "coleslaw.jpg",
-    ),
-  }),
-  goldilocks_cookies: featuredRecipe("sweets", [], 23.25, {
-    en: localizedMetadata(
-      "Goldilocks and the Three Bears Style Cookies",
-      "Chocolate butter cookies made with Shokolit, rolled thin and cut into shapes.",
-      "goldilocks_cookies_before_after.jpg",
-    ),
-    he: localizedMetadata(
-      "עוגיות בסגנון זהבה ושלושת הדובים",
-      "עוגיות חמאה עם שוקולית, מרודדות דק וקרוצות בצורות שאוהבים.",
-      "goldilocks_cookies_before_after.jpg",
-    ),
-  }),
-  cookie_cutter_cookies: featuredRecipe("sweets", [], 23, {
-    en: localizedMetadata(
-      "Cookie Cutter Butter Cookies",
-      "Butter cookies built to hold clean cutter shapes.",
-      "cookiecutter.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות בצורות",
-      "עוגיות חמאה שנשארות יציבות בחיתוך צורות.",
-      "cookiecutter.jpeg",
-    ),
-  }),
-  crackers: featuredRecipe("snacks", ["favorite", "vegan"], 32, {
-    en: localizedMetadata(
-      "Seed and Nut Crackers",
-      "Crunchy seed and nut crackers for snacking.",
-      "crackers.jpeg",
-    ),
-    he: localizedMetadata(
-      "קרקרים מגרעינים וזרעים",
-      "קרקרים פריכים מגרעינים ואגוזים.",
-      "crackers.jpeg",
-    ),
-  }),
-  crepe: featuredRecipe("sweets", [], 31, {
-    en: localizedMetadata(
-      "Crepe",
-      "Thin crepes for sweet or savory fillings.",
-      "crepe.jpg",
-    ),
-    he: localizedMetadata(
-      "קרפ",
-      "קרפים דקים למילוי מתוק או מלוח.",
-      "crepe.jpg",
-    ),
-  }),
-  frozen_banana: featuredRecipe("sweets", ["favorite", "vegan"], 29, {
-    en: localizedMetadata(
-      "Banana Chocolate Popsicles",
-      "Frozen banana and chocolate treats on a stick.",
-      "frozen_banana.jpeg",
-    ),
-    he: localizedMetadata(
-      "ארטיק בננה שוקולד",
-      "בננה קפואה עם שוקולד על מקל.",
-      "frozen_banana.jpeg",
-    ),
-  }),
-  gluten_free_chocolate_banana_brownies: featuredRecipe("sweets", [], 30, {
-    en: localizedMetadata(
-      "Gluten-Free Chocolate Banana Brownies",
-      "Chocolate banana brownies without gluten.",
-    ),
-    he: localizedMetadata(
-      "בראוניז בננה-שוקולד ללא גלוטן",
-      "בראוניז בננה ושוקולד ללא גלוטן.",
-    ),
-  }),
-  grill_rub: featuredRecipe("basics", ["favorite", "vegan"], 1, {
+  grill_rub: featuredRecipe("basics", ["favorite", "vegan"], {
     en: localizedMetadata(
       "Grill Rub",
       "A vegan spice blend for seasoning grilled food.",
@@ -276,67 +61,29 @@ export const recipeCatalog: RecipeCatalog = {
       "תערובת תבלינים טבעונית לגריל.",
     ),
   }),
-  ground_beef_on_sweet_potato: featuredRecipe("mains", [], 16.5, {
+  quinoa: featuredRecipe("doughs_starches", ["vegan"], {
     en: localizedMetadata(
-      "Ground Beef over Roasted Sweet Potato",
-      "Roasted sweet potato topped with browned beef, caramelized onions, tahini, silan, and toasted nuts.",
-      "ground_beef_on_sweet_potato.jpg",
+      "Delicious Quinoa with Sweet Potato",
+      "A simple quinoa and sweet potato base measured in grams.",
+      "quinoa.jpg",
     ),
     he: localizedMetadata(
-      "בשר טחון על מצע בטטה",
-      "בטטה צלויה עם בשר שחום, בצל מקורמל, טחינה, סילאן וצנוברים קלויים.",
-      "ground_beef_on_sweet_potato.jpg",
+      "קינואה טעימה עם בטטה",
+      "קינואה פשוטה עם בטטה, מדודה בגרמים.",
+      "quinoa.jpg",
     ),
   }),
-  grilled_chicken_thighs: featuredRecipe("mains", [], 9, {
+  rice_pilaf: featuredRecipe("doughs_starches", [], {
     en: localizedMetadata(
-      "Grilled Chicken Thighs",
-      "High-heat chicken thighs with repeatable seasoning and juicy results.",
-      "grilledchicken.jpeg",
+      "Rice Pilaf",
+      "A reliable rice pilaf side with clear weights.",
     ),
     he: localizedMetadata(
-      "ירכי עוף על הגריל",
-      "ירכי עוף בחום גבוה עם תיבול מדויק ותוצאה עסיסית.",
-      "grilledchicken.jpeg",
+      "פילאף אורז",
+      "תוספת אורז פילאף אמינה עם כמויות ברורות.",
     ),
   }),
-  honey_sugar_cookies: featuredRecipe("sweets", [], 28.5, {
-    en: localizedMetadata(
-      "Honey Sugar Cookies",
-      "Tender sugar cookies sweetened with honey.",
-      "honeycookies.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות סוכר עם דבש",
-      "עוגיות סוכר עדינות עם דבש.",
-      "honeycookies.jpeg",
-    ),
-  }),
-  leopard_cookies: featuredRecipe("sweets", [], 23.5, {
-    en: localizedMetadata(
-      "Leopard Print Cookies",
-      "Patterned cookies with a playful leopard look.",
-      "leopardcookie.jpeg",
-    ),
-    he: localizedMetadata(
-      "עוגיות מנומרות",
-      "עוגיות מעוצבות במראה מנומר.",
-      "leopardcookie.jpeg",
-    ),
-  }),
-  pankcakebatter: featuredRecipe("sweets", [], 26, {
-    en: localizedMetadata(
-      "Pancake Batter",
-      "A reliable gram-based pancake batter.",
-      "pancake1.jpeg",
-    ),
-    he: localizedMetadata(
-      "בצק פנקייק",
-      "בלילת פנקייק אמינה לפי גרמים.",
-      "pancake1.jpeg",
-    ),
-  }),
-  paodequeijo: featuredRecipe("doughs_starches", [], 3, {
+  paodequeijo: featuredRecipe("doughs_starches", [], {
     en: localizedMetadata(
       "Pão de Queijo",
       "Brazilian cheese bread with a chewy center.",
@@ -348,7 +95,31 @@ export const recipeCatalog: RecipeCatalog = {
       "paude.jpeg",
     ),
   }),
-  paprikesh_pasta: featuredRecipe("doughs_starches", ["favorite", "vegan"], 7, {
+  pizza_dough: featuredRecipe("doughs_starches", [], {
+    en: localizedMetadata(
+      "Pizza Dough Recipe",
+      "A gram-based overnight poolish dough for two pizzas.",
+      "pizza.jpg",
+    ),
+    he: localizedMetadata(
+      "מתכון לבצק פיצה",
+      "בצק פיצה בשיטת פוליש לילה לשתי פיצות.",
+      "pizza.jpg",
+    ),
+  }),
+  tortillas: featuredRecipe("doughs_starches", ["vegan"], {
+    en: localizedMetadata(
+      "Tortillas",
+      "Flexible tortillas measured by weight.",
+      "tortila.jpeg",
+    ),
+    he: localizedMetadata(
+      "טורטיות",
+      "טורטיות גמישות לפי גרמים.",
+      "tortila.jpeg",
+    ),
+  }),
+  paprikesh_pasta: featuredRecipe("doughs_starches", ["favorite", "vegan"], {
     en: localizedMetadata(
       "Pasta Paprikash",
       "A vegan paprika pasta for a quick savory meal.",
@@ -358,6 +129,403 @@ export const recipeCatalog: RecipeCatalog = {
       "פסטה פפריקש",
       "פסטה פפריקה טבעונית לארוחה מהירה.",
       "paprikesh.jpeg",
+    ),
+  }),
+  pilmeni_dough: featuredRecipe("doughs_starches", [], {
+    en: localizedMetadata(
+      "Pelmeni Dough",
+      "A sturdy dough for rolling and filling pelmeni.",
+      "pilmeni1.jpg",
+    ),
+    he: localizedMetadata(
+      "בצק פלמני",
+      "בצק יציב לרידוד ומילוי פלמני.",
+      "pilmeni1.jpg",
+    ),
+  }),
+  grilled_chicken_thighs: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Grilled Chicken Thighs",
+      "High-heat chicken thighs with repeatable seasoning and juicy results.",
+      "grilledchicken.jpeg",
+    ),
+    he: localizedMetadata(
+      "ירכי עוף על הגריל",
+      "ירכי עוף בחום גבוה עם תיבול מדויק ותוצאה עסיסית.",
+      "grilledchicken.jpeg",
+    ),
+  }),
+  teriyaki_salmon_air_fryer: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Air Fryer Teriyaki Salmon",
+      "Teriyaki salmon cooked quickly in the air fryer.",
+      "teriyaki_salmon_air_fryer.jpg",
+    ),
+    he: localizedMetadata(
+      "סלמון טריאקי באייר פרייר",
+      "סלמון טריאקי מהיר באייר פרייר.",
+      "teriyaki_salmon_air_fryer.jpg",
+    ),
+  }),
+  yozhiki: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Yozhiki",
+      "Rice-studded meatballs in a simple sauce.",
+    ),
+    he: localizedMetadata("יוז'יקי", "קציצות עם אורז ברוטב פשוט."),
+  }),
+  chicken_meatballs: featuredRecipe("mains", ["favorite"], {
+    en: localizedMetadata(
+      "Quick Chicken Meatballs",
+      "Sash's quick chicken meatballs for a simple family dinner.",
+      "meatballsc.jpeg",
+    ),
+    he: localizedMetadata(
+      "קציצות עוף מהירות",
+      "קציצות העוף המהירות של סש לארוחת ערב.",
+      "meatballsc.jpeg",
+    ),
+  }),
+  shnitzel: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Simple Oven-Baked Schnitzel",
+      "Oven-baked schnitzel using the slurry method.",
+      "shnitzel.jpg",
+    ),
+    he: localizedMetadata(
+      "שניצל פשוט אפוי בתנור",
+      "שניצל אפוי בתנור בשיטת בלילה.",
+      "shnitzel.jpg",
+    ),
+  }),
+  chicken_soup: featuredRecipe("mains", ["favorite"], {
+    en: localizedMetadata(
+      "Chicken and Vegetable Soup",
+      "A homestyle chicken soup with vegetables.",
+      "chicken_soup.jpg",
+    ),
+    he: localizedMetadata(
+      "מרק עוף וירקות",
+      "מרק עוף וירקות ביתי ומנחם.",
+      "chicken_soup.jpg",
+    ),
+  }),
+  rustic_chicken_lentil_soup: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Rustic Chicken Soup with Red Lentils and Potatoes",
+      "A hearty chicken soup with red lentils, potatoes, hawaij, and dill.",
+      "rustic_chicken_lentil_soup.jpg",
+    ),
+    he: localizedMetadata(
+      "מרק עוף כפרי עם עדשים כתומות ותפוחי אדמה",
+      "מרק עוף סמיך ומנחם עם עדשים כתומות, תפוחי אדמה, חוויאג׳ ושמיר.",
+      "rustic_chicken_lentil_soup.jpg",
+    ),
+  }),
+  borscht: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Borscht",
+      "A comforting beet soup with a deep red broth.",
+      "borscht.jpg",
+    ),
+    he: localizedMetadata(
+      "בורשט",
+      "מרק סלק מנחם עם צבע וטעם עמוקים.",
+      "borscht.jpg",
+    ),
+  }),
+  cabbage_salad: featuredRecipe("salads_pickles", ["vegan"], {
+    en: localizedMetadata(
+      "Cabbage Salad",
+      "A crunchy cabbage salad with soy dressing, using cabbage of any color.",
+      "purple_cabbage_salad.jpg",
+    ),
+    he: localizedMetadata(
+      "סלט כרוב",
+      "סלט כרוב פריך עם רוטב סויה, מכרוב בכל צבע.",
+      "purple_cabbage_salad.jpg",
+    ),
+  }),
+  sweet_potato_bake: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Sweet Potato Bake",
+      "A savory sweet potato and onion bake with eggs and warm spices.",
+      "sweet_potato_bake.jpg",
+    ),
+    he: localizedMetadata(
+      "פשטידת בטטה",
+      "פשטידת בטטה ובצל מלוחה עם ביצים ותבלינים חמים.",
+      "sweet_potato_bake.jpg",
+    ),
+  }),
+  ground_beef_on_sweet_potato: featuredRecipe("mains", [], {
+    en: localizedMetadata(
+      "Ground Beef over Roasted Sweet Potato",
+      "Roasted sweet potato topped with browned beef, caramelized onions, tahini, silan, and toasted nuts.",
+      "ground_beef_on_sweet_potato.jpg",
+    ),
+    he: localizedMetadata(
+      "בשר טחון על מצע בטטה",
+      "בטטה צלויה עם בשר שחום, בצל מקורמל, טחינה, סילאן וצנוברים קלויים.",
+      "ground_beef_on_sweet_potato.jpg",
+    ),
+  }),
+  carrot_salad: featuredRecipe("salads_pickles", ["favorite", "vegan"], {
+    en: localizedMetadata(
+      "Sweet and Sour Carrot Salad",
+      "Dina's bright carrot salad with a sweet-sour dressing.",
+      "carrot_salad.jpg",
+    ),
+    he: localizedMetadata(
+      "סלט גזר חמוץ מתוק",
+      "סלט הגזר של דינה עם רוטב חמוץ-מתוק.",
+      "carrot_salad.jpg",
+    ),
+  }),
+  quick_pickle_carrot: featuredRecipe("salads_pickles", ["vegan"], {
+    en: localizedMetadata(
+      "Quick Vinegar-Pickled Carrots",
+      "Fast vinegar-pickled carrots for a bright side.",
+    ),
+    he: localizedMetadata(
+      "גזר כבוש מהיר בחומץ",
+      "גזר כבוש מהיר בחומץ כתוספת מרעננת.",
+    ),
+  }),
+  colslaw_vinaigrette: featuredRecipe("salads_pickles", ["vegan"], {
+    en: localizedMetadata(
+      "Coleslaw with Simple Vinaigrette",
+      "Crisp coleslaw dressed with a simple vinaigrette.",
+      "coleslaw.jpg",
+    ),
+    he: localizedMetadata(
+      "סלט קולסלאו עם ויניגרט פשוט",
+      "קולסלאו פריך עם ויניגרט פשוט.",
+      "coleslaw.jpg",
+    ),
+  }),
+  chocolatechip_cookies: featuredRecipe("sweets", ["favorite"], {
+    en: localizedMetadata(
+      "Chocolate Chip Cookies",
+      "Classic chocolate chip cookies measured by weight.",
+      "chocookies.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות שוקולד צ'יפס",
+      "עוגיות שוקולד צ'יפס קלאסיות בגרמים.",
+      "chocookies.jpeg",
+    ),
+  }),
+  coconut_almond_choclate_cookies: featuredRecipe("sweets", ["vegan"], {
+    en: localizedMetadata(
+      "Coconut Almond Chocolate Cookies",
+      "Coconut and almond cookies with chocolate in a vegan dough.",
+      "almondcoconut.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות קוקוס, שוקולד ושקדים",
+      "עוגיות קוקוס ושקדים עם שוקולד בבצק טבעוני.",
+      "almondcoconut.jpeg",
+    ),
+  }),
+  choclatechip_vegan: featuredRecipe("sweets", ["vegan"], {
+    en: localizedMetadata(
+      "Vegan Chocolate Chip Cookies",
+      "Plant-based cookies with crisp edges and soft centers.",
+      "Veganchoc.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות שוקולד צ'יפס טבעוניות",
+      "עוגיות טבעוניות עם קצוות פריכים ומרכז רך.",
+      "Veganchoc.jpeg",
+    ),
+  }),
+  cookie_cutter_cookies: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Cookie Cutter Butter Cookies",
+      "Butter cookies built to hold clean cutter shapes.",
+      "cookiecutter.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות בצורות",
+      "עוגיות חמאה שנשארות יציבות בחיתוך צורות.",
+      "cookiecutter.jpeg",
+    ),
+  }),
+  goldilocks_cookies: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Goldilocks and the Three Bears Style Cookies",
+      "Chocolate butter cookies made with Shokolit, rolled thin and cut into shapes.",
+      "goldilocks_cookies_before_after.jpg",
+    ),
+    he: localizedMetadata(
+      "עוגיות בסגנון זהבה ושלושת הדובים",
+      "עוגיות חמאה עם שוקולית, מרודדות דק וקרוצות בצורות שאוהבים.",
+      "goldilocks_cookies_before_after.jpg",
+    ),
+  }),
+  leopard_cookies: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Leopard Print Cookies",
+      "Patterned cookies with a playful leopard look.",
+      "leopardcookie.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות מנומרות",
+      "עוגיות מעוצבות במראה מנומר.",
+      "leopardcookie.jpeg",
+    ),
+  }),
+  chouquettes: featuredRecipe("sweets", ["favorite"], {
+    en: localizedMetadata(
+      "Chouquettes",
+      "Light choux pastry puffs finished with pearl sugar.",
+      "chouquettes.jpeg",
+    ),
+    he: localizedMetadata(
+      "שוקטים",
+      "פחזניות קלילות מבצק רבוך עם סוכר פנינים.",
+      "chouquettes.jpeg",
+    ),
+  }),
+  vanila_cupcakes: featuredRecipe("sweets", ["favorite"], {
+    en: localizedMetadata(
+      "Vanilla Cupcakes",
+      "A white-cake style vanilla cupcake recipe.",
+      "cupcake.jpg",
+    ),
+    he: localizedMetadata(
+      "קאפקייקס וניל",
+      "קאפקייקס וניל בסגנון עוגה לבנה.",
+      "cupcake.jpg",
+    ),
+  }),
+  pateachoux: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Pate a Choux",
+      "Classic choux pastry dough for puffs and related pastries.",
+      "peta.jpeg",
+    ),
+    he: localizedMetadata(
+      "בצק רבוך",
+      "בצק רבוך קלאסי לפחזניות ומאפים.",
+      "peta.jpeg",
+    ),
+  }),
+  pankcakebatter: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Pancake Batter",
+      "A reliable gram-based pancake batter.",
+      "pancake1.jpeg",
+    ),
+    he: localizedMetadata(
+      "בצק פנקייק",
+      "בלילת פנקייק אמינה לפי גרמים.",
+      "pancake1.jpeg",
+    ),
+  }),
+  chocolate_cake: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Chocolate Cake",
+      "A straightforward chocolate cake for celebrations.",
+      "chocake.jpg",
+    ),
+    he: localizedMetadata(
+      "עוגת שוקולד",
+      "עוגת שוקולד פשוטה לאירועים וליומיום.",
+      "chocake.jpg",
+    ),
+  }),
+  banana_bread: featuredRecipe("sweets", ["favorite"], {
+    en: localizedMetadata(
+      "Banana Bread",
+      "A soft banana cake for using ripe bananas.",
+      "bananaBread1.jpg",
+    ),
+    he: localizedMetadata(
+      "עוגת בננות",
+      "עוגת בננות רכה לבננות בשלות.",
+      "bananaBread1.jpg",
+    ),
+  }),
+  super_easy_banana_cake: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Super-Easy Banana Cake",
+      "A quick, tender blender banana cake with dark chocolate.",
+    ),
+    he: localizedMetadata(
+      "עוגת בננה סופר קלה",
+      "עוגת בננה מהירה ורכה שמכינים בבלנדר עם שוקולד מריר.",
+    ),
+  }),
+  carrot_cake_muffins: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Easy Sweet Carrot Muffins or Loaf Cake",
+      "A lightly sweet carrot batter that works as muffins or a loaf cake.",
+      "carrot_cake_muffin.jpg",
+    ),
+    he: localizedMetadata(
+      "מאפינס או עוגת גזר מתוקה וקלה",
+      "בלילת גזר מתוקה וקלה שמתאימה למאפינס או לעוגת אינגליש קייק.",
+      "carrot_cake_muffin.jpg",
+    ),
+  }),
+  honey_sugar_cookies: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Honey Sugar Cookies",
+      "Tender sugar cookies sweetened with honey.",
+      "honeycookies.jpeg",
+    ),
+    he: localizedMetadata(
+      "עוגיות סוכר עם דבש",
+      "עוגיות סוכר עדינות עם דבש.",
+      "honeycookies.jpeg",
+    ),
+  }),
+  frozen_banana: featuredRecipe("sweets", ["favorite", "vegan"], {
+    en: localizedMetadata(
+      "Banana Chocolate Popsicles",
+      "Frozen banana and chocolate treats on a stick.",
+      "frozen_banana.jpeg",
+    ),
+    he: localizedMetadata(
+      "ארטיק בננה שוקולד",
+      "בננה קפואה עם שוקולד על מקל.",
+      "frozen_banana.jpeg",
+    ),
+  }),
+  gluten_free_chocolate_banana_brownies: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Gluten-Free Chocolate Banana Brownies",
+      "Chocolate banana brownies without gluten.",
+    ),
+    he: localizedMetadata(
+      "בראוניז בננה-שוקולד ללא גלוטן",
+      "בראוניז בננה ושוקולד ללא גלוטן.",
+    ),
+  }),
+  crepe: featuredRecipe("sweets", [], {
+    en: localizedMetadata(
+      "Crepe",
+      "Thin crepes for sweet or savory fillings.",
+      "crepe.jpg",
+    ),
+    he: localizedMetadata(
+      "קרפ",
+      "קרפים דקים למילוי מתוק או מלוח.",
+      "crepe.jpg",
+    ),
+  }),
+  crackers: featuredRecipe("snacks", ["favorite", "vegan"], {
+    en: localizedMetadata(
+      "Seed and Nut Crackers",
+      "Crunchy seed and nut crackers for snacking.",
+      "crackers.jpeg",
+    ),
+    he: localizedMetadata(
+      "קרקרים מגרעינים וזרעים",
+      "קרקרים פריכים מגרעינים ואגוזים.",
+      "crackers.jpeg",
     ),
   }),
   pastry_cream: unlistedRecipe(
@@ -371,113 +539,9 @@ export const recipeCatalog: RecipeCatalog = {
       he: localizedMetadata("קרם פטיסייר", "מתכון עזר לקרם פטיסייר חלק."),
     },
   ),
-  pateachoux: featuredRecipe("sweets", [], 25, {
-    en: localizedMetadata(
-      "Pate a Choux",
-      "Classic choux pastry dough for puffs and related pastries.",
-      "peta.jpeg",
-    ),
-    he: localizedMetadata(
-      "בצק רבוך",
-      "בצק רבוך קלאסי לפחזניות ומאפים.",
-      "peta.jpeg",
-    ),
-  }),
-  pilmeni_dough: featuredRecipe("doughs_starches", [], 8, {
-    en: localizedMetadata(
-      "Pelmeni Dough",
-      "A sturdy dough for rolling and filling pelmeni.",
-      "pilmeni1.jpg",
-    ),
-    he: localizedMetadata(
-      "בצק פלמני",
-      "בצק יציב לרידוד ומילוי פלמני.",
-      "pilmeni1.jpg",
-    ),
-  }),
-  pizza_dough: featuredRecipe("doughs_starches", [], 4, {
-    en: localizedMetadata(
-      "Pizza Dough Recipe",
-      "A gram-based overnight poolish dough for two pizzas.",
-      "pizza.jpg",
-    ),
-    he: localizedMetadata(
-      "מתכון לבצק פיצה",
-      "בצק פיצה בשיטת פוליש לילה לשתי פיצות.",
-      "pizza.jpg",
-    ),
-  }),
-  cabbage_salad: featuredRecipe("salads_pickles", ["vegan"], 16, {
-    en: localizedMetadata(
-      "Cabbage Salad",
-      "A crunchy cabbage salad with soy dressing, using cabbage of any color.",
-      "purple_cabbage_salad.jpg",
-    ),
-    he: localizedMetadata(
-      "סלט כרוב",
-      "סלט כרוב פריך עם רוטב סויה, מכרוב בכל צבע.",
-      "purple_cabbage_salad.jpg",
-    ),
-  }),
-  quick_pickle_carrot: featuredRecipe("salads_pickles", ["vegan"], 18, {
-    en: localizedMetadata(
-      "Quick Vinegar-Pickled Carrots",
-      "Fast vinegar-pickled carrots for a bright side.",
-    ),
-    he: localizedMetadata(
-      "גזר כבוש מהיר בחומץ",
-      "גזר כבוש מהיר בחומץ כתוספת מרעננת.",
-    ),
-  }),
-  quinoa: featuredRecipe("doughs_starches", ["vegan"], 1, {
-    en: localizedMetadata(
-      "Delicious Quinoa with Sweet Potato",
-      "A simple quinoa and sweet potato base measured in grams.",
-      "quinoa.jpg",
-    ),
-    he: localizedMetadata(
-      "קינואה טעימה עם בטטה",
-      "קינואה פשוטה עם בטטה, מדודה בגרמים.",
-      "quinoa.jpg",
-    ),
-  }),
-  rice_pilaf: featuredRecipe("doughs_starches", [], 2, {
-    en: localizedMetadata(
-      "Rice Pilaf",
-      "A reliable rice pilaf side with clear weights.",
-    ),
-    he: localizedMetadata(
-      "פילאף אורז",
-      "תוספת אורז פילאף אמינה עם כמויות ברורות.",
-    ),
-  }),
-  rustic_chicken_lentil_soup: featuredRecipe("mains", [], 14.5, {
-    en: localizedMetadata(
-      "Rustic Chicken Soup with Red Lentils and Potatoes",
-      "A hearty chicken soup with red lentils, potatoes, hawaij, and dill.",
-      "rustic_chicken_lentil_soup.jpg",
-    ),
-    he: localizedMetadata(
-      "מרק עוף כפרי עם עדשים כתומות ותפוחי אדמה",
-      "מרק עוף סמיך ומנחם עם עדשים כתומות, תפוחי אדמה, חוויאג׳ ושמיר.",
-      "rustic_chicken_lentil_soup.jpg",
-    ),
-  }),
   salt: unlistedRecipe("Seasoning reference note rather than a recipe.", [], {
     en: localizedMetadata("Salt", "A small helper note for salt measurements."),
     he: localizedMetadata("מלח", "הערת עזר קצרה למדידות מלח."),
-  }),
-  shnitzel: featuredRecipe("mains", [], 13, {
-    en: localizedMetadata(
-      "Simple Oven-Baked Schnitzel",
-      "Oven-baked schnitzel using the slurry method.",
-      "shnitzel.jpg",
-    ),
-    he: localizedMetadata(
-      "שניצל פשוט אפוי בתנור",
-      "שניצל אפוי בתנור בשיטת בלילה.",
-      "shnitzel.jpg",
-    ),
   }),
   simple_vinaigrette: unlistedRecipe(
     "Dressing helper the salads that use it link to.",
@@ -490,71 +554,6 @@ export const recipeCatalog: RecipeCatalog = {
       he: localizedMetadata("ויניגרט פשוט", "מתכון עזר לויניגרט בסיסי."),
     },
   ),
-  sweet_potato_bake: featuredRecipe("mains", [], 16, {
-    en: localizedMetadata(
-      "Sweet Potato Bake",
-      "A savory sweet potato and onion bake with eggs and warm spices.",
-      "sweet_potato_bake.jpg",
-    ),
-    he: localizedMetadata(
-      "פשטידת בטטה",
-      "פשטידת בטטה ובצל מלוחה עם ביצים ותבלינים חמים.",
-      "sweet_potato_bake.jpg",
-    ),
-  }),
-  super_easy_banana_cake: featuredRecipe("sweets", [], 28.25, {
-    en: localizedMetadata(
-      "Super-Easy Banana Cake",
-      "A quick, tender blender banana cake with dark chocolate.",
-    ),
-    he: localizedMetadata(
-      "עוגת בננה סופר קלה",
-      "עוגת בננה מהירה ורכה שמכינים בבלנדר עם שוקולד מריר.",
-    ),
-  }),
-  teriyaki_salmon_air_fryer: featuredRecipe("mains", [], 10, {
-    en: localizedMetadata(
-      "Air Fryer Teriyaki Salmon",
-      "Teriyaki salmon cooked quickly in the air fryer.",
-      "teriyaki_salmon_air_fryer.jpg",
-    ),
-    he: localizedMetadata(
-      "סלמון טריאקי באייר פרייר",
-      "סלמון טריאקי מהיר באייר פרייר.",
-      "teriyaki_salmon_air_fryer.jpg",
-    ),
-  }),
-  tortillas: featuredRecipe("doughs_starches", ["vegan"], 6, {
-    en: localizedMetadata(
-      "Tortillas",
-      "Flexible tortillas measured by weight.",
-      "tortila.jpeg",
-    ),
-    he: localizedMetadata(
-      "טורטיות",
-      "טורטיות גמישות לפי גרמים.",
-      "tortila.jpeg",
-    ),
-  }),
-  vanila_cupcakes: featuredRecipe("sweets", ["favorite"], 24.5, {
-    en: localizedMetadata(
-      "Vanilla Cupcakes",
-      "A white-cake style vanilla cupcake recipe.",
-      "cupcake.jpg",
-    ),
-    he: localizedMetadata(
-      "קאפקייקס וניל",
-      "קאפקייקס וניל בסגנון עוגה לבנה.",
-      "cupcake.jpg",
-    ),
-  }),
-  yozhiki: featuredRecipe("mains", [], 11, {
-    en: localizedMetadata(
-      "Yozhiki",
-      "Rice-studded meatballs in a simple sauce.",
-    ),
-    he: localizedMetadata("יוז'יקי", "קציצות עם אורז ברוטב פשוט."),
-  }),
 };
 
 const genericMetadata = {
@@ -600,36 +599,30 @@ export function selectFeaturedRecipes(
   recipes: readonly RecipeIdentity[],
   catalog: RecipeCatalog = recipeCatalog,
 ): FeaturedRecipe[] {
-  const sourceLanguages = groupSourceLanguages(recipes);
+  const pairedSlugs = new Set(listRecipePairs(recipes));
 
-  return Array.from(sourceLanguages)
-    .filter(([, availableLanguages]) =>
-      languages.every((candidate) => availableLanguages.has(candidate)),
-    )
-    .flatMap(([slug]) => {
-      const entry = catalog[slug];
-      const metadata = entry?.localizations[language];
+  return Object.entries(catalog).flatMap(([slug, entry]) => {
+    const metadata = entry.localizations[language];
 
-      if (
-        entry?.listing.intent !== "featured" ||
-        !metadata?.title ||
-        !metadata.description
-      ) {
-        return [];
-      }
+    if (
+      !pairedSlugs.has(slug) ||
+      entry.listing.intent !== "featured" ||
+      !metadata?.title ||
+      !metadata.description
+    ) {
+      return [];
+    }
 
-      return [
-        {
-          slug,
-          language,
-          categoryId: entry.listing.categoryId,
-          featuredOrder: entry.listing.featuredOrder,
-          markerIds: entry.markerIds,
-          metadata,
-        },
-      ];
-    })
-    .sort((first, second) => first.featuredOrder - second.featuredOrder);
+    return [
+      {
+        slug,
+        language,
+        categoryId: entry.listing.categoryId,
+        markerIds: entry.markerIds,
+        metadata,
+      },
+    ];
+  });
 }
 
 export function listUnlistedRecipes(
@@ -650,6 +643,7 @@ export function collectCatalogDiagnostics(
   catalog: RecipeCatalog = recipeCatalog,
 ): CatalogDiagnostic[] {
   const sourceLanguages = groupSourceLanguages(recipes);
+  const pairedSlugs = new Set(listRecipePairs(recipes));
   const diagnostics: CatalogDiagnostic[] = [];
 
   for (const [slug, availableLanguages] of sourceLanguages) {
@@ -698,10 +692,7 @@ export function collectCatalogDiagnostics(
       });
     }
 
-    if (
-      entry.listing.intent === "featured" &&
-      !languages.every((language) => availableLanguages.has(language))
-    ) {
+    if (entry.listing.intent === "featured" && !pairedSlugs.has(slug)) {
       diagnostics.push({
         severity: "warning",
         slug,
@@ -722,7 +713,16 @@ export function collectCatalogDiagnostics(
     });
   }
 
-  return [...diagnostics, ...duplicateFeaturedOrders(catalog)];
+  return diagnostics;
+}
+
+/** Slugs that exist in every language, sorted. */
+export function listRecipePairs(recipes: readonly RecipeIdentity[]): string[] {
+  return Array.from(groupSourceLanguages(recipes))
+    .filter(([, availableLanguages]) =>
+      languages.every((language) => availableLanguages.has(language)),
+    )
+    .map(([slug]) => slug);
 }
 
 function groupSourceLanguages(
@@ -758,41 +758,13 @@ function missingMetadataFields(
   return missing;
 }
 
-function duplicateFeaturedOrders(catalog: RecipeCatalog): CatalogDiagnostic[] {
-  const slugsByPosition = new Map<string, string[]>();
-
-  for (const [slug, entry] of Object.entries(catalog)) {
-    if (entry.listing.intent !== "featured") {
-      continue;
-    }
-
-    const position = `${entry.listing.categoryId}\n${entry.listing.featuredOrder}`;
-    slugsByPosition.set(position, [
-      ...(slugsByPosition.get(position) ?? []),
-      slug,
-    ]);
-  }
-
-  return Array.from(slugsByPosition)
-    .filter(([, slugs]) => slugs.length > 1)
-    .map(([position, slugs]) => {
-      const [categoryId, featuredOrder] = position.split("\n");
-      return {
-        severity: "warning" as const,
-        slug: slugs[0]!,
-        message: `${slugs.join(", ")} share featured order ${featuredOrder} in ${categoryId}, so their card sequence is undefined.`,
-      };
-    });
-}
-
 function featuredRecipe(
   categoryId: RecipeCategoryId,
   markerIds: RecipeMarkerId[],
-  featuredOrder: number,
   localizations: Partial<Record<RecipeLanguage, LocalizedRecipeMetadata>>,
 ): RecipeCatalogEntry {
   return {
-    listing: { intent: "featured", categoryId, featuredOrder },
+    listing: { intent: "featured", categoryId },
     markerIds,
     localizations,
   };
