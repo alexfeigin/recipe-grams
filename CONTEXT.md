@@ -27,7 +27,7 @@ The site's readable presentation of a localized recipe.
 _Avoid_: Replacement recipe, generated Markdown
 
 **Featured Recipe**:
-A published recipe selected for landing-page browsing, with a category and order.
+A published recipe selected for landing-page browsing, with a category and a position in the catalog.
 _Avoid_: Published recipe, indexed recipe
 
 **Unlisted Recipe**:

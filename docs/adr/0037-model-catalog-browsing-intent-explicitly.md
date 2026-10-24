@@ -12,8 +12,9 @@ access while making incomplete browsing metadata visible.
 
 ## Consequences
 
-- `featuredRecipe(categoryId, markerIds, featuredOrder, localizations)` supplies a
-  landing card's category and order.
+- `featuredRecipe(categoryId, markerIds, localizations)` supplies a landing card's
+  category. Cards appear within their category in catalog order, so moving an entry
+  moves its card; there is no separate order value to keep unique.
 - `unlistedRecipe(reason, markerIds, localizations)` records intentional omission
   from landing browsing. Unlisted recipes remain published and searchable.
 
@@ -22,15 +23,17 @@ localizes their presentation. A missing category cannot stand in for unlisted
 intent. Catalog localizations are partial because the build supports a source
 existing in only one language; the authoring workflow creates complete pairs.
 
-`collectCatalogDiagnostics` checks the catalog against discovered sources once
-per discovered set. Severity is explicit:
+`collectCatalogDiagnostics` checks the catalog against discovered sources. Listing
+recipes has no side effects; the build runs the diagnostics once at start
+(`recipeCatalogCheck` in `astro.config.mjs`), printing warnings and failing on
+errors. `verify:catalog-source` reports the same diagnostics without a build. Severity is explicit:
 
-| Condition                                                                                                                       | Result                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| Featured entry lacks title or description for an existing localized source                                                      | **Error:** stop the build; its promised card would disappear. |
-| Source has no catalog entry                                                                                                     | Warning; publish/search it without a landing card.            |
-| Unlisted entry lacks localized title or description                                                                             | Warning; use generic page metadata.                           |
-| Orphan entry, catalog localization without a source, incomplete featured pair, or duplicate featured position within a category | Warning; build continues.                                     |
+| Condition                                                                        | Result                                                        |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Featured entry lacks title or description for an existing localized source       | **Error:** stop the build; its promised card would disappear. |
+| Source has no catalog entry                                                      | Warning; publish/search it without a landing card.            |
+| Unlisted entry lacks localized title or description                              | Warning; use generic page metadata.                           |
+| Orphan entry, catalog localization without a source, or incomplete featured pair | Warning; build continues.                                     |
 
 Landing cards require a complete source pair, even when the available language has
 complete metadata. Intentional unlisted entries with complete metadata do not warn.

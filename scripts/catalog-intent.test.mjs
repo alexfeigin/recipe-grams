@@ -21,9 +21,9 @@ function localizations(title, description) {
   };
 }
 
-function featured(categoryId, featuredOrder, title = "Featured") {
+function featured(categoryId, title = "Featured") {
   return {
-    listing: { intent: "featured", categoryId, featuredOrder },
+    listing: { intent: "featured", categoryId },
     markerIds: [],
     localizations: localizations(title, "A featured recipe."),
   };
@@ -49,11 +49,11 @@ function messagesFor(diagnostics, severity) {
     .map((diagnostic) => diagnostic.message);
 }
 
-test("featured recipes become cards in featured order", () => {
-  const recipes = [...pair("second"), ...pair("first")];
+test("featured recipes become cards in catalog order", () => {
+  const recipes = [...pair("first"), ...pair("second")];
   const catalog = {
-    first: featured("sweets", 2, "First"),
-    second: featured("mains", 1, "Second"),
+    second: featured("mains", "Second"),
+    first: featured("sweets", "First"),
   };
 
   assert.deepEqual(
@@ -72,7 +72,7 @@ test("featured recipes become cards in featured order", () => {
 test("an intentionally unfeatured recipe stays off the landing page quietly", () => {
   const recipes = [...pair("featured_dish"), ...pair("helper")];
   const catalog = {
-    featured_dish: featured("mains", 1),
+    featured_dish: featured("mains"),
     helper: unlisted("Component recipe other recipes link to."),
   };
 
@@ -99,7 +99,7 @@ test("incomplete featured metadata is an error, not a silent exclusion", () => {
   const recipes = pair("half_written");
   const catalog = {
     half_written: {
-      listing: { intent: "featured", categoryId: "sweets", featuredOrder: 1 },
+      listing: { intent: "featured", categoryId: "sweets" },
       markerIds: [],
       localizations: { en: { title: "Half Written", description: "" } },
     },
@@ -217,7 +217,7 @@ test("an empty localization is no better than a missing one", () => {
 test("complete metadata reaches the page untouched, social override included", () => {
   const catalog = {
     dish: {
-      listing: { intent: "featured", categoryId: "mains", featuredOrder: 1 },
+      listing: { intent: "featured", categoryId: "mains" },
       markerIds: [],
       localizations: {
         en: {
@@ -247,7 +247,7 @@ test("verification checks the unlisted pages the source tree actually has", () =
     { language: "en", slug: "helper" },
   ];
   const catalog = {
-    featured_dish: featured("mains", 1),
+    featured_dish: featured("mains"),
     helper: unlisted("Component recipe other recipes link to."),
     removed: unlisted("Kept for a recipe that no longer exists."),
   };
@@ -263,7 +263,7 @@ test("verification checks the unlisted pages the source tree actually has", () =
 
 test("a catalog with nothing unlisted asks verification for nothing", () => {
   const recipes = pair("featured_dish");
-  const catalog = { featured_dish: featured("mains", 1) };
+  const catalog = { featured_dish: featured("mains") };
 
   assert.deepEqual(listUnlistedRecipes(recipes, catalog), []);
   assert.deepEqual(collectCatalogDiagnostics(recipes, catalog), []);
@@ -271,7 +271,7 @@ test("a catalog with nothing unlisted asks verification for nothing", () => {
 
 test("a recipe missing one language keeps its card off every landing page", () => {
   const recipes = [{ language: "en", slug: "english_only" }];
-  const catalog = { english_only: featured("mains", 1) };
+  const catalog = { english_only: featured("mains") };
 
   assert.deepEqual(selectFeaturedRecipes("en", recipes, catalog), []);
 
@@ -290,27 +290,12 @@ test("a recipe missing one language keeps its card off every landing page", () =
 test("a catalog entry without any recipe source is an orphan", () => {
   const warnings = messagesFor(
     collectCatalogDiagnostics(pair("real"), {
-      real: featured("mains", 1),
-      removed: featured("sweets", 2),
+      real: featured("mains"),
+      removed: featured("sweets"),
     }),
     "warning",
   );
 
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /removed is an orphan catalog entry/);
-});
-
-test("one featured position per category, and orders may repeat across categories", () => {
-  const recipes = [...pair("one"), ...pair("two"), ...pair("three")];
-  const warnings = messagesFor(
-    collectCatalogDiagnostics(recipes, {
-      one: featured("mains", 1),
-      two: featured("mains", 1),
-      three: featured("sweets", 1),
-    }),
-    "warning",
-  );
-
-  assert.equal(warnings.length, 1);
-  assert.match(warnings[0], /one, two share featured order 1 in mains/);
 });

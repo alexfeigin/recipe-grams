@@ -268,7 +268,7 @@ pure calculation tests); Astro's extensionless imports are not a Node template.
 The pure checks need no build, browser, or `SITE_BASE_URL`. `test:preview` exercises
 the preview lifecycle separately. Generated checks split responsibilities:
 `verify:recipes` owns source-to-page coverage and landing card destinations;
-`verify:catalog` owns card membership/order; `verify:navigation` owns expected
+`verify:catalog` owns card membership and catalog-order card sequence; `verify:navigation` owns expected
 destinations; `verify:links` owns destination existence; `verify:static-assets`
 owns image placement; `verify:search-index`
 owns Pagefind artifacts; `verify:search-console` owns the exact verification file;

@@ -2,6 +2,7 @@ import { uiLabels } from "../i18n/ui";
 import { getPageContext } from "../lib/pageContext";
 import { isRecipeLanguage, languages, sitePath } from "../lib/site";
 import type { RecipeLanguage } from "../lib/site";
+import { createElementLookup } from "./requireElement";
 
 const mobileNavigationQuery = "(max-width: 880px)";
 const shortestSearchQuery = 2;
@@ -16,16 +17,7 @@ type SiteHeaderSettings = {
   basePath: string;
 };
 
-function requireElement<T extends Element>(
-  root: ParentNode,
-  selector: string,
-): T {
-  const element = root.querySelector<T>(selector);
-  if (!element) {
-    throw new Error(`The site header is missing ${selector}.`);
-  }
-  return element;
-}
+const requireElement = createElementLookup("The site header");
 
 function readSettings(header: HTMLElement): SiteHeaderSettings {
   const { language, basePath } = header.dataset;
@@ -140,11 +132,8 @@ function createSearch(
   let lastSearchId = 0;
 
   function normalizeResultUrl(url: string) {
-    const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
-    if (url.startsWith(normalizedBase)) {
-      return url;
-    }
-    return `${normalizedBase}${url.replace(/^\/+/, "")}`;
+    const normalizedBase = sitePath(basePath, "");
+    return url.startsWith(normalizedBase) ? url : sitePath(basePath, url);
   }
 
   async function getPagefind() {

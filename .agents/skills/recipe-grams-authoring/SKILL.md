@@ -39,7 +39,8 @@ normalizing grammar and structure.
    see [image ownership and retention](../../../docs/adr/0043-serve-static-assets-from-public.md).
 5. Update `src/lib/recipeCatalog.ts` with localized titles and descriptions,
    markers, and explicit preview images. Use `featuredRecipe(category, markers,
-order, localizations)` with a unique order within its category, or
+localizations)`, placed in the catalog where its card should fall within its
+   category, or
    `unlistedRecipe(reason, markers, localizations)` for a helper the user wants
    omitted from landing browsing. Pass an image filename as the third argument
    of each `localizedMetadata(...)` call to select a card/social image; body
