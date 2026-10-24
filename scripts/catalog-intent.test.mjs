@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import astroConfig from "../astro.config.mjs";
 import {
   collectCatalogDiagnostics,
   getRecipeMetadata,
   listUnlistedRecipes,
+  recipeCatalog,
   selectFeaturedRecipes,
 } from "../src/lib/recipeCatalog.ts";
 
@@ -298,4 +300,80 @@ test("a catalog entry without any recipe source is an orphan", () => {
 
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /removed is an orphan catalog entry/);
+});
+
+function catalogBuildHook() {
+  const integrations = astroConfig.integrations.filter(
+    ({ name }) => name === "recipe-catalog-check",
+  );
+  assert.equal(
+    integrations.length,
+    1,
+    "register the catalog check exactly once",
+  );
+  const hook = integrations[0].hooks["astro:build:start"];
+  assert.equal(typeof hook, "function");
+  return hook;
+}
+
+test("the configured build hook accepts a complete catalog quietly", (t) => {
+  const warnings = t.mock.method(console, "warn", () => {});
+
+  assert.doesNotThrow(() => catalogBuildHook()());
+  assert.equal(warnings.mock.callCount(), 0);
+});
+
+test("the configured build hook preserves errors and checks each build afresh", (t) => {
+  const entry = recipeCatalog.grill_rub;
+  t.after(() => {
+    recipeCatalog.grill_rub = entry;
+  });
+  const warnings = t.mock.method(console, "warn", () => {});
+  const hook = catalogBuildHook();
+  recipeCatalog.grill_rub = {
+    ...entry,
+    localizations: {
+      ...entry.localizations,
+      en: { ...entry.localizations.en, title: "" },
+    },
+  };
+
+  assert.throws(() => hook(), {
+    message:
+      "Incomplete recipe catalog metadata:\n  - en/grill_rub.MD is featured but its catalog entry has no title, so the landing page would drop its card.",
+  });
+
+  recipeCatalog.grill_rub = entry;
+  assert.doesNotThrow(() => hook());
+  assert.equal(warnings.mock.callCount(), 0);
+});
+
+test("the configured build hook emits warnings once per build without failing", (t) => {
+  const entry = recipeCatalog.grill_rub;
+  t.after(() => {
+    recipeCatalog.grill_rub = entry;
+  });
+  recipeCatalog.grill_rub = {
+    ...entry,
+    listing: { intent: "unlisted", reason: "Build warning fixture." },
+    localizations: {
+      ...entry.localizations,
+      en: { ...entry.localizations.en, description: "" },
+    },
+  };
+  const warnings = t.mock.method(console, "warn", () => {});
+  const hook = catalogBuildHook();
+  const expected =
+    "[recipe catalog] en/grill_rub.MD is unlisted and its catalog entry has no description, so its page falls back to the generic title and description.";
+
+  assert.doesNotThrow(() => hook());
+  assert.deepEqual(
+    warnings.mock.calls.map(({ arguments: args }) => args),
+    [[expected]],
+  );
+  assert.doesNotThrow(() => hook());
+  assert.deepEqual(
+    warnings.mock.calls.map(({ arguments: args }) => args),
+    [[expected], [expected]],
+  );
 });
