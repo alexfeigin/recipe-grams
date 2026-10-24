@@ -7,6 +7,21 @@
   --tomato: #b43e2f;
   --olive: #687449;
   --steel: #d8d0c3;
+  --paper-light: #fbf7ef;
+  --paper-deep: #efe7d9;
+  --ink-soft: #4f463c;
+  --tomato-dark: #7f2f24;
+  --line: rgba(112, 104, 94, 0.22);
+  --line-medium: rgba(112, 104, 94, 0.2);
+  --line-soft: rgba(112, 104, 94, 0.18);
+  --surface-glass: rgba(255, 253, 248, 0.62);
+  --tomato-tint: rgba(180, 62, 47, 0.12);
+  --olive-tint: rgba(104, 116, 73, 0.14);
+  --shadow-ink: 61, 43, 28;
+  --shadow: 0 18px 48px rgba(var(--shadow-ink), 0.14);
+  --shadow-card: 0 14px 32px rgba(var(--shadow-ink), 0.12);
+  --page-glow: none;
+  --page-fade-stop: 48%;
   font-family:
     ui-sans-serif,
     system-ui,
@@ -31,4 +46,58 @@
   );
   --control-accent-focus-ring: 0 0 0 3px
     color-mix(in srgb, var(--control-accent) 22%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    var(--page-glow),
+    linear-gradient(
+      180deg,
+      var(--paper-light) 0%,
+      var(--paper) var(--page-fade-stop),
+      var(--paper-deep) 100%
+    );
+  color: var(--ink);
+}
+
+[data-category="doughs_starches"] {
+  --category-fill: #f5e6bd;
+  --category-border: #c7962f;
+  --category-ink: #684607;
+}
+
+[data-category="mains"] {
+  --category-fill: #f3d5ce;
+  --category-border: #bf6b58;
+  --category-ink: #742f22;
+}
+
+[data-category="salads_pickles"] {
+  --category-fill: #dbeacf;
+  --category-border: #78a65e;
+  --category-ink: #34592c;
+}
+
+[data-category="basics"] {
+  --category-fill: #dceaf0;
+  --category-border: #729daa;
+  --category-ink: #315b67;
+}
+
+[data-category="sweets"] {
+  --category-fill: #efd8e3;
+  --category-border: #b77a98;
+  --category-ink: #703b56;
+}
+
+[data-category="snacks"] {
+  --category-fill: #f4dfc2;
+  --category-border: #c88a3e;
+  --category-ink: #70440e;
 }
