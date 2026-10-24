@@ -10,6 +10,11 @@ a single reading column for recipes, and form/results panels for the calculator.
 palette values, light color scheme, system sans font stack, and semantic
 `--control-*` tokens. Use those tokens in consumers. There are no web fonts.
 
+The same file owns the shared `box-sizing` reset, the page `body` background
+(pages only set `--page-glow` and `--page-fade-stop`), line, tint, and shadow
+colors, and the landing category colors. Add new colors there as tokens; a page's
+CSS holds only values specific to that page.
+
 Warm paper and pale cards support dark ink and muted secondary text. Tomato,
 olive, and steel are content and edge accents. Interactive controls use the shared
 blue accent, darkened to `#487889` to give white labels about 4.86:1 contrast;
