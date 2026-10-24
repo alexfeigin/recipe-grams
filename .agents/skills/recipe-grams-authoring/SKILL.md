@@ -21,8 +21,10 @@ normalizing grammar and structure.
    without frontmatter or Hebrew RTL wrappers. Link peer recipes as `./grill_rub.MD`.
 3. Use grams rather than cups; convert volume measurements when reasonable and
    put uncertain assumptions in the recipe text.
-4. Put web-ready images in `public/images/` with clear filenames, compressing/resizing
-   oversized originals while retaining enough detail for pages and previews.
+4. Put web-ready images in `public/images/` with clear filenames. Size photos before
+   adding them: at most 1200 px wide, JPEG quality about 80 (on macOS,
+   `sips --resampleWidth 1200 -s formatOptions 80 file.jpg`), keeping enough detail
+   for pages and previews.
    Link useful body images from both localizations as `../public/images/file.ext`, after
    the recipe unless its existing layout suggests otherwise. Confirm paths resolve.
    Existing unreferenced images stay unless positive evidence supports removal;
