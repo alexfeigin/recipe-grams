@@ -21,8 +21,18 @@ normalizing grammar and structure.
    without frontmatter or Hebrew RTL wrappers. Link peer recipes as `./grill_rub.MD`.
 3. Use grams rather than cups; convert volume measurements when reasonable and
    put uncertain assumptions in the recipe text.
-4. Put web-ready images in `public/images/` with clear filenames, compressing/resizing
-   oversized originals while retaining enough detail for pages and previews.
+4. Put web-ready images in `public/images/` with clear filenames. Size photos before
+   adding them: at most 1200 px wide, preserving aspect ratio and smaller dimensions,
+   at JPEG quality about 80. From the repository root, use the installed Sharp encoder
+   with a separate output file:
+
+   ```bash
+   node --input-type=module -e 'import sharp from "sharp"; await sharp(process.argv[1]).rotate().resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 80, mozjpeg: true }).toFile(process.argv[2]);' source-photo.jpg public/images/photo.jpg
+   ```
+
+   Compare the output with the original at page and preview sizes; keep enough
+   detail and check that the file size drops. Re-encode from the original when
+   adjusting settings to avoid accumulating JPEG losses.
    Link useful body images from both localizations as `../public/images/file.ext`, after
    the recipe unless its existing layout suggests otherwise. Confirm paths resolve.
    Existing unreferenced images stay unless positive evidence supports removal;
