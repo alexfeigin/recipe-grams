@@ -173,6 +173,21 @@ const languageHref = alternateRecipe
     margin-top: 0.35rem;
   }
 
+  .recipe-body :global(a) {
+    color: var(--control-accent);
+    text-underline-offset: 0.18em;
+  }
+
+  .recipe-body :global(a:hover) {
+    color: var(--control-accent-hover);
+  }
+
+  .recipe-body :global(a:focus-visible) {
+    outline: 2px solid var(--control-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
   .recipe-body :global(img) {
     max-width: 100%;
     height: auto;

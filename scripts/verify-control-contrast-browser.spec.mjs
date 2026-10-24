@@ -2,6 +2,17 @@ import { expect, test } from "@playwright/test";
 
 import { baseUrl } from "./browser-target.mjs";
 
+async function paletteColor(page, token) {
+  return page.evaluate((token) => {
+    const probe = document.createElement("span");
+    probe.style.color = `var(${token})`;
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }, token);
+}
+
 async function contrast(locator) {
   return locator.evaluate((element) => {
     const context = document.createElement("canvas").getContext("2d");
@@ -118,6 +129,33 @@ for (const language of ["en", "he"]) {
           await page.keyboard.press("Shift");
           await copy.focus();
           await check(copy, "copy focus");
+        }
+
+        if (surface === "recipe") {
+          const link = page.locator(".recipe-body a").first();
+          const accent = await paletteColor(page, "--control-accent");
+          const hoverAccent = await paletteColor(
+            page,
+            "--control-accent-hover",
+          );
+          await page.mouse.move(0, 0);
+          await check(link, "recipe link default");
+          await expect(link).toHaveCSS("color", accent);
+          await link.hover();
+          await check(link, "recipe link hover");
+          await expect(link).toHaveCSS("color", hoverAccent);
+          await page.mouse.move(0, 0);
+          await page.keyboard.press("Shift");
+          await link.focus();
+          await check(link, "recipe link focus");
+          await expect(link).toHaveCSS("color", accent);
+          await expect(link).toHaveCSS("outline-style", "solid");
+          await expect(link).toHaveCSS("outline-color", accent);
+          expect(
+            await link.evaluate((element) =>
+              parseFloat(getComputedStyle(element).outlineWidth),
+            ),
+          ).toBeGreaterThanOrEqual(2);
         }
 
         // The short desktop calculator may never scroll far enough to show it.
