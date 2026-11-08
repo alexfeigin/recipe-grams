@@ -26,6 +26,6 @@ Thigh mince gives a richer, softer texture. Breast mince contains very little fa
 
 ## Uses
 
-- **Meatballs:** Shape and bake according to the [oven-baked chicken meatballs recipe](./chicken_meatballs.MD). This mixture makes about 1 oven tray; the meatballs recipe uses a double batch.
+- **Meatballs:** Shape and bake according to the [oven-baked chicken meatballs recipe](./chicken_meatballs.MD). Makes about 1 oven tray.
 - **Pelmeni filling:** Use with the [pelmeni dough recipe](./pilmeni_dough.MD). Adjust the filling quantity to the amount of dough.
 - **Leftover filling:** Shape any leftover pelmeni filling into meatballs and cook in the oven or air fryer.
