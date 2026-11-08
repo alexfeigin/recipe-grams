@@ -8,19 +8,19 @@
 - 6g salt (2% of the flour weight)
 - 1 egg
 - 1 egg yolk
-- Cold water (to complement wet ingrediants to 185g)
+- Cold water (enough to bring the wet ingredients to 185g total)
 
 ## Filling option
 
-Try the [chicken mince mixture](./chicken_mince_mix.MD) as a filling. It uses precooked onions cooled with ice, which also adds water to the mixture. The full filling recipe makes a large batch; use only as much as needed for this dough.
+Use the [chicken mince mixture](./chicken_mince_mix.MD) as an optional filling. Adjust the filling quantity to the amount of dough.
 
 ## Instructions
 
-1. In a food processor, buzz the flour and salt for 10 seconds.
-2. Weigh out wet ingrediants eggs, egg yolks, and enough cold water to reach a total weight of 185g.
+1. Process the flour and salt in a food processor for 10 seconds.
+2. Weigh the egg, egg yolk, and enough cold water to reach 185g total.
 3. Process until the dough forms.
 4. Knead the dough by hand for 12 minutes.
-5. If you don't have a food processor, use the well method to mix the ingredients.
+5. Alternatively, use the well method to mix the ingredients by hand.
 6. Flour the dough, wrap it in plastic, and let it rest at room temperature for 30 minutes.
 
 |                           ★                            |                          ★                           |

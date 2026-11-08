@@ -6,17 +6,17 @@
 
 - 2 batches of [chicken mince mixture](./chicken_mince_mix.MD) (2000g meat in total)
 
-This amount fills 2 oven trays. The cooked meatballs freeze well and reheat well in the microwave or oven.
+Makes 2 oven trays. The cooked meatballs freeze well; reheat in the microwave or oven.
 
 ## Instructions:
 
-1. Prepare a double batch of the [chicken mince mixture](./chicken_mince_mix.MD), including precooking the onions and cooling them with ice before mixing with the meat.
+1. Prepare a double batch of the [chicken mince mixture](./chicken_mince_mix.MD).
 2. Preheat the oven to 230°C in turbo mode.
-3. Form balls from the mixture (using a meatball maker is recommended).
-4. Space the meatballs apart to allow room for oven air to circulate get a more even roast.
-5. Place in the preheated oven and bake for 10-15 minutes until the edges start to brown.
+3. Form balls from the mixture by hand or with a meatball maker.
+4. Arrange on baking trays, leaving space between the meatballs for even roasting.
+5. Bake for 10–15 minutes until the edges start to brown.
 
-You can buy the meatball maker [here](https://a.aliexpress.com/_oD9yzu5).
+[Meatball maker](https://a.aliexpress.com/_oD9yzu5).
 
 |                          ★                          |                         ★                         |
 | :-------------------------------------------------: | :-----------------------------------------------: |
