@@ -51,6 +51,16 @@ export type CatalogDiagnostic = {
 
 // Landing cards appear in this order within their category.
 export const recipeCatalog: RecipeCatalog = {
+  chicken_mince_mix: featuredRecipe("basics", [], {
+    en: localizedMetadata(
+      "Chicken Mince Mixture",
+      "Chicken mince with softened onions, for oven meatballs or pelmeni filling.",
+    ),
+    he: localizedMetadata(
+      "תערובת עוף טחון",
+      "תערובת עוף טחון עם בצל מרוכך, לקציצות בתנור או למילוי פלמני.",
+    ),
+  }),
   grill_rub: featuredRecipe("basics", ["favorite", "vegan"], {
     en: localizedMetadata(
       "Grill Rub",

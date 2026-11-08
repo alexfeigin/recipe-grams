@@ -4,17 +4,13 @@
 
 ## Ingredients:
 
-- 1 kg ground chicken breast
-- 1 kg ground chicken thighs
-- 1 kg finely chopped onion
-- 26g Salt
-- black pepper, granulated garlic, cayenne pepper - to taste (also works with [grill rub](grill_rub.MD))
+- 1 full batch of [chicken mince mixture](./chicken_mince_mix.MD)
 
-this amount fills 2 oven trays. they freeze well, and reheat well in microwave or oven.
+This amount fills 2 oven trays. The cooked meatballs freeze well and reheat well in the microwave or oven.
 
 ## Instructions:
 
-1. Mix all the ingredients together using your hands (it's recommended to wear gloves).
+1. Prepare the [chicken mince mixture](./chicken_mince_mix.MD), including precooking the onions and cooling them with ice before mixing with the meat.
 2. Preheat the oven to 230°C in turbo mode.
 3. Form balls from the mixture (using a meatball maker is recommended).
 4. Space the meatballs apart to allow room for oven air to circulate get a more even roast.

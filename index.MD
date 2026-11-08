@@ -55,9 +55,10 @@
     <img src="public/images/titles_for_index/chestnut.png" alt="Basics" width="70" height="70" style="margin: 5px;">
 </div>
 
-| Hebrew (he)                          | English (en)                       |
-| ------------------------------------ | ---------------------------------- |
-| [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥 | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥 |
+| Hebrew (he)                                | English (en)                                     |
+| ------------------------------------------ | ------------------------------------------------ |
+| [תערובת עוף טחון](he/chicken_mince_mix.MD) | [Chicken Mince Mixture](en/chicken_mince_mix.MD) |
+| [תיבול לגריל](he/grill_rub.MD) 🌶️★ 🅥       | [Grill Rub](en/grill_rub.MD) 🌶️★ 🅥               |
 
 <br>
 <br>

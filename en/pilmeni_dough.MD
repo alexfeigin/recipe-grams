@@ -10,6 +10,10 @@
 - 1 egg yolk
 - Cold water (to complement wet ingrediants to 185g)
 
+## Filling option
+
+Try the [chicken mince mixture](./chicken_mince_mix.MD) as a filling. It uses precooked onions cooled with ice, which also adds water to the mixture. The full filling recipe makes a large batch; use only as much as needed for this dough.
+
 ## Instructions
 
 1. In a food processor, buzz the flour and salt for 10 seconds.
