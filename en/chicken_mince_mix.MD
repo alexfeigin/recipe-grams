@@ -6,7 +6,7 @@ A chicken mince mixture for [oven-baked chicken meatballs](./chicken_meatballs.M
 
 ## Ingredients
 
-- 1000g boneless chicken thigh mince (or 500g thigh mince and 500g breast mince for a leaner option)
+- 1kg boneless chicken thigh mince (or 500g thigh mince and 500g breast mince for a leaner option)
 - 750g finely chopped onion (weight before cooking; 75% of the meat weight)
 - About 100g ice cubes
 - A little olive oil, if sweating the onions in a pan
