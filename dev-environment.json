@@ -26,52 +26,52 @@
   "impeccable": {
     "role": "required when absent; any installed version is accepted by setup and --check",
     "source": "https://github.com/pbakaus/impeccable",
-    "installer": "impeccable@4.5.2",
-    "version": "4.5.2",
+    "installer": "impeccable@4.8.1",
+    "version": "4.8.1",
     "bundle": {
-      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.5.2/universal.zip",
-      "sha256": "8b445a7529581a36626b328c3077e3d3dd7fbf247521e20ec8759ca939f77470"
+      "url": "https://github.com/pbakaus/impeccable/releases/download/skill-v4.8.1/universal.zip",
+      "sha256": "960ee8999b06de7d724534edd38d2ef5720909d7aa57dd26a2e8030460d70e2a"
     },
     "providers": ["claude", "codex"],
     "adaptation": "scripts/impeccable-project-route.md",
     "files": {
       "darwin-arm64": {
-        ".agents/skills/impeccable": "e8f0268814ce13980d043ce8ae7bba63ccf59fb5c87cdb5e17a430cc93faff30",
+        ".agents/skills/impeccable": "eb090a630aeb1df8b3b83bcbf8adc5f53bd839f64a3ef0f6a37c1294bb9617ad",
         ".claude/agents/impeccable-asset-producer.md": "c8bdcb9a4de2319f42972f6bfeb83f6524868b27cf32b6671babc603172bf40b",
-        ".claude/agents/impeccable-documenter.md": "bca49de3d2b79f22923cc32353ef0ffb882221439497f11e33d7798e82e5ed63",
-        ".claude/agents/impeccable-finish-reviewer.md": "d9f1f653e1b704c78adddbaf927fddf481b5ea452cbf88fbc5af8793a418b259",
-        ".claude/agents/impeccable-manual-edit-applier.md": "634b3281cc67d711ab250078f096b511d4d7a6df660fdec0c71bd0e4edf2ab4b",
-        ".claude/skills/impeccable": "12668624f2faa850d64518ca35dda3eb9fcb9b92c8e0baebe4b1dc42bb3c731a"
+        ".claude/agents/impeccable-documenter.md": "7827dc5aa5d170259fe5b033351e640c365840dd833312cac7caa26eee0c9714",
+        ".claude/agents/impeccable-finish-reviewer.md": "9248a3cb3d9f2bf480cee23799e0c27a6902c4a8fffecacf238b5cba7e75650c",
+        ".claude/agents/impeccable-manual-edit-applier.md": "a62d22db9adc9dc8c91cafffd6d688a873318b8cd9bf8faf472f41ad12b965ef",
+        ".claude/skills/impeccable": "76e26e727cba9ef4a3fdce41bbb9a0e540db98d9f2c19973a0d49c9805045f81"
       }
     }
   },
   "mattpocockSkills": {
     "role": "optional; any installed version is accepted, and setup installs missing named skills",
     "source": "https://github.com/mattpocock/skills",
-    "installer": "skills@1.7.2",
-    "release": "v1.3.1",
-    "revision": "24fe0ef7737efae15c87225755e9f6f5965e4888",
+    "installer": "skills@1.7.6",
+    "release": "v1.3.2",
+    "revision": "d1478fcb140db0b93c0c8df17bcfd311844749d0",
     "agents": ["codex", "claude-code"],
     "skills": {
       "ask-matt": {
         "path": "skills/engineering/ask-matt",
-        "sha256": "614a746774577bef83e89b6a42d89a4f310ce284b7de949593307a810e8c99e7"
+        "sha256": "ec252e782e2753fbc55e1d5fa5b1a93c038ed89ba6a950daab4b1328763612aa"
       },
       "claude-handoff": {
         "path": "skills/in-progress/claude-handoff",
-        "sha256": "a3d2cf626005da2aec2505b6061056119837bca2ac1f668e1adbc7b0736095bd"
+        "sha256": "4948d0feddd5309cb8e9d78258cb293aca1ed53cf38d6ce173cd2ad797397e06"
       },
       "code-review": {
         "path": "skills/engineering/code-review",
-        "sha256": "cf6a211ec37edc7f10bab816c8ae6506831eb566e209eef642cf8cf5afdf40f6"
+        "sha256": "68eafd0c69cda56c4fd033e01d6b82855517744708c99c004979d291220c0de4"
       },
       "codebase-design": {
         "path": "skills/engineering/codebase-design",
-        "sha256": "967032d9eead896fbc84e3d91f5dd051130b666b3b155247d3a932c24e1d6697"
+        "sha256": "48d6834bb5083707897bba7ea10feb4fa09d49fcbbc929ae964a5a263514377e"
       },
       "diagnosing-bugs": {
         "path": "skills/engineering/diagnosing-bugs",
-        "sha256": "82aac5b17e5d152e7b92085e1f5f79ac2d551f6b12a9e69e0f42a04b64454048"
+        "sha256": "995b26e90dcdf90e937cfeeeb83c0721c086b407ff89602fae4e4c277481fb0a"
       },
       "domain-modeling": {
         "path": "skills/engineering/domain-modeling",
@@ -91,19 +91,19 @@
       },
       "grilling": {
         "path": "skills/productivity/grilling",
-        "sha256": "52afd7e67a178aded323d4ee739e77688620542cadb10e3c2defc09c35a804e7"
+        "sha256": "9c297a1008f5739bd3383c9ba48d2663eebeb395ba6fe4f60679f643a4ad4665"
       },
       "handoff": {
         "path": "skills/productivity/handoff",
-        "sha256": "219b3cf9832761e8cb0fe81b49b8ab9f420e08617102e49126bbdf5edb7c52c9"
+        "sha256": "bca04185abb3dbcb2d5b67f35836f638192632333a7062c3539962744856941e"
       },
       "implement": {
         "path": "skills/engineering/implement",
-        "sha256": "63fb97cd240aa2445d251752cdaaf23cb64ef39eebd748b365848af7c9e03e73"
+        "sha256": "c14e6c9bcdd83d47aab88af4d76e36f7898cf5dc16f836ed6becec0f18a8cd4e"
       },
       "improve-codebase-architecture": {
         "path": "skills/engineering/improve-codebase-architecture",
-        "sha256": "a06adb368b32959b3ffd0338bd04608878349eca337f0d44fec7d4f3ea728081"
+        "sha256": "3bcf84425c276b5e383f9da4136023c04968473bad9d565ae294d96a96849c34"
       },
       "loop-me": {
         "path": "skills/in-progress/loop-me",
@@ -119,7 +119,7 @@
       },
       "research": {
         "path": "skills/engineering/research",
-        "sha256": "ec6c41819c9124c7cda3678a2db0dfb91a81c144d90fbb09d0dbc230be909da3"
+        "sha256": "15973acfaeb3c5af1f5ef3d6b51eee962e0ca28416e41110fadd671b4e46bb21"
       },
       "scaffold-exercises": {
         "path": "skills/misc/scaffold-exercises",
@@ -127,7 +127,7 @@
       },
       "setup-matt-pocock-skills": {
         "path": "skills/engineering/setup-matt-pocock-skills",
-        "sha256": "de02fe39dd163c9c45bd09ebd285ec7852734cb3cb559c6bf5d70fdcbb5240a0"
+        "sha256": "ef26d566b26d6d73c36776f85fed521a53e2609cf423b72e01f8f81877845f4f"
       },
       "setup-pre-commit": {
         "path": "skills/misc/setup-pre-commit",
@@ -139,11 +139,11 @@
       },
       "tdd": {
         "path": "skills/engineering/tdd",
-        "sha256": "b471621ad323bd328cd4b1d0bde6abe3cb7aa408d280afd72d1e390a648c2ba1"
+        "sha256": "3af5befd45c44256f870ae61fa11a70f745cff41600ee098de766e6f142b89ce"
       },
       "teach": {
         "path": "skills/productivity/teach",
-        "sha256": "d6ee2720bae6c77b5fdffabd994f763b74f3737d6bbe4747cb2276d4d5bdd4b6"
+        "sha256": "2637fe5498dcf075c574575ca34f5efc1e5a9680b382910fa07dff717a832e41"
       },
       "to-questionnaire": {
         "path": "skills/productivity/to-questionnaire",
@@ -155,7 +155,7 @@
       },
       "to-tickets": {
         "path": "skills/engineering/to-tickets",
-        "sha256": "015a0ebb9f586629b1e11ccd7f00fc2c16b6814bae70c7f4d6cd79a8d52f8053"
+        "sha256": "e27b7ea753306f2461b52899c98fb87d0304e75a6bf9f553d19a565671f47768"
       },
       "triage": {
         "path": "skills/engineering/triage",
@@ -167,11 +167,11 @@
       },
       "wayfinder": {
         "path": "skills/engineering/wayfinder",
-        "sha256": "de7f883f149cbf793675f7a94f461c15b41de452fdb87a186d2cfb23219e3aaf"
+        "sha256": "9dd37ac66cbead02cb10377034cf63fb47ff48cbac14602fee723d9863b6ea09"
       },
       "wizard": {
         "path": "skills/engineering/wizard",
-        "sha256": "81819b5781dd704085dddb829c63057611486f26cdbf867ae5cbbbcf41eefd6c"
+        "sha256": "85f51789804590bb48b2a5ae9f64494d1d0a139ec213e673d92a011a43a18163"
       },
       "writing-beats": {
         "path": "skills/in-progress/writing-beats",
